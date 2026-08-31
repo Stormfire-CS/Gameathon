@@ -16,10 +16,9 @@ public class LoginServiceImpl implements LoginService {
     }
 
     /**
-     * Given a loginForm, determine if the information provided is valid, and the user exists in the system.
-     *
-     * @param loginForm - Data containing user login information, such as username and password.
-     * @return true if data exists and matches what's on record, false otherwise
+     * Determine if the information provided is valid, and the user exists in the system.
+     * @param username - The username of the person trying to log in.
+     * @param password - The password entered by the person trying to log in.
      */
     @Override
     public boolean validateUser(String username, String password) {
