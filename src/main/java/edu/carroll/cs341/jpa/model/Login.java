@@ -23,6 +23,14 @@ public class Login {
     @Column(name = "password", nullable = false)
     private String hashedPassword;
 
+    public Login() {
+    }
+
+    public Login(String username, String rawPassword) {
+        this.username = username;
+        setRawPassword(rawPassword);
+    }
+
     public Integer getId() {
         return id;
     }
@@ -74,5 +82,10 @@ public class Login {
     @Override
     public int hashCode() {
         return Objects.hash(username, hashedPassword);
+    }
+
+    public void setRawPassword(String rawPassword) {
+        // XXX - This should *NEVER* be done in a real project
+        this.hashedPassword = Integer.toString(rawPassword.hashCode());
     }
 }
