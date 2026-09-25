@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 @Table(name = "login")
 public class Login {
     private static final long serialVersionUID = 1L;
-
+    // id should be long.
     @Id
     @GeneratedValue
     private Integer id;
@@ -79,6 +79,7 @@ public class Login {
         return username.equals(login.username) && hashedPassword.equals(login.hashedPassword);
     }
 
+    //Never use primary key for hash
     @Override
     public int hashCode() {
         return Objects.hash(username, hashedPassword);
