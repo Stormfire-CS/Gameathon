@@ -15,13 +15,16 @@ public class Login {
     // id should be long.
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", nullable = false)
     private String hashedPassword;
+
+    @Column(name = "family_ID", nullable = false)
+    private Long family_ID;
 
     public Login() {
     }

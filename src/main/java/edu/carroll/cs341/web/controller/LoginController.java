@@ -37,7 +37,7 @@ public class LoginController {
             return "login";
         }
         attrs.addAttribute("username", loginForm.getUsername());
-        return "redirect:/loginSuccess";
+        return "redirect:/homePage";
     }
 
     @GetMapping("/loginSuccess")
