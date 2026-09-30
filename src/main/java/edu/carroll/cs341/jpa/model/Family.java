@@ -44,6 +44,17 @@ public class Family {
 
     @Override
     public String toString() {
+        return "Family{" + "family_ID=" + family_ID + ", familyName='" + familyName + '\'' +'}';
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Family family = (Family) o;
+        return(family_ID.equals(family.family_ID));
     }
 }
