@@ -23,9 +23,6 @@ public class Login {
     @Column(name = "password", nullable = false)
     private String hashedPassword;
 
-    @Column(name = "family_ID", nullable = false)
-    private Long family_ID;
-
     public Login() {
     }
 

@@ -8,13 +8,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import static org.aspectj.util.LangUtil.EOL;
+
 @Entity
 @Table(name = "Family")
 public class Family {
 
     @Id
     @GeneratedValue
-    private Long family_ID;
+    private Long familyID;
 
     @Column(name = "family_name", nullable = false, unique = true)
     private String familyName;
@@ -26,12 +28,12 @@ public class Family {
         this.familyName = familyName;
     }
 
-    public Long getFamily_ID() {
-        return family_ID;
+    public Long getFamilyID() {
+        return familyID;
     }
 
-    public void setFamily_ID() {
-        this.family_ID = family_ID;
+    public void setFamilyID(Long familyID) {
+        this.familyID = familyID;
     }
 
     public String getFamilyName() {
@@ -44,7 +46,10 @@ public class Family {
 
     @Override
     public String toString() {
-        return "Family{" + "family_ID=" + family_ID + ", familyName='" + familyName + '\'' +'}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("Family: family_ID = ").append(familyID).append(EOL);
+        builder.append("familyName = ").append(familyName);
+        return builder.toString();
     }
 
     @Override
@@ -55,6 +60,6 @@ public class Family {
             return false;
 
         Family family = (Family) o;
-        return(family_ID.equals(family.family_ID));
+        return(familyID.equals(family.familyID));
     }
 }
