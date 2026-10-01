@@ -82,10 +82,10 @@ public class Games {
         StringBuilder builder = new StringBuilder();
         builder.append("Game: Game_ID = ").append(gameID).append(EOL);
         if (publishYear != null) {
-            builder.append("Publish Year = ").append(publishYear);
+            builder.append("Publish Year = ").append(publishYear).append(EOL);
         }
         if (maxPlayers != null) {
-            builder.append("Max Number of Players = ").append(maxPlayers);
+            builder.append("Max Number of Players = ").append(maxPlayers).append(EOL);
         }
         if (minPlayers != null) {
             builder.append("Min Number of Players = ").append(minPlayers);
