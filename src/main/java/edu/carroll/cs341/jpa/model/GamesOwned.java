@@ -22,6 +22,14 @@ public class GamesOwned {
     @Column(name = "ownerID", nullable = false)
     private Long ownerID;
 
+    public GamesOwned() {
+    }
+
+    public GamesOwned(Long gameID, Long ownerID) {
+        this.gameID = gameID;
+        this.ownerID = ownerID;
+    }
+
     public Long getGameOwnedID() {
         return gameOwnedID;
     }

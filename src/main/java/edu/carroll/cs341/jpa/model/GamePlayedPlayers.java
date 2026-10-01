@@ -25,6 +25,13 @@ public class GamePlayedPlayers {
     @Column(name = "didWin")
     private Boolean didWin;
 
+    public GamePlayedPlayers() {
+    }
+
+    public GamePlayedPlayers(Long playerID) {
+        this.playerID = playerID;
+    }
+
     public Long getGamePlayedPlayerID() {
         return gamePlayedPlayerID;
     }

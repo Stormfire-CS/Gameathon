@@ -22,6 +22,13 @@ public class GamePlayers {
     @Column(name = "ownerID", unique = true)
     private Long ownerID;
 
+    public GamePlayers() {
+    }
+
+    public GamePlayers(String name) {
+        this.name = name;
+    }
+
     public Long getGamePlayerID() {
         return gamePlayerID;
     }

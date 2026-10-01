@@ -24,6 +24,14 @@ public class GamesPlayed {
     @Column(name = "datePlayed", nullable = false)
     private Date datePlayed;
 
+    public GamesPlayed() {
+    }
+
+    public GamesPlayed(Long ownedGameID, Date datePlayed) {
+        this.ownedGameID = ownedGameID;
+        this.datePlayed = datePlayed;
+    }
+
     public Long getGamePlayedID() {
         return gamePlayedID;
     }
