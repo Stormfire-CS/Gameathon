@@ -16,10 +16,10 @@ public class Owner {
     @GeneratedValue
     private Long ownerID;
 
-    @Column(name = "name", nullable = true, unique = false)
+    @Column(name = "name", nullable = false, unique = false)
     private String name;
 
-    @Column(name = "family_id", nullable = true, unique = false)
+    @Column(name = "familyID", nullable = true, unique = false)
     private Long familyID;
 
     public Owner() {

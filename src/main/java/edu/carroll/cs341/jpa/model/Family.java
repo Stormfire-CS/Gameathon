@@ -18,8 +18,11 @@ public class Family {
     @GeneratedValue
     private Long familyID;
 
-    @Column(name = "family_name", nullable = false, unique = true)
+    @Column(name = "familyName", nullable = false, unique = true)
     private String familyName;
+
+    @Column(name = "familyAdmin", nullable = false)
+    private Long familyAdminId;
 
     public Family() {
     }
@@ -42,6 +45,14 @@ public class Family {
 
     public void setFamilyName(String familyName) {
         this.familyName = familyName;
+    }
+
+    public Long getFamilyAdminId() {
+        return familyAdminId;
+    }
+
+    public void setFamilyAdminId (Long familyAdminId) {
+        this.familyAdminId = familyAdminId;
     }
 
     @Override
