@@ -56,7 +56,7 @@ public class Families {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Family: family_ID = ").append(familyID).append(EOL);
+        builder.append("Family: family ID = ").append(familyID).append(EOL);
         builder.append("familyName = ").append(familyName);
         return builder.toString();
     }
