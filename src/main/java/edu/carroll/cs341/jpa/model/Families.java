@@ -1,7 +1,5 @@
 package edu.carroll.cs341.jpa.model;
 
-import java.util.Objects;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,8 +9,8 @@ import jakarta.persistence.Table;
 import static org.aspectj.util.LangUtil.EOL;
 
 @Entity
-@Table(name = "Family")
-public class Family {
+@Table(name = "Families")
+public class Families {
 
     @Id
     @GeneratedValue
@@ -24,10 +22,10 @@ public class Family {
     @Column(name = "familyAdmin", nullable = false)
     private Long familyAdminId;
 
-    public Family() {
+    public Families() {
     }
 
-    public Family(String familyName) {
+    public Families(String familyName) {
         this.familyName = familyName;
     }
 
@@ -70,7 +68,7 @@ public class Family {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        Family family = (Family) o;
+        Families family = (Families) o;
         return(familyID.equals(family.familyID));
     }
 }

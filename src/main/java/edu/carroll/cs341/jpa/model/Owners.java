@@ -9,8 +9,8 @@ import jakarta.persistence.Table;
 import static org.aspectj.util.LangUtil.EOL;
 
 @Entity
-@Table(name = "Owner")
-public class Owner {
+@Table(name = "Owners")
+public class Owners {
 
     @Id
     @GeneratedValue
@@ -22,10 +22,10 @@ public class Owner {
     @Column(name = "familyID", nullable = true, unique = false)
     private Long familyID;
 
-    public Owner() {
+    public Owners() {
     }
 
-    public Owner(String name) {
+    public Owners(String name) {
         this.name = name;
     }
 
@@ -60,7 +60,7 @@ public class Owner {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        Owner owner = (Owner) o;
+        Owners owner = (Owners) o;
         return(ownerID.equals(owner.ownerID));
     }
 
