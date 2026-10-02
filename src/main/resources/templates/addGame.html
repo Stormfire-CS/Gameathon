@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Add Game</title>
 </head>
 <body>
-
+    <h1>Gameathon</h1>
+    <p>Please enter game information: <span th:text="${username}"></span> </p>
+    <a th:href="@{/ownerPage(username=${username})}">
+        <button type="button">My Home</button>
+    </a>
+    <input type="text" id="gameID" name="userID" placeholder="UserID?"/>
+    <button type="button">Fake Submit</button>
 </body>
 </html>
