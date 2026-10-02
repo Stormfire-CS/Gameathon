@@ -7,7 +7,11 @@
 <body>
     <h1>Gameathon</h1>
     <p>Welcome to your home page, <span th:text="${username}"></span> </p>
-    <button type="button" value = "">Families Games</button>
-    <button type="button" value = "">My Games</button>
+    <a th:href="@{/familyPage(username=${username})}">
+        <button type="button">Family</button>
+    </a>
+    <a th:href="@{/ownerPage(username=${username})}">
+        <button type="button">My Home</button>
+    </a>
 </body>
 </html>

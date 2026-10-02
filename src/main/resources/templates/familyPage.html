@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Family Home</title>
 </head>
 <body>
-
+    <h1>Gameathon</h1>
+    <p>Welcome to your family home page, <span th:text="${username}"></span> </p>
+    <button type="button" value = "">Add Family Member</button>
+    <button type="button" value = "">Back to Home</button>
+    <button type="button" value = "">To Owner Page</button>
 </body>
 </html>
+
