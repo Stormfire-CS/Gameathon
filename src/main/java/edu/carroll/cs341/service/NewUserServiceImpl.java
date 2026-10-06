@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class NewUserServiceImpl implements NewUserService{
     private final LoginRepository loginRepo;
 
@@ -22,6 +23,10 @@ public class NewUserServiceImpl implements NewUserService{
         if (!password1.equals(password2)) {
             return false;
         }
+
+        Login user = new Login(username, password1);
+        loginRepo.save(user);
+
         return true;
     }
 }
