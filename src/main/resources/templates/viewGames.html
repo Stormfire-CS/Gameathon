@@ -20,11 +20,13 @@
             <th>Game Name</th>
             <th>Minimum Players</th>
             <th>Maximum Players</th>
+            <th>Year Produced</th>
         </tr>
-        <tr th:each="game : ${games}">
-            <td th:text="${game.gameName}"></td>
-            <td th:text="${game.minPlayers}"></td>
-            <td th:text="${game.maxPlayers}"></td>
+        <tr th:each="gameOwned : ${games}">
+            <td th:text="${gameOwned.game.gameName}"></td>
+            <td th:text="${gameOwned.game.minPlayers}"></td>
+            <td th:text="${gameOwned.game.maxPlayers}"></td>
+            <td th:text="${gameOwned.yearProduced}"></td>
         </tr>
     </table>
 </body>

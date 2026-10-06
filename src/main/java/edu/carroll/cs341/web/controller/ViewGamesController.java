@@ -1,5 +1,6 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.service.GamesOwnedService;
 import edu.carroll.cs341.service.GamesService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.stereotype.Controller;
@@ -8,10 +9,10 @@ import org.springframework.ui.Model;
 @Controller
 public class ViewGamesController {
 
-    private final GamesService gamesService;
+    private final GamesOwnedService gamesOwnedService;
 
-    public ViewGamesController(GamesService gamesService) {
-        this.gamesService = gamesService;
+    public ViewGamesController(GamesOwnedService gamesOwnedService) {
+        this.gamesOwnedService = gamesOwnedService;
     }
 
     @GetMapping("/viewGamesPage")

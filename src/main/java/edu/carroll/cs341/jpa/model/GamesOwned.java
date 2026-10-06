@@ -1,10 +1,6 @@
 package edu.carroll.cs341.jpa.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import static org.aspectj.util.LangUtil.EOL;
 
@@ -16,8 +12,9 @@ public class GamesOwned {
     @Id
     private Long gameOwnedID;
 
-    @Column(name = "gameID", nullable = false)
-    private Long gameID;
+    @ManyToOne
+    @JoinColumn(name = "gameID", nullable = false)
+    private Games game;
 
     @Column(name = "ownerID", nullable = false)
     private Long ownerID;
@@ -28,8 +25,8 @@ public class GamesOwned {
     public GamesOwned() {
     }
 
-    public GamesOwned(Long gameID, Long ownerID) {
-        this.gameID = gameID;
+    public GamesOwned(Games game, Long ownerID) {
+        this.game = game;
         this.ownerID = ownerID;
     }
 
@@ -41,12 +38,12 @@ public class GamesOwned {
         this.gameOwnedID = gameOwnedID;
     }
 
-    public Long getGameID() {
-        return gameID;
+    public Games getGame() {
+        return game;
     }
 
-    public void setGameID(Long gameID) {
-        this.gameID = gameID;
+    public void setGame(Games game) {
+        this.game = game;
     }
 
     public Long getOwnerID() {
@@ -69,7 +66,8 @@ public class GamesOwned {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Game Owned ID = ").append(gameOwnedID).append(EOL);
-        builder.append("Game ID = ").append(gameID).append(EOL);
+        builder.append("Game ID = ").append(game.getGameID()).append(EOL);
+        builder.append("Game Name = ").append(game.getGameName()).append(EOL);
         builder.append("Owner ID = ").append(ownerID);
         if (yearProduced != null) {
             builder.append("Publish Year = ").append(yearProduced).append(EOL);
