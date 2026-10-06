@@ -28,8 +28,8 @@ public class CreateUserForm {
         return password2;
     }
 
-    public void setPassword2(String password12) {
-        this.password1 = password2;
+    public void setPassword2(String password2) {
+        this.password2 = password2;
     }
 
 
