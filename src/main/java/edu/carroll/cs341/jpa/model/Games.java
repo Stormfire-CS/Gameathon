@@ -21,9 +21,6 @@ public class Games {
     @Column(name = "gameName", nullable = false)
     private String gameName;
 
-    @Column(name = "publishYear")
-    private Integer publishYear;
-
     @Column(name = "minPlayers")
     private Integer minPlayers;
 
@@ -35,14 +32,6 @@ public class Games {
 
     public Games(String gameName) {
         this.gameName = gameName;
-    }
-
-    public Integer getPublishYear() {
-        return publishYear;
-    }
-
-    public void setPublishYear(Integer publishYear) {
-        this.publishYear = publishYear;
     }
 
     public String getGameName() {
@@ -81,9 +70,6 @@ public class Games {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Game: Game_ID = ").append(gameID).append(EOL);
-        if (publishYear != null) {
-            builder.append("Publish Year = ").append(publishYear).append(EOL);
-        }
         if (maxPlayers != null) {
             builder.append("Max Number of Players = ").append(maxPlayers).append(EOL);
         }
@@ -101,7 +87,7 @@ public class Games {
             return false;
 
         Games game = (Games) o;
-        return(gameID.equals(game.gameID));
+        return(gameName.equals(game.gameName));
     }
 
 }

@@ -1,0 +1,500 @@
+Monopoly|2|8
+Clue|3|6
+Risk|2|6
+The Game of Life|2|4
+Sorry!|2|4
+Trouble|2|4
+Connect 4|2|2
+Battleship|2|2
+Guess Who?|2|2
+Operation|1|1
+Candy Land|2|4
+Chutes and Ladders|2|4
+Mouse Trap|2|4
+Hungry Hungry Hippos|2|4
+Jenga|1|8
+Yahtzee|2|10
+Scrabble|2|4
+Boggle|1|8
+Clue Master Detective|3|10
+Sorry! Sliders|2|4
+Trouble Pop-O-Matic|2|4
+Parcheesi|2|4
+Aggravation|2|6
+Chinese Checkers|2|6
+Checkers|2|2
+Chess|2|2
+Backgammon|2|2
+Go|2|2
+Othello|2|2
+Mancala|2|4
+Nine Men's Morris|2|2
+Dominoes|2|4
+Mahjong|3|4
+Qwirkle|2|4
+Sequence|2|12
+Rummikub|2|4
+Skip-Bo|2|6
+Phase 10|2|6
+Uno|2|10
+Apples to Apples|4|10
+Pictionary|3|16
+Trivial Pursuit|2|6
+Scattergories|2|6
+Taboo|4|10
+Cranium|4|16
+Balderdash|2|6
+Outburst|4|20
+The Game of Things|4|15
+HedBanz|2|6
+Pictureka|2|7
+Blokus|2|4
+Catan|3|4
+Ticket to Ride|2|5
+Carcassonne|2|5
+Pandemic|2|4
+Splendor|2|4
+Azul|2|4
+Kingdomino|2|4
+7 Wonders|3|7
+7 Wonders Duel|2|2
+Sushi Go!|2|5
+Sushi Go Party!|2|8
+Love Letter|2|4
+Codenames|2|8
+Codenames: Duet|2|2
+Dixit|3|8
+The Crew: The Quest for Planet Nine|2|5
+The Crew: Mission Deep Sea|2|5
+Patchwork|2|2
+Jaipur|2|2
+Century: Spice Road|2|5
+King of Tokyo|2|6
+King of New York|2|6
+Takenoko|2|4
+Carcassonne: Hunters and Gatherers|2|5
+Santorini|2|4
+Cascadia|1|4
+Calico|1|4
+PARKS|1|5
+Flamecraft|1|5
+Everdell|1|4
+Wingspan|1|5
+Wyrmspan|1|5
+Harmonies|1|4
+Splendor Duel|2|2
+Azul: Summer Pavilion|2|4
+Azul: Stained Glass of Sintra|2|4
+Sagrada|1|4
+Lords of Waterdeep|2|5
+Stone Age|2|4
+Viticulture Essential Edition|1|6
+Welcome To...|1|100
+Railroad Ink|1|6
+Cartographers|1|100
+Welcome Back to the Dungeon|2|4
+Century: Golem Edition|2|5
+The Quacks of Quedlinburg|2|4
+Kingdom Builder|2|4
+Terraforming Mars|1|5
+Terraforming Mars: Ares Expedition|1|4
+Scythe|1|5
+Brass: Birmingham|2|4
+Brass: Lancashire|2|4
+Concordia|2|5
+Great Western Trail|1|4
+Great Western Trail: Second Edition|1|4
+Puerto Rico|3|5
+Agricola|1|5
+Caverna|1|7
+Le Havre|1|5
+Ora et Labora|1|4
+Fields of Arle|1|2
+A Feast for Odin|1|4
+The Castles of Burgundy|2|4
+Tzolk'in: The Mayan Calendar|2|4
+Troyes|1|4
+Trajan|2|4
+Lorenzo il Magnifico|2|4
+Marco Polo|2|4
+Marco Polo II|2|4
+Lisboa|1|4
+The Gallerist|1|4
+Kanban EV|1|4
+On Mars|1|4
+Weather Machine|1|4
+Lacrimosa|1|4
+Coimbra|2|4
+Grand Austria Hotel|2|4
+Russian Railroads|2|4
+Power Grid|2|6
+Terra Mystica|2|5
+Gaia Project|1|4
+Clans of Caledonia|1|4
+Underwater Cities|1|4
+Beyond the Sun|2|4
+Ark Nova|1|4
+Dune: Imperium|1|4
+Dune: Imperium – Uprising|1|6
+Lost Ruins of Arnak|1|4
+Raiders of the North Sea|2|4
+Architects of the West Kingdom|1|5
+Paladins of the West Kingdom|1|4
+Viscounts of the West Kingdom|1|4
+Shipwrights of the North Sea|2|5
+Barrage|1|4
+Anachrony|1|4
+Pax Pamir: Second Edition|1|5
+The Voyages of Marco Polo|2|4
+Gloomhaven|1|4
+Gloomhaven: Jaws of the Lion|1|4
+Frosthaven|1|4
+Gloomhaven: Buttons & Bugs|1|2
+Kingdom Death: Monster|1|5
+Oath: Chronicles of Empire and Exile|1|6
+Root|2|4
+Oathsworn: Into the Deepwood|1|4
+Middara: Unintentional Malum|1|4
+Aeon Trespass: Odyssey|1|4
+Nemesis|1|5
+Nemesis: Lockdown|1|5
+This War of Mine: The Board Game|1|6
+Frostpunk: The Board Game|1|4
+The 7th Continent|1|4
+The 7th Citadel|1|4
+Sleeping Gods|1|4
+Tainted Grail: The Fall of Avalon|1|4
+ISS Vanguard|1|4
+KDM: Monster Pack|1|5
+Etherfields|1|4
+Middara|1|4
+Krosmaster: Arena|2|4
+Blood Rage|2|4
+Rising Sun|3|5
+Ankh: Gods of Egypt|2|5
+Cthulhu: Death May Die|1|5
+The Others|2|5
+Massive Darkness|1|6
+Massive Darkness 2|1|6
+Zombicide|1|6
+Zombicide: Black Plague|1|6
+Zombicide: 2nd Edition|1|6
+Arcadia Quest|2|4
+Star Wars: Imperial Assault|2|5
+Descent: Journeys in the Dark|2|5
+Descent: Legends of the Dark|1|4
+Mansions of Madness Second Edition|1|5
+Arkham Horror: The Card Game|1|4
+Eldritch Horror|1|8
+Arkham Horror|1|8
+Elder Sign|1|8
+Betrayal at House on the Hill|3|6
+Betrayal Legacy|3|5
+Horrified|1|5
+Horrified: American Monsters|1|5
+Mice and Mystics|1|4
+Stuffed Fables|2|4
+Forgotten Waters|3|7
+Pandemic Legacy: Season 1|2|4
+Pandemic Legacy: Season 2|2|4
+Pandemic Legacy: Season 0|2|4
+Pandemic: Iberia|2|5
+Pandemic: Fall of Rome|1|5
+Forbidden Island|2|4
+Forbidden Desert|2|5
+Forbidden Sky|2|4
+Flash Point: Fire Rescue|2|6
+The Loop|1|4
+Spirit Island|1|4
+Horizons of Spirit Island|1|3
+Robinson Crusoe: Adventures on the Cursed Island|1|4
+Sherlock Holmes Consulting Detective|1|8
+Chronicles of Crime|1|4
+Detective: A Modern Crime Board Game|1|5
+MicroMacro: Crime City|1|4
+MicroMacro: Crime City – Full House|1|4
+MicroMacro: Crime City – All In|1|4
+Mysterium|2|7
+Mysterium Park|2|6
+Decrypto|3|8
+The Resistance|5|10
+The Resistance: Avalon|5|10
+Secret Hitler|5|10
+One Night Ultimate Werewolf|3|10
+Ultimate Werewolf|5|75
+Werewords|4|10
+Blood on the Clocktower|5|20
+Spyfall|3|8
+Spyfall 2|3|12
+Just One|3|7
+Wavelength|2|12
+So Clover!|3|6
+Telestrations|4|8
+Telestrations: 12 Player|4|12
+Concept|4|12
+Deception: Murder in Hong Kong|4|12
+Chronicles of Crime: 1900|1|4
+Detective Club|4|8
+A Fake Artist Goes to New York|5|10
+The Mind|2|4
+Cards Against Humanity|4|20
+Exploding Kittens|2|5
+Throw Throw Burrito|2|6
+Poetry for Neanderthals|2|12
+Taco Cat Goat Cheese Pizza|2|8
+Happy Little Accidents|2|5
+Herd Mentality|4|20
+Blank Slate|3|8
+Wits & Wagers|3|7
+Wits & Wagers Party|3|6
+Telestrations After Dark|4|8
+Monikers|4|12
+Time's Up!|4|18
+Fishbowl|4|20
+Werewolf|5|30
+Mafia|6|20
+The Voting Game|5|10
+Trial by Trolley|3|13
+Superfight|3|10
+Joking Hazard|3|10
+What Do You Meme?|3|20
+Codenames: Pictures|2|8
+Codenames: Harry Potter|2|8
+Codenames: Disney Family Edition|2|8
+Decrypto: Las Vegas|3|8
+Anomia|3|6
+Dutch Blitz|2|4
+Pit|3|8
+Skull|3|6
+Cockroach Poker|2|8
+No Thanks!|3|7
+6 nimmt!|2|10
+Take 5|2|10
+For Sale|3|6
+Modern Art|3|5
+Liar's Dice|2|6
+Perudo|2|6
+Camel Up|3|8
+Camel Up: Second Edition|3|8
+Downforce|2|6
+Ready Set Bet|2|9
+Long Shot: The Dice Game|1|8
+QE|3|5
+Stockpile|2|5
+Chinatown|3|5
+Bohnanza|2|7
+Mille Bornes|2|6
+Dominion|2|4
+Dominion: Intrigue|2|4
+Star Realms|2|2
+Hero Realms|2|4
+Ascension|2|4
+Legendary: A Marvel Deck Building Game|1|5
+Legendary Encounters: An Alien Deck Building Game|1|5
+Clank!|2|4
+Clank! In! Space!|2|4
+Clank! Legacy: Acquisitions Incorporated|2|4
+The Quest for El Dorado|2|4
+Dale of Merchants|2|4
+Aeon's End|1|4
+Aeon's End: War Eternal|1|4
+Shards of Infinity|2|4
+Valley of the Kings|2|4
+Paperback|2|5
+Hardback|2|5
+Mystic Vale|2|4
+Res Arcana|2|4
+Radlands|2|2
+Unmatched: Battle of Legends|2|4
+Unmatched: Cobble & Fog|2|4
+Unmatched: Battle of Legends, Volume Two|2|4
+Here to Slay|2|6
+Dungeon Mayhem|2|4
+Fluxx|2|6
+Star Wars: The Deckbuilding Game|2|2
+Marvel Champions: The Card Game|1|4
+The Lord of the Rings: The Card Game|1|4
+Android: Netrunner|2|2
+Netrunner|2|2
+Magic: The Gathering|2|2
+Pokémon Trading Card Game|2|2
+Yu-Gi-Oh! Trading Card Game|2|2
+Disney Lorcana|2|2
+Flesh and Blood|2|2
+KeyForge|2|2
+Marvel Snap|2|2
+Arkham Horror: The Card Game – Revised Core Set|1|4
+Android: Mainframe|2|4
+The Fox in the Forest|2|2
+The Fox in the Forest Duet|2|2
+Air, Land & Sea|2|2
+Battle Line|2|2
+Schotten Totten|2|2
+Lost Cities|2|2
+Dice Forge|2|4
+Sagrada: Artisans|1|4
+Roll for the Galaxy|2|5
+Race for the Galaxy|2|4
+Ganz Schön Clever|1|4
+That's Pretty Clever!|1|4
+Welcome to the Dungeon|2|4
+Roll Through the Ages: The Bronze Age|1|4
+King of Monster Island|1|5
+Too Many Bones|1|4
+Dice Throne|2|6
+Dice Throne: Season One|2|6
+Dice Throne Adventures|1|4
+Zombie Dice|2|99
+Dungeon Dice|1|4
+Las Vegas|2|5
+Can't Stop|2|4
+Quarriors!|2|4
+Dice Masters|2|2
+Marvel Dice Masters|2|2
+Star Wars: Destiny|2|2
+Marvel Dice Throne|2|6
+Rival Restaurants|2|6
+That's Not a Hat|3|8
+Perpetual-Motion Machine|2|5
+Drop It|2|4
+Strike|2|5
+Deep Sea Adventure|2|6
+Incan Gold|3|8
+Diamant|3|8
+Push|2|6
+Port Royal|2|5
+Hive|2|2
+Hive Pocket|2|2
+Onitama|2|2
+Tak|2|2
+Quoridor|2|4
+Azul Duel|2|2
+Patchwork Doodle|1|6
+FoxMind Logic Games|1|1
+GIPF|2|2
+YINSH|2|2
+ZERTZ|2|2
+DVONN|2|2
+TZAAR|2|2
+Kahuna|2|2
+Targi|2|2
+Mandala|2|2
+Sobek: 2 Players|2|2
+Watergate|2|2
+Twilight Struggle|2|2
+1960: The Making of the President|2|2
+13 Days|2|2
+Caesar!|2|2
+Undaunted: Normandy|2|2
+Undaunted: North Africa|2|2
+Memoir '44|2|8
+Commands & Colors: Ancients|2|2
+BattleLore|2|2
+Summoner Wars|2|4
+War Chest|2|4
+Mindbug|2|2
+Schotten Totten 2|2|2
+Fox in the Forest|2|2
+Boop|2|2
+Sky Team|2|2
+The King Is Dead: Second Edition|2|4
+Hive Carbon|2|2
+Hive Steel Series|2|2
+Onitama: Sensei's Path|2|2
+Tak: A Beautiful Game|2|2
+Santorini: New York|2|4
+Santorini: Golden Fleece|2|4
+Twilight Imperium: Fourth Edition|3|6
+Eclipse: Second Dawn for the Galaxy|2|6
+Eclipse: New Dawn for the Galaxy|2|6
+Civilization: A New Dawn|2|4
+Sid Meier's Civilization: The Board Game|2|4
+Through the Ages: A New Story of Civilization|2|4
+Nations|1|5
+Imperial|2|6
+Imperial 2030|2|6
+Diplomacy|2|7
+Axis & Allies|2|5
+Axis & Allies: 1942 Second Edition|2|5
+Axis & Allies Europe|2|4
+Axis & Allies Pacific|2|4
+Risk: Legacy|3|5
+Risk 2210 A.D.|2|5
+Risk Europe|2|4
+Risk: Game of Thrones|2|7
+A Game of Thrones: The Board Game|3|5
+A Game of Thrones: The Board Game Second Edition|3|5
+Dune|2|6
+Dune: A Game of Conquest and Diplomacy|2|4
+Dune: House Secrets|1|4
+Dune: Betrayal|4|8
+War of the Ring: Second Edition|2|4
+Star Wars: Rebellion|2|4
+Star Wars: The Clone Wars|1|5
+Star Wars: Outer Rim|1|4
+Star Wars: Outer Rim – Unfinished Business|1|4
+Star Wars: Armada|2|2
+Star Wars: X-Wing Miniatures Game|2|2
+Star Wars: Legion|2|2
+Marvel Crisis Protocol|2|2
+Warhammer Underworlds|2|4
+Commands & Colors: Napoleonics|2|2
+Combat Commander: Europe|2|2
+Advanced Squad Leader|2|2
+Squad Leader|2|2
+Axis & Allies: Europe 1940|2|5
+Axis & Allies: Pacific 1940|2|5
+Here I Stand|3|6
+Virgin Queen|2|6
+Churchill|1|3
+Sekigahara: The Unification of Japan|2|2
+Napoleon's War|2|2
+1775: Rebellion|2|4
+1812: The Invasion of Canada|2|5
+878: Vikings – Invasions of England|2|4
+The U.S. Civil War|2|2
+Commands & Colors: Medieval|2|2
+BattleLore Second Edition|2|4
+Undaunted: Stalingrad|2|2
+Undaunted: Battle of Britain|2|2
+Pavlov's House|1|4
+Fields of Fire|1|2
+The Grizzled|2|5
+The Hunters|1|1
+The Halls of Montezuma|2|2
+Fire in the Lake|1|4
+A Distant Plain|1|4
+Cuba Libre|1|4
+Pendragon: The Fall of Roman Britain|1|4
+Falling Sky|1|4
+Liberty or Death|1|4
+Colonial Twilight|1|2
+All Bridges Burning|1|3
+Mansions of Madness|2|5
+Horrified: Greek Monsters|1|5
+The Night Cage|1|5
+Final Girl|1|1
+Unfathomable|3|6
+Battlestar Galactica|3|6
+Nemesis: Retaliation|1|5
+Alien: Fate of the Nostromo|1|5
+Alien: The Roleplaying Game|2|6
+Aliens: Another Glorious Day in the Corps|1|6
+The Thing: Infection at Outpost 31|4|8
+The Thing: Norwegian Outpost|1|8
+The Shining: Escape from the Overlook Hotel|1|5
+Dracula|2|5
+Fury of Dracula|2|5
+Letters from Whitechapel|2|6
+Whitehall Mystery|2|4
+The Bloody Inn|1|4
+Camp Grizzly|1|6
+Dead of Winter|2|5
+Dead of Winter: The Long Night|2|5
+Winter Tales|3|7
+Last Night on Earth|2|6
+Shadows of Brimstone|1|4
+Hellboy: The Board Game|1|4
+Dark Souls: The Board Game|1|4
+Bloodborne: The Board Game|1|4
+Mansions of Madness: Second Edition|1|5

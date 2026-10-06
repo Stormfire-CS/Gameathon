@@ -22,6 +22,9 @@ public class GamesOwned {
     @Column(name = "ownerID", nullable = false)
     private Long ownerID;
 
+    @Column(name = "yearProduced")
+    private Integer yearProduced;
+
     public GamesOwned() {
     }
 
@@ -54,12 +57,23 @@ public class GamesOwned {
         this.ownerID = ownerID;
     }
 
+    public Integer getYearProduced() {
+        return yearProduced;
+    }
+
+    public void setYearProduced(Integer yearProduced) {
+        this.yearProduced = yearProduced;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Game Owned ID = ").append(gameOwnedID).append(EOL);
         builder.append("Game ID = ").append(gameID).append(EOL);
         builder.append("Owner ID = ").append(ownerID);
+        if (yearProduced != null) {
+            builder.append("Publish Year = ").append(yearProduced).append(EOL);
+        }
         return builder.toString();
     }
 
