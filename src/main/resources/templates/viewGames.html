@@ -13,5 +13,19 @@
     <a th:href="@{/addGamePage(username=${username})}">
         <button type="button">Add Game</button>
     </a>
+
+    <h2>Games</h2>
+    <table>
+        <tr>
+            <th>Game Name</th>
+            <th>Minimum Players</th>
+            <th>Maximum Players</th>
+        </tr>
+        <tr th:each="game : ${games}">
+            <td th:text="${game.gameName}"></td>
+            <td th:text="${game.minPlayers}"></td>
+            <td th:text="${game.maxPlayers}"></td>
+        </tr>
+    </table>
 </body>
 </html>
