@@ -20,7 +20,7 @@ public class GameDataInit implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            Scanner fileReader = new Scanner(new File("/src/main/resources/data/games.txt"));
+            Scanner fileReader = new Scanner(new File("src/main/resources/data/games.txt"));
 
             while (fileReader.hasNextLine()) {
                 String line = fileReader.nextLine();
