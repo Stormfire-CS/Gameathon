@@ -1,0 +1,9 @@
+package edu.carroll.cs341.service;
+
+import edu.carroll.cs341.jpa.model.Games;
+
+import java.util.List;
+
+public interface GamesService {
+    List<Games> getAllGames();
+}
