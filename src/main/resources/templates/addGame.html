@@ -10,7 +10,22 @@
     <a th:href="@{/ownerPage(username=${username})}">
         <button type="button">My Home</button>
     </a>
-    <input type="text" id="gameID" name="userID" placeholder="UserID?"/>
-    <button type="button">Fake Submit</button>
+    <form th:action="@{/addGame}" method="post">
+        <input type="hidden" name="username" th:value="${username}"/>
+        <input type="text" id="gameName" name="gameName"
+               placeholder="Game Name" autocomplete="off"/>
+
+        <input type="hidden" id="gameID" name="gameID"/>
+        <div id="gameSuggestions"></div>
+
+        <label>Year Produced:</label>
+        <input type="number" name="yearProduced" placeholder="Year Produced (optional)"/>
+
+        <br/>
+
+        <button type="submit">Add Game</button>
+
+    </form>
+    <script th:src="@{/js/addGame.js}"></script>
 </body>
 </html>

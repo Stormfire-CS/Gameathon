@@ -1,8 +1,10 @@
 package edu.carroll.cs341.service;
 
+import edu.carroll.cs341.jpa.model.Games;
 import edu.carroll.cs341.jpa.model.GamesOwned;
 import edu.carroll.cs341.jpa.model.Login;
 import edu.carroll.cs341.jpa.repo.GamesOwnedRepository;
+import edu.carroll.cs341.jpa.repo.GamesRepository;
 import edu.carroll.cs341.jpa.repo.LoginRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +16,37 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
 
     private final GamesOwnedRepository gamesOwnedRepo;
     private final LoginRepository loginRepo;
+    private final GamesRepository gamesRepo;
 
-    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, LoginRepository loginRepo) {
+
+    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, LoginRepository loginRepo, GamesRepository gamesRepo) {
         this.gamesOwnedRepo = gamesOwnedRepo;
         this.loginRepo = loginRepo;
+        this.gamesRepo = gamesRepo;
+    }
+
+    @Override
+    public void addGame(String username, String gameName, Integer yearProduced) {
+
+        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
+
+        if (users.size() != 1) {
+            return;
+        }
+
+        Login user = users.getFirst();
+
+        Games game = gamesRepo.findByGameName(gameName);
+
+        if (game == null) {
+            return; //Later I want to safely allow the user to generate new game entries in our table.
+        }
+
+        GamesOwned gamesOwned = new GamesOwned(game, user.getId());
+
+        gamesOwned.setYearProduced(yearProduced);
+
+        gamesOwnedRepo.save(gamesOwned);
     }
 
     @Override
@@ -31,5 +60,10 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         Long ownerID = users.getFirst().getId();
 
         return gamesOwnedRepo.findByOwnerID(ownerID);
+    }
+
+    @Override
+    public List<Games> findGames(String gameName) {
+        return gamesRepo.findByGameNameContainingIgnoreCase(gameName);
     }
 }
