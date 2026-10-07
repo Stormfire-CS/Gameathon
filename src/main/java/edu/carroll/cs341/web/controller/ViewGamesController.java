@@ -16,9 +16,9 @@ public class ViewGamesController {
     }
 
     @GetMapping("/viewGamesPage")
-    public String viewGamesPage(Long ownerID, String username, Model model) {
+    public String viewGamesPage(String username, Model model) {
         model.addAttribute("username", username);
-        model.addAttribute("games", gamesOwnedService.getGamesOwnedByOwner(ownerID));
+        model.addAttribute("games", gamesOwnedService.getGamesOwnedByUsername(username));
         return "viewGames";
     }
 }

@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface GamesOwnedService {
 
-    List<GamesOwned> getGamesOwnedByOwner(Long ownerID);
+    List<GamesOwned> getGamesOwnedByUsername(String username);
 }
