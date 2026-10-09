@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface FamiliesRepository extends JpaRepository<Families, Long> {
 
-    List<Families> findByFamilyAdminId(Long familyAdminId);
+    Families findByFamilyAdminId(Long familyAdminId);
 
     boolean existsByFamilyNameIgnoreCase(String familyName);
 }

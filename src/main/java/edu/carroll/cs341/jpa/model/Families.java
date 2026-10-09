@@ -25,6 +25,11 @@ public class Families {
     public Families() {
     }
 
+    public Families(String familyName, Long familyAdminId){
+        this.familyName = familyName;
+        this.familyAdminId = familyAdminId;
+    }
+
     public Families(String familyName) {
         this.familyName = familyName;
     }
