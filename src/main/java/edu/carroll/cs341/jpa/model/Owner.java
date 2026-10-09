@@ -10,7 +10,7 @@ import static org.aspectj.util.LangUtil.EOL;
 
 @Entity
 @Table(name = "Owners")
-public class Owners {
+public class Owner {
 
     @Id
     @GeneratedValue
@@ -22,10 +22,10 @@ public class Owners {
     @Column(name = "familyID", nullable = true, unique = false)
     private Long familyID;
 
-    public Owners() {
+    public Owner() {
     }
 
-    public Owners(String name) {
+    public Owner(String name) {
         this.name = name;
     }
 
@@ -60,7 +60,7 @@ public class Owners {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        Owners owner = (Owners) o;
+        Owner owner = (Owner) o;
         return(ownerID.equals(owner.ownerID));
     }
 

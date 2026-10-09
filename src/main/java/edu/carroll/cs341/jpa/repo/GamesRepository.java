@@ -1,17 +1,17 @@
 package edu.carroll.cs341.jpa.repo;
 
-import edu.carroll.cs341.jpa.model.Games;
+import edu.carroll.cs341.jpa.model.Game;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface GamesRepository extends JpaRepository<Games, Long> {
+public interface GamesRepository extends JpaRepository<Game, Long> {
 
     boolean existsByGameName(String gameName);
 
-    Games findByGameNameIgnoreCase(String gameName);
+    Game findByGameNameIgnoreCase(String gameName);
 
-    Games findByGameID(Long gameID);
+    Game findByGameID(Long gameID);
 
-    List<Games> findByOwnerIDOfAdderIsNullOrOwnerIDOfAdderOrderByGameNameAsc(Long ownerIDOfAdder);
+    List<Game> findByOwnerIDOfAdderIsNullOrOwnerIDOfAdderOrderByGameNameAsc(Long ownerIDOfAdder);
 }

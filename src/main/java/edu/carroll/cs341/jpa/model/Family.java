@@ -10,7 +10,7 @@ import static org.aspectj.util.LangUtil.EOL;
 
 @Entity
 @Table(name = "Families")
-public class Families {
+public class Family {
 
     @Id
     @GeneratedValue
@@ -22,15 +22,15 @@ public class Families {
     @Column(name = "familyAdmin", nullable = false)
     private Long familyAdminId;
 
-    public Families() {
+    public Family() {
     }
 
-    public Families(String familyName, Long familyAdminId){
+    public Family(String familyName, Long familyAdminId){
         this.familyName = familyName;
         this.familyAdminId = familyAdminId;
     }
 
-    public Families(String familyName) {
+    public Family(String familyName) {
         this.familyName = familyName;
     }
 
@@ -73,7 +73,7 @@ public class Families {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        Families family = (Families) o;
+        Family family = (Family) o;
         return(familyID.equals(family.familyID));
     }
 }

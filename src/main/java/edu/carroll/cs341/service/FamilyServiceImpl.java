@@ -1,12 +1,11 @@
 package edu.carroll.cs341.service;
 
-import edu.carroll.cs341.jpa.model.Families;
+import edu.carroll.cs341.jpa.model.Family;
 import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.Login;
 import edu.carroll.cs341.jpa.repo.FamiliesRepository;
 import edu.carroll.cs341.jpa.repo.FamilyMembershipRepository;
 import edu.carroll.cs341.jpa.repo.LoginRepository;
-import org.apache.juli.logging.Log;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
@@ -53,7 +52,7 @@ public class FamilyServiceImpl implements FamilyService {
     }
 
     @Override
-    public Families getFamilyForUser(String username) {
+    public Family getFamilyForUser(String username) {
         Login user = findUser(username);
 
         if (user == null) {
@@ -89,7 +88,7 @@ public class FamilyServiceImpl implements FamilyService {
             return false;
         }
 
-        Families family = new Families(cleanedName, user.getId());
+        Family family = new Family(cleanedName, user.getId());
 
         family = familiesRepo.save(family);
 
@@ -113,7 +112,7 @@ public class FamilyServiceImpl implements FamilyService {
             return false;
         }
 
-        Families family = familiesRepo.findById(familyID).orElse(null);
+        Family family = familiesRepo.findById(familyID).orElse(null);
 
         if (family == null) {
             return false;
@@ -147,7 +146,7 @@ public class FamilyServiceImpl implements FamilyService {
             return new LinkedList<>();
         }
 
-        Families family = familiesRepo.findByFamilyAdminId(admin.getId());
+        Family family = familiesRepo.findByFamilyAdminId(admin.getId());
 
         if (family == null) {
             return new LinkedList<>();
@@ -170,7 +169,7 @@ public class FamilyServiceImpl implements FamilyService {
             return false;
         }
 
-        Families family = familiesRepo.findById(request.getFamilyID()).orElse(null);
+        Family family = familiesRepo.findById(request.getFamilyID()).orElse(null);
 
         if (family == null || !family.getFamilyAdminId().equals(admin.getId())) {
             return false;
@@ -201,7 +200,7 @@ public class FamilyServiceImpl implements FamilyService {
             return false;
         }
 
-        Families family = familiesRepo.findById(request.getFamilyID()).orElse(null);
+        Family family = familiesRepo.findById(request.getFamilyID()).orElse(null);
 
         if (family == null || !family.getFamilyAdminId().equals(admin.getId())) {
             return false;
@@ -221,7 +220,7 @@ public class FamilyServiceImpl implements FamilyService {
             return false;
         }
 
-        Families family = familiesRepo.findById(familyID).orElse(null);
+        Family family = familiesRepo.findById(familyID).orElse(null);
 
         return family != null && family.getFamilyAdminId().equals(user.getId());
     }

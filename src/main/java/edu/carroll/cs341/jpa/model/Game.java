@@ -1,7 +1,5 @@
 package edu.carroll.cs341.jpa.model;
 
-import java.util.Objects;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +10,7 @@ import static org.aspectj.util.LangUtil.EOL;
 
 @Entity
 @Table(name = "Games")
-public class Games {
+public class Game {
 
     @Id
     @GeneratedValue
@@ -30,10 +28,10 @@ public class Games {
     @Column(name = "owner_id_of_adder")
     private Long ownerIDOfAdder;
 
-    public Games() {
+    public Game() {
     }
 
-    public Games(String gameName) {
+    public Game(String gameName) {
         this.gameName = gameName;
     }
 
@@ -93,7 +91,7 @@ public class Games {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        Games game = (Games) o;
+        Game game = (Game) o;
         return(gameName.equals(game.gameName));
     }
 

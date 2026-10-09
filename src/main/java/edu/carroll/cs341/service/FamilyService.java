@@ -1,13 +1,13 @@
 package edu.carroll.cs341.service;
 
-import edu.carroll.cs341.jpa.model.Families;
+import edu.carroll.cs341.jpa.model.Family;
 import edu.carroll.cs341.jpa.model.FamilyMembership;
 
 import java.util.List;
 
 public interface FamilyService {
 
-    Families getFamilyForUser(String username);
+    Family getFamilyForUser(String username);
 
     boolean createFamily(String username, String familyName);
 

@@ -5,16 +5,16 @@
     <title>Family Home</title>
 </head>
 <body>
-<h1>Gameathon</h1>
+<h1>Gameathon Family</h1>
 <p>
-    Welcome to your family home page: <span th:text="${username}"></span>
+    Welcome to your family page: <span th:text="${username}"></span>
 </p>
 <a th:href="@{/homePage(username=${username})}">
-    <button type="button">Home</button>
+    <button type="button">My Home</button>
 </a>
 
 <a th:href="@{/ownerPage(username=${username})}">
-    <button type="button">My Home</button>
+    <button type="button">My Stuff</button>
 </a>
 
 

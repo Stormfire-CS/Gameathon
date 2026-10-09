@@ -10,7 +10,7 @@ import static org.aspectj.util.LangUtil.EOL;
 
 @Entity
 @Table(name = "GamePlayers")
-public class GamePlayers {
+public class GamePlayer {
 
     @Id
     @GeneratedValue
@@ -22,10 +22,10 @@ public class GamePlayers {
     @Column(name = "ownerID", unique = true)
     private Long ownerID;
 
-    public GamePlayers() {
+    public GamePlayer() {
     }
 
-    public GamePlayers(String name) {
+    public GamePlayer(String name) {
         this.name = name;
     }
 

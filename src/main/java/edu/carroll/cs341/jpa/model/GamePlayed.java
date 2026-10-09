@@ -12,7 +12,7 @@ import static org.aspectj.util.LangUtil.EOL;
 
 @Entity
 @Table(name = "GamesPlayed")
-public class GamesPlayed {
+public class GamePlayed {
 
     @Id
     @GeneratedValue
@@ -24,10 +24,10 @@ public class GamesPlayed {
     @Column(name = "datePlayed", nullable = false)
     private Date datePlayed;
 
-    public GamesPlayed() {
+    public GamePlayed() {
     }
 
-    public GamesPlayed(Long ownedGameID, Date datePlayed) {
+    public GamePlayed(Long ownedGameID, Date datePlayed) {
         this.ownedGameID = ownedGameID;
         this.datePlayed = datePlayed;
     }
@@ -72,7 +72,7 @@ public class GamesPlayed {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        GamesPlayed gamePlayed = (GamesPlayed) o;
+        GamePlayed gamePlayed = (GamePlayed) o;
         return(gamePlayedID.equals(gamePlayed.gamePlayedID));
     }
 }

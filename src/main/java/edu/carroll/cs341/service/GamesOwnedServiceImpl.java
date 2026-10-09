@@ -1,7 +1,7 @@
 package edu.carroll.cs341.service;
 
-import edu.carroll.cs341.jpa.model.Games;
-import edu.carroll.cs341.jpa.model.GamesOwned;
+import edu.carroll.cs341.jpa.model.Game;
+import edu.carroll.cs341.jpa.model.GameOwned;
 import edu.carroll.cs341.jpa.model.Login;
 import edu.carroll.cs341.jpa.repo.GamesOwnedRepository;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
@@ -36,21 +36,21 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
 
         Login user = users.getFirst();
 
-        Games game = gamesRepo.findByGameID(gameID);
+        Game game = gamesRepo.findByGameID(gameID);
 
         if (game == null) {
             return; //Later I want to safely allow the user to generate new game entries in our table.
         }
 
-        GamesOwned gamesOwned = new GamesOwned(game, user.getId());
+        GameOwned gameOwned = new GameOwned(game, user.getId());
 
-        gamesOwned.setYearProduced(yearProduced);
+        gameOwned.setYearProduced(yearProduced);
 
-        gamesOwnedRepo.save(gamesOwned);
+        gamesOwnedRepo.save(gameOwned);
     }
 
     @Override
-    public List<GamesOwned> getGamesOwnedByUsername(String username) {
+    public List<GameOwned> getGamesOwnedByUsername(String username) {
         List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
 
         if (users.size() != 1) {

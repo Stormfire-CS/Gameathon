@@ -1,6 +1,6 @@
 package edu.carroll.cs341.jpa.initializer;
 
-import edu.carroll.cs341.jpa.model.Games;
+import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class GameDataInit implements CommandLineRunner {
 
                 String[] data = line.split("\\|");
 
-                Games game = new Games(data[0]);
+                Game game = new Game(data[0]);
                 if (!gamesRepo.existsByGameName(data[0])) {
                     game.setMinPlayers(Integer.parseInt(data[1]));
                     game.setMaxPlayers(Integer.parseInt(data[2]));

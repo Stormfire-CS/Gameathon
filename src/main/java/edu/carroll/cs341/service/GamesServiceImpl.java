@@ -1,11 +1,9 @@
 package edu.carroll.cs341.service;
 
-import edu.carroll.cs341.jpa.model.Games;
-import edu.carroll.cs341.jpa.model.GamesOwned;
+import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.Login;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
 import edu.carroll.cs341.jpa.repo.LoginRepository;
-import org.apache.juli.logging.Log;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +20,7 @@ public class GamesServiceImpl implements GamesService{
     }
 
     @Override
-    public List<Games> getAvailableGames(Long ownerID) {
+    public List<Game> getAvailableGames(Long ownerID) {
         return gamesRepo.findByOwnerIDOfAdderIsNullOrOwnerIDOfAdderOrderByGameNameAsc(ownerID);
     }
 
@@ -36,13 +34,13 @@ public class GamesServiceImpl implements GamesService{
 
         Login user = users.getFirst();
 
-        Games game = gamesRepo.findByGameNameIgnoreCase(gameName);
+        Game game = gamesRepo.findByGameNameIgnoreCase(gameName);
 
         if (game != null) {
             return;
         }
 
-        Games newGame = new Games(gameName);
+        Game newGame = new Game(gameName);
 
         newGame.setMaxPlayers(maxPlayers);
         newGame.setMinPlayers(minPlayers);

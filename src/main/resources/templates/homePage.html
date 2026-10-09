@@ -5,13 +5,13 @@
     <title>Gameathon Home</title>
 </head>
 <body>
-    <h1>Gameathon</h1>
-    <p>Welcome to your home page, <span th:text="${username}"></span> </p>
+    <h1>Gameathon Home</h1>
+    <p>Welcome Home: <span th:text="${username}"></span> </p>
     <a th:href="@{/familyPage(username=${username})}">
-        <button type="button">Family</button>
+        <button type="button">View My Family</button>
     </a>
     <a th:href="@{/ownerPage(username=${username})}">
-        <button type="button">My Home</button>
+        <button type="button">View My Stuff</button>
     </a>
 </body>
 </html>

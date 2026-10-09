@@ -8,7 +8,7 @@
     <h1>Gameathon</h1>
     <p>Welcome to viewing your games: <span th:text="${username}"></span> </p>
     <a th:href="@{/ownerPage(username=${username})}">
-        <button type="button">Back to Home</button>
+        <button type="button">Back to My Stuff</button>
     </a>
     <a th:href="@{/addGametoCollectionPage(username=${username})}">
         <button type="button">Add Game</button>
