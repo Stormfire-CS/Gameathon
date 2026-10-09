@@ -50,28 +50,39 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public boolean validateNewUser(String username, String password1, String password2) {
+        log.debug("validateNewUser: attempting to register username '{}'", username);
+
         List<Login> users =  loginRepo.findByUsernameIgnoreCase(username);
         if (!users.isEmpty()) {
+            log.debug("validateNewUser: username '{}' already exists", username);
             return false;
         }
         if (!password1.equals(password2)) {
+            log.debug("validateNewUser: passwords do not match for '{}'", username);
             return false;
         }
 
         Login user = new Login(username, password1);
         loginRepo.save(user);
 
+        log.info("validateNewUser: successfully registered user '{}'", username);
         return true;
     }
 
     @Override
     public Long getUserID(String username) {
+        log.debug("getUserID: looking up ID for '{}'", username);
         List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
 
         if (users.size() != 1) {
+            log.debug("getUserID: found {} users for '{}'", users.size(), username);
             return null;
         }
 
-        return users.getFirst().getId();
+        Long userID = users.getFirst().getId();
+
+        log.debug("getUserID: found ID {} for '{}'", userID, username);
+
+        return userID;
     }
 }
