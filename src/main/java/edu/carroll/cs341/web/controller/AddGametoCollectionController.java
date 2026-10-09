@@ -3,9 +3,9 @@ package edu.carroll.cs341.web.controller;
 import edu.carroll.cs341.service.GamesOwnedService;
 import edu.carroll.cs341.service.GamesService;
 import edu.carroll.cs341.service.UserService;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller

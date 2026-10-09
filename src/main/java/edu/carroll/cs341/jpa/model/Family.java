@@ -1,10 +1,6 @@
 package edu.carroll.cs341.jpa.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import static org.aspectj.util.LangUtil.EOL;
 
@@ -25,7 +21,7 @@ public class Family {
     public Family() {
     }
 
-    public Family(String familyName, Long familyAdminId){
+    public Family(String familyName, Long familyAdminId) {
         this.familyName = familyName;
         this.familyAdminId = familyAdminId;
     }
@@ -54,7 +50,7 @@ public class Family {
         return familyAdminId;
     }
 
-    public void setFamilyAdminId (Long familyAdminId) {
+    public void setFamilyAdminId(Long familyAdminId) {
         this.familyAdminId = familyAdminId;
     }
 
@@ -74,6 +70,6 @@ public class Family {
             return false;
 
         Family family = (Family) o;
-        return(familyID.equals(family.familyID));
+        return (familyID.equals(family.familyID));
     }
 }

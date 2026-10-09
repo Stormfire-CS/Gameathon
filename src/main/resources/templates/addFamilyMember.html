@@ -20,11 +20,17 @@
 
 <table th:if="${!#lists.isEmpty(requests)}">
     <thead>
-    <tr><th>User ID</th><th>Family ID</th><th>Action</th></tr>
+    <tr>
+        <th>User ID</th>
+        <th>Family ID</th>
+        <th>Action</th>
+    </tr>
     </thead>
 
     <tbody>
-    <tr th:each="request : ${requests}"><td th:text="${request.userID}"></td><td th:text="${request.familyID}"></td>
+    <tr th:each="request : ${requests}">
+        <td th:text="${request.userID}"></td>
+        <td th:text="${request.familyID}"></td>
         <td>
             <form th:action="@{/acceptFamilyMember}" method="post" style="display:inline">
                 <input type="hidden" name="username" th:value="${username}"/>

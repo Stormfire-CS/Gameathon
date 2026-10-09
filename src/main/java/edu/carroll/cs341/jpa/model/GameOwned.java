@@ -82,7 +82,7 @@ public class GameOwned {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        final GameOwned gameOwned = (GameOwned)o;
+        final GameOwned gameOwned = (GameOwned) o;
         return gameOwnedID.equals(gameOwned.gameOwnedID);
     }
 }

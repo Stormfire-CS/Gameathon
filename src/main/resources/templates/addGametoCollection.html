@@ -5,34 +5,32 @@
     <title>Add Game</title>
 </head>
 <body>
-    <h1>Gameathon</h1>
-    <p>Please enter game information: <span th:text="${username}"></span> </p>
-    <a th:href="@{/ownerPage(username=${username})}">
-        <button type="button">My Stuff</button>
-    </a>
-    <a th:href="@{/viewGamesPage(username=${username})}">
-        <button type="button">View My Games</button>
-    </a>
-    <a th:href="@{/addGamePage(username=${username})}">
-        <button type="button">Don't See desired Game?</button>
-    </a>
-    <form th:action="@{/addGametoCollection}" method="post">
-        <input type="hidden" name="username" th:value="${username}"/>
-        <label>Game Name:</label>
-        <select name="gameID">
-            <option value="">Select a Game</option>
+<h1>Gameathon</h1>
+<p>Please enter game information: <span th:text="${username}"></span></p>
+<a th:href="@{/ownerPage(username=${username})}">
+    <button type="button">My Stuff</button>
+</a>
+<a th:href="@{/viewGamesPage(username=${username})}">
+    <button type="button">View My Games</button>
+</a>
+<a th:href="@{/addGamePage(username=${username})}">
+    <button type="button">Don't See desired Game?</button>
+</a>
+<form th:action="@{/addGametoCollection}" method="post">
+    <input type="hidden" name="username" th:value="${username}"/>
+    <label>Game Name:</label>
+    <select name="gameID">
+        <option value="">Select a Game</option>
 
-            <option th:each="game : ${games}"
-                    th:value="${game.gameID}"
-                    th:text="${game.gameName}">
-            </option>
-        </select>
+        <option th:each="game : ${games}" th:value="${game.gameID}" th:text="${game.gameName}">
+        </option>
+    </select>
 
-        <label>Year Produced:</label>
-        <input type="number" name="yearProduced" placeholder="Year Produced (optional)"/>
+    <label>Year Produced:</label>
+    <input type="number" name="yearProduced" placeholder="Year Produced (optional)"/>
 
-        <button type="submit">Add Game to Collection</button>
+    <button type="submit">Add Game to Collection</button>
 
-    </form>
+</form>
 </body>
 </html>

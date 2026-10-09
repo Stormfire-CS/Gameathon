@@ -5,29 +5,29 @@
     <title>View Games</title>
 </head>
 <body>
-    <h1>Gameathon</h1>
-    <p>Welcome to viewing your games: <span th:text="${username}"></span> </p>
-    <a th:href="@{/ownerPage(username=${username})}">
-        <button type="button">Back to My Stuff</button>
-    </a>
-    <a th:href="@{/addGametoCollectionPage(username=${username})}">
-        <button type="button">Add Game</button>
-    </a>
+<h1>Gameathon</h1>
+<p>Welcome to viewing your games: <span th:text="${username}"></span></p>
+<a th:href="@{/ownerPage(username=${username})}">
+    <button type="button">Back to My Stuff</button>
+</a>
+<a th:href="@{/addGametoCollectionPage(username=${username})}">
+    <button type="button">Add Game</button>
+</a>
 
-    <h2>Games</h2>
-    <table>
-        <tr>
-            <th>Game Name</th>
-            <th>Minimum Players</th>
-            <th>Maximum Players</th>
-            <th>Year Produced</th>
-        </tr>
-        <tr th:each="gameOwned : ${games}">
-            <td th:text="${gameOwned.game.gameName}"></td>
-            <td th:text="${gameOwned.game.minPlayers}"></td>
-            <td th:text="${gameOwned.game.maxPlayers}"></td>
-            <td th:text="${gameOwned.yearProduced}"></td>
-        </tr>
-    </table>
+<h2>Games</h2>
+<table>
+    <tr>
+        <th>Game Name</th>
+        <th>Minimum Players</th>
+        <th>Maximum Players</th>
+        <th>Year Produced</th>
+    </tr>
+    <tr th:each="gameOwned : ${games}">
+        <td th:text="${gameOwned.game.gameName}"></td>
+        <td th:text="${gameOwned.game.minPlayers}"></td>
+        <td th:text="${gameOwned.game.maxPlayers}"></td>
+        <td th:text="${gameOwned.yearProduced}"></td>
+    </tr>
+</table>
 </body>
 </html>

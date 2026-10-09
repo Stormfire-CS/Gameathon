@@ -12,9 +12,13 @@ public class CreateUserForm {
     @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password2;
 
-    public String getUsername() {return username;}
+    public String getUsername() {
+        return username;
+    }
 
-    public void setUsername(String username){this.username = username;}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String getPassword1() {
         return password1;
@@ -31,7 +35,6 @@ public class CreateUserForm {
     public void setPassword2(String password2) {
         this.password2 = password2;
     }
-
 
 
 }

@@ -41,7 +41,7 @@ public class FamilyServiceImpl implements FamilyService {
         List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
 
         if (users.size() != 1) {
-            log.debug("findUser: found {} users for username '{}'",users.size(), username);
+            log.debug("findUser: found {} users for username '{}'", users.size(), username);
             return null;
         }
 

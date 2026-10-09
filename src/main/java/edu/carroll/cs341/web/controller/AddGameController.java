@@ -1,6 +1,5 @@
 package edu.carroll.cs341.web.controller;
 
-import edu.carroll.cs341.jpa.repo.GamesRepository;
 import edu.carroll.cs341.service.GamesService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +16,7 @@ public class AddGameController {
     }
 
     @GetMapping("/addGamePage")
-    public String addGame (String username, Model model) {
+    public String addGame(String username, Model model) {
         model.addAttribute("username", username);
         return "addGame";
     }

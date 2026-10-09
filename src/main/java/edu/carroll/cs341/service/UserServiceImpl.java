@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final LoginRepository loginRepo;
 
@@ -19,6 +19,7 @@ public class UserServiceImpl implements UserService{
 
     /**
      * Determine if the information provided is valid, and the user exists in the system.
+     *
      * @param username - The username of the person trying to log in.
      * @param password - The password entered by the person trying to log in.
      */
@@ -52,7 +53,7 @@ public class UserServiceImpl implements UserService{
     public boolean validateNewUser(String username, String password1, String password2) {
         log.debug("validateNewUser: attempting to register username '{}'", username);
 
-        List<Login> users =  loginRepo.findByUsernameIgnoreCase(username);
+        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
         if (!users.isEmpty()) {
             log.debug("validateNewUser: username '{}' already exists", username);
             return false;

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class GamesServiceImpl implements GamesService{
+public class GamesServiceImpl implements GamesService {
     private static final Logger log = LoggerFactory.getLogger(GamesServiceImpl.class);
 
     private final GamesRepository gamesRepo;

@@ -1,11 +1,11 @@
 package edu.carroll.cs341;
 
-import java.util.List;
-
 import edu.carroll.cs341.jpa.model.Login;
 import edu.carroll.cs341.jpa.repo.LoginRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 // This class optionally pre-populates the database with login data.  In
 // a real application, this would be done with a completely different
