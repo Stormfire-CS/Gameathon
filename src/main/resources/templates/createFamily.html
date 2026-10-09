@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Family</title>
+</head>
+<body>
+<h1>Create a Family</h1>
+<p>
+    Creating a family <span th:text="${username}"></span>
+</p>
+<a th:href="@{/familyPage(username=${username})}">
+    <button type="button">Back to Family</button>
+</a>
+
+<form th:action="@{/createFamily}" method="post">
+    <input type="hidden" name="username" th:value="${username}"/>
+    <label for="familyName">Family Name:</label>
+    <input type="text" id="familyName" name="familyName" placeholder="Family Name"/>
+    <button type="submit">Create Family</button>
+</form>
+</body>
+</html>

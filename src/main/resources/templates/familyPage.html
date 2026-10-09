@@ -17,11 +17,6 @@
     <button type="button">My Home</button>
 </a>
 
-<p th:if="${message != null}"
-   th:text="${message}"></p>
-
-<p th:if="${error != null}"
-   th:text="${error}"></p>
 
 <div th:if="${!isFamilyMember}">
     <h2>You are not currently part of a family.</h2>

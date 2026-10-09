@@ -1,18 +1,44 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Add Family Memb</title>
+    <meta charset="UTF-8">
+    <title>Family Requests</title>
 </head>
 <body>
-    <h1>Gameathon</h1>
-    <p>Please enter Family member Information , <span th:text="${username}"></span> </p>
-    <a th:href="@{/familyPage(username=${username})}">
-        <button type="button">Back to Family</button>
-    </a>
-    <input type="text" id="userID" name="userID" placeholder="UserID?"/>
-    <button type="button">Fake Submit</button>
+<h1>Pending Family Requests</h1>
+<p>
+    Welcome Administer: <span th:text="${username}"></span>
+</p>
 
+<a th:href="@{/familyPage(username=${username})}">
+    <button type="button">Back to Family</button>
+</a>
+
+<div th:if="${#lists.isEmpty(requests)}">
+    <p>There are no pending family requests.</p>
+</div>
+
+<table th:if="${!#lists.isEmpty(requests)}">
+    <thead>
+    <tr><th>User ID</th><th>Family ID</th><th>Action</th></tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="request : ${requests}"><td th:text="${request.userID}"></td><td th:text="${request.familyID}"></td>
+        <td>
+            <form th:action="@{/acceptFamilyMember}" method="post" style="display:inline">
+                <input type="hidden" name="username" th:value="${username}"/>
+                <input type="hidden" name="membershipID" th:value="${request.membershipID}"/>
+                <button type="submit">Accept</button>
+            </form>
+            <form th:action="@{/rejectFamilyMember}" method="post" style="display:inline">
+                <input type="hidden" name="username" th:value="${username}"/>
+                <input type="hidden" name="membershipID" th:value="${request.membershipID}"/>
+                <button type="submit">Reject</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>
-

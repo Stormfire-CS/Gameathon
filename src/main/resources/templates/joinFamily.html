@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Join a Family</title>
+</head>
+<body>
+<h1>Join a Family</h1>
+<p>
+    Request to join family: <span th:text="${username}"></span>
+</p>
+<a th:href="@{/familyPage(username=${username})}">
+    <button type="button">Back to Family</button>
+</a>
+<p>
+    Enter the family ID that you were given by the family administrator.
+    They must first approve your request before you can become a member.
+</p>
+<form th:action="@{/requestToJoinFamily}" method="post">
+    <input type="hidden" name="username" th:value="${username}"/>
+    <label for="familyID">Family ID:</label>
+    <input type="number" id="familyID" name="familyID"/>
+    <button type="submit">Request to Join</button>
+</form>
+</body>
+</html>
