@@ -10,7 +10,7 @@
     <a th:href="@{/ownerPage(username=${username})}">
         <button type="button">My Home</button>
     </a>
-    <form th:action="@{/addGame}" method="post">
+    <form th:action="@{/addGametoCollection}" method="post">
         <input type="hidden" name="username" th:value="${username}"/>
         <label>Game Name:</label>
         <select name="gameID">
