@@ -23,6 +23,7 @@ public class FamilyPageController {
         Families family = familyService.getFamilyForUser(username);
         model.addAttribute("family", family);
         model.addAttribute("isFamilyMember", family != null);
+        model.addAttribute("isFamilyAdmin", family != null && familyService.isFamilyAdmin(username, family.getFamilyID()));
         return "familyPage";
     }
 }

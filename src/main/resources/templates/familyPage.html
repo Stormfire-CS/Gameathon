@@ -1,22 +1,58 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
     <title>Family Home</title>
 </head>
 <body>
-    <h1>Gameathon</h1>
-    <p>Welcome to your family home page, <span th:text="${username}"></span> </p>
-    <a th:href="@{/homePage(username=${username})}">
-        <button type="button">Home</button>
+<h1>Gameathon</h1>
+<p>
+    Welcome to your family home page: <span th:text="${username}"></span>
+</p>
+<a th:href="@{/homePage(username=${username})}">
+    <button type="button">Home</button>
+</a>
+
+<a th:href="@{/ownerPage(username=${username})}">
+    <button type="button">My Home</button>
+</a>
+
+<p th:if="${message != null}"
+   th:text="${message}"></p>
+
+<p th:if="${error != null}"
+   th:text="${error}"></p>
+
+<div th:if="${!isFamilyMember}">
+    <h2>You are not currently part of a family.</h2>
+    <p>You can join an existing family or create your own.</p>
+    <a th:href="@{/joinFamilyPage(username=${username})}">
+        <button type="button">Join a Family</button>
     </a>
-    <a th:href="@{/ownerPage(username=${username})}">
-        <button type="button">My Home</button>
+    <a th:href="@{/createFamilyPage(username=${username})}">
+        <button type="button">Create a Family</button>
     </a>
-    </a>
-    <a th:href="@{/addFamilyPage(username=${username})}">
-        <button type="button">Add New Family Member</button>
-    </a>
+</div>
+
+<div th:if="${isFamilyMember}">
+    <h2>Your Family</h2>
+    <p>
+        Family Name:
+        <span th:text="${family.familyName}"></span>
+    </p>
+    <p>
+        Family ID:
+        <span th:text="${family.familyID}"></span>
+    </p>
+    <p>
+        Family Administrator ID:
+        <span th:text="${family.familyAdminId}"></span>
+    </p>
+    <div th:if="${isFamilyAdmin}">
+        <a th:href="@{/addFamilyPage(username=${username})}">
+            <button type="button">Review Family Requests</button>
+        </a>
+    </div>
+</div>
 </body>
 </html>
-

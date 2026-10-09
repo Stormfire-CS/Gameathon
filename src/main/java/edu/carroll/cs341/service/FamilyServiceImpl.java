@@ -212,5 +212,18 @@ public class FamilyServiceImpl implements FamilyService {
 
         return true;
     }
+
+    @Override
+    public boolean isFamilyAdmin(String username, Long familyID) {
+        Login user = findUser(username);
+
+        if (user == null || familyID == null) {
+            return false;
+        }
+
+        Families family = familiesRepo.findById(familyID).orElse(null);
+
+        return family != null && family.getFamilyAdminId().equals(user.getId());
+    }
 }
 

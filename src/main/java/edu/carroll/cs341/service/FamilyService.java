@@ -18,4 +18,6 @@ public interface FamilyService {
     boolean acceptRequest(String username, Long membershipID);
 
     boolean rejectRequest(String username, Long membershipID);
+
+    boolean isFamilyAdmin(String username, Long familyID);
 }
