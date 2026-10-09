@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface GamesService {
     List<Games> getAllGames();
+    void addGame(String username, String gameName, Integer minPlayers, Integer maxPlayers);
 }

@@ -183,7 +183,6 @@ Arcadia Quest|2|4
 Star Wars: Imperial Assault|2|5
 Descent: Journeys in the Dark|2|5
 Descent: Legends of the Dark|1|4
-Mansions of Madness Second Edition|1|5
 Arkham Horror: The Card Game|1|4
 Eldritch Horror|1|8
 Arkham Horror|1|8

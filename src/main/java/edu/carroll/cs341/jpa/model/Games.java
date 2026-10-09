@@ -28,7 +28,7 @@ public class Games {
     private Integer maxPlayers;
 
     @Column(name = "owner_id_of_adder")
-    private Integer ownerIDOfAdder;
+    private Long ownerIDOfAdder;
 
     public Games() {
     }
@@ -69,9 +69,9 @@ public class Games {
         this.maxPlayers = maxPlayers;
     }
 
-    public Integer getOwnerIDOfAdder() {return ownerIDOfAdder;}
+    public Long getOwnerIDOfAdder() {return ownerIDOfAdder;}
 
-    public void setOwnerIDOfAdder(Integer ownerIDOfAdder) {this.ownerIDOfAdder = ownerIDOfAdder;}
+    public void setOwnerIDOfAdder(Long ownerIDOfAdder) {this.ownerIDOfAdder = ownerIDOfAdder;}
 
     @Override
     public String toString() {

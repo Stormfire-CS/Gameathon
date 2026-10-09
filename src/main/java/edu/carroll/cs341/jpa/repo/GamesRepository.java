@@ -9,7 +9,7 @@ public interface GamesRepository extends JpaRepository<Games, Long> {
 
     boolean existsByGameName(String gameName);
 
-    Games findByGameName(String gameName);
+    Games findByGameNameIgnoreCase(String gameName);
 
     Games findByGameID(Long gameID);
 

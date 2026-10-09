@@ -24,11 +24,11 @@ public class AddGameController {
         this.gamesOwnedService = gamesOwnedService;
     }
 
-    @GetMapping("/addGamePage")
+    @GetMapping("/addGametoCollectionPage")
     public String addGamePage(String username, Model model) {
         model.addAttribute("username", username);
         model.addAttribute("games", gamesService.getAllGames());
-        return "addGame";
+        return "addGametoCollection";
     }
 
     @PostMapping("/addGame")
