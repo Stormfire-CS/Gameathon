@@ -22,8 +22,8 @@ public class GamesServiceImpl implements GamesService{
     }
 
     @Override
-    public List<Games> getAllGames() {
-        return gamesRepo.findAllByOrderByGameNameAsc();
+    public List<Games> getAvailableGames(Long ownerID) {
+        return gamesRepo.findByOwnerIDOfAdderIsNullOrOwnerIDOfAdderOrderByGameNameAsc(ownerID);
     }
 
     @Override

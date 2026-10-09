@@ -29,4 +29,15 @@ public class NewUserServiceImpl implements NewUserService{
 
         return true;
     }
+
+    @Override
+    public Long getUserID(String username) {
+        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
+
+        if (users.size() != 1) {
+            return null;
+        }
+
+        return users.getFirst().getId();
+    }
 }

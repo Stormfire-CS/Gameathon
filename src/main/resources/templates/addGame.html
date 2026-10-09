@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Add Game Page</title>
+</head>
+<body>
+<h1>Add a New Game</h1>
+<p>Please enter the name of the game: <span th:text="${username}"></span></p>
+<a th:href="@{/addGametoCollectionPage(username=${username})}">
+    <button type="button">Back to Adding Game to Collection</button>
+</a>
+<form th:action="@{/addGame}" method="post">
+    <input type="hidden" name="username" th:value="${username}"/>
+    <label>Game Name:</label>
+    <input type="text" name="gameName" placeholder="Game Name"/>
+    <label>Maximum Number of Players</label>
+    <input type="number" name="maxPlayers" placeholder="Max # of Players"/>
+    <label>Minimum Number of Players</label>
+    <input type="number" name="minPlayers" placeholder="Minimum # of Players"/>
+    <button type="submit">Add Game to Database</button>
+</form>
+</body>
+</html>

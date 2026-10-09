@@ -13,5 +13,5 @@ public interface GamesRepository extends JpaRepository<Games, Long> {
 
     Games findByGameID(Long gameID);
 
-    List<Games> findAllByOrderByGameNameAsc();
+    List<Games> findByOwnerIDOfAdderIsNullOrOwnerIDOfAdderOrderByGameNameAsc(Long ownerIDOfAdder);
 }

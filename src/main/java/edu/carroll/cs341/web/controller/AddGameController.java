@@ -26,7 +26,7 @@ public class AddGameController {
     public String addGame(String username, String gameName, Integer minPlayers, Integer maxPlayers) {
         gamesService.addGame(username, gameName, minPlayers, maxPlayers);
 
-        return "redirect:/addGameToCollectionPage?username=" + username;
+        return "redirect:/addGametoCollectionPage?username=" + username;
     }
 
 
