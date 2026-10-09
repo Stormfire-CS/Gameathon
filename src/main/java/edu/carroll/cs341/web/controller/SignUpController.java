@@ -1,6 +1,6 @@
 package edu.carroll.cs341.web.controller;
 
-import edu.carroll.cs341.service.NewUserService;
+import edu.carroll.cs341.service.UserService;
 import edu.carroll.cs341.web.form.CreateUserForm;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
@@ -14,10 +14,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class SignUpController {
-    private final NewUserService newUserService;
+    private final UserService userService;
 
-    public SignUpController(NewUserService newUserService) {
-        this.newUserService = newUserService;
+    public SignUpController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping("/signUpPage")
@@ -32,7 +32,7 @@ public class SignUpController {
             return "signUpPage";
         }
 
-        if (!newUserService.validateNewUser(createUserForm.getUsername(), createUserForm.getPassword1(), createUserForm.getPassword2())){
+        if (!userService.validateNewUser(createUserForm.getUsername(), createUserForm.getPassword1(), createUserForm.getPassword2())){
             result.addError(new ObjectError("globalError", "Username already exists or passwords do not match"));
             return "signUpPage";
         }

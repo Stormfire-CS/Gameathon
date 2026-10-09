@@ -19,7 +19,7 @@ public class LoginServiceTest {
     private static final String password = "testpass";
 
     @Autowired
-    private LoginService loginService;
+    private UserService userService;
 
     @Autowired
     private LoginRepository loginRepo;
@@ -29,7 +29,7 @@ public class LoginServiceTest {
     @BeforeEach
     public void beforeTest() {
         assertNotNull("loginRepository must be injected", loginRepo);
-        assertNotNull("loginService must be injected", loginService);
+        assertNotNull("loginService must be injected", userService);
 
         // Ensure dummy record is in the DB
         final List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
@@ -39,21 +39,21 @@ public class LoginServiceTest {
 
     @Test
     public void validateUserSuccessTest() {
-        assertTrue("validateUserSuccessTest: should succeed using the same user/pass info", loginService.validateUser(username, password));
+        assertTrue("validateUserSuccessTest: should succeed using the same user/pass info", userService.validateUser(username, password));
     }
 
     @Test
     public void validateUserExistingUserInvalidPasswordTest() {
-        assertFalse("validateUserExistingUserInvalidPasswordTest: should fail using a valid user, invalid pass", loginService.validateUser(username, password + "extra"));
+        assertFalse("validateUserExistingUserInvalidPasswordTest: should fail using a valid user, invalid pass", userService.validateUser(username, password + "extra"));
     }
 
     @Test
     public void validateUserInvalidUserValidPasswordTest() {
-        assertFalse("validateUserInvalidUserValidPasswordTest: should fail using an invalid user, valid pass", loginService.validateUser(username + "not", password));
+        assertFalse("validateUserInvalidUserValidPasswordTest: should fail using an invalid user, valid pass", userService.validateUser(username + "not", password));
     }
 
     @Test
     public void validateUserInvalidUserInvalidPasswordTest() {
-        assertFalse("validateUserInvalidUserInvalidPasswordTest: should fail using an invalid user, valid pass", loginService.validateUser(username + "not", password + "extra"));
+        assertFalse("validateUserInvalidUserInvalidPasswordTest: should fail using an invalid user, valid pass", userService.validateUser(username + "not", password + "extra"));
     }
 }
