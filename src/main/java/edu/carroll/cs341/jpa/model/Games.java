@@ -27,6 +27,9 @@ public class Games {
     @Column(name = "maxPlayers")
     private Integer maxPlayers;
 
+    @Column(name = "owner_id_of_adder")
+    private Integer ownerIDOfAdder;
+
     public Games() {
     }
 
@@ -65,6 +68,10 @@ public class Games {
     public void setMaxPlayers(Integer maxPlayers) {
         this.maxPlayers = maxPlayers;
     }
+
+    public Integer getOwnerIDOfAdder() {return ownerIDOfAdder;}
+
+    public void setOwnerIDOfAdder(Integer ownerIDOfAdder) {this.ownerIDOfAdder = ownerIDOfAdder;}
 
     @Override
     public String toString() {

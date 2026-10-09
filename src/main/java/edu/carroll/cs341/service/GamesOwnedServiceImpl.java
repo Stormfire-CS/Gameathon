@@ -26,7 +26,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
     }
 
     @Override
-    public void addGame(String username, String gameName, Integer yearProduced) {
+    public void addGame(String username, Long gameID, Integer yearProduced) {
 
         List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
 
@@ -36,7 +36,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
 
         Login user = users.getFirst();
 
-        Games game = gamesRepo.findByGameName(gameName);
+        Games game = gamesRepo.findByGameID(gameID);
 
         if (game == null) {
             return; //Later I want to safely allow the user to generate new game entries in our table.
@@ -60,10 +60,5 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         Long ownerID = users.getFirst().getId();
 
         return gamesOwnedRepo.findByOwnerID(ownerID);
-    }
-
-    @Override
-    public List<Games> findGames(String gameName) {
-        return gamesRepo.findByGameNameContainingIgnoreCase(gameName);
     }
 }

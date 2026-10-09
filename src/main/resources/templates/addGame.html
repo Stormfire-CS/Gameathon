@@ -12,20 +12,21 @@
     </a>
     <form th:action="@{/addGame}" method="post">
         <input type="hidden" name="username" th:value="${username}"/>
-        <input type="text" id="gameName" name="gameName"
-               placeholder="Game Name" autocomplete="off"/>
+        <label>Game Name:</label>
+        <select name="gameID">
+            <option value="">Select a Game</option>
 
-        <input type="hidden" id="gameID" name="gameID"/>
-        <div id="gameSuggestions"></div>
+            <option th:each="game : ${games}"
+                    th:value="${game.gameID}"
+                    th:text="${game.gameName}">
+            </option>
+        </select>
 
         <label>Year Produced:</label>
         <input type="number" name="yearProduced" placeholder="Year Produced (optional)"/>
 
-        <br/>
-
         <button type="submit">Add Game</button>
 
     </form>
-    <script th:src="@{/js/addGame.js}"></script>
 </body>
 </html>

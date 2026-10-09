@@ -9,7 +9,5 @@ public interface GamesOwnedService {
 
     List<GamesOwned> getGamesOwnedByUsername(String username);
 
-    void addGame(String username, String gameName, Integer yearProduced);
-
-    List<Games> findGames(String gameName);
+    void addGame(String username, Long gameID, Integer yearProduced);
 }
