@@ -36,5 +36,8 @@ public interface GamesOwnedService {
      * @param gameID the ID of the game to add
      * @param yearProduced the year the owned game was produced
      */
-    void addGame(String username, Long gameID, Integer yearProduced);
+    boolean addGameToCollection(String username, Long gameID, Integer yearProduced);
+
+
+    boolean removeGameFromCollection(String username, Long gameOwnedID);
 }

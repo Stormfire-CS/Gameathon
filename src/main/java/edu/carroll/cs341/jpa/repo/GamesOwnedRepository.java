@@ -6,14 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 /**
- * Provides database operations for GameOwned entities.
+ * Provides database operations for {@link GameOwned} entities.
  *
- * <p>This repository extends {@link JpaRepository} to provide standard
+ * This repository extends {@link JpaRepository} to provide standard
  * persistence operations for {@link GameOwned} objects, using {@link Long}
- * as the type of the entity's primary key.</p>
+ * as the type of the entity's primary key.
  *
- * <p>It also defines a query method for retrieving all games owned by
- * a specified owner.</p>
+ * It also defines query methods for retrieving game ownership records
+ * by owner ID and game ownership record ID.
  *
  * <p><b>Sources Used:</b></p>
  * <ul>
@@ -32,4 +32,13 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
      *         an empty list if no matching records are found
      */
     List<GameOwned> findByOwnerID(Long ownerID);
+
+    /**
+     * Finds the game ownership record associated with the specific ID.
+     *
+     * @param gameOwnedID the ID of the owned game being retrieved
+     * @return the matching game ownership record, or {@code null} if no
+     * matching record is found
+     */
+    GameOwned findByGameOwnedID(Long gameOwnedID);
 }
