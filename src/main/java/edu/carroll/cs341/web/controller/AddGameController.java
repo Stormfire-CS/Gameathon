@@ -25,14 +25,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AddGameController {
 
     /** Service used to add games to the game catalog. */
-    GamesService gamesService;
+    private final GamesService gamesService;
 
     /**
      * Constructs the controller with the service required to manage games.
      *
      * @param gamesService service for retrieving and adding games
      */
-    AddGameController(GamesService gamesService) {
+    public AddGameController(GamesService gamesService) {
         this.gamesService = gamesService;
     }
 
