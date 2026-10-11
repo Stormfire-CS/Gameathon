@@ -92,6 +92,24 @@ public class Owner {
     }
 
     /**
+     * Retrieves the family ID.
+     *
+     * @return the family ID
+     */
+    public Long getFamilyID() {
+        return familyID;
+    }
+
+    /**
+     * Sets the owner's family ID.
+     *
+     * @param familyID the family ID to assign to the owner
+     */
+    public void setFamilyID(Long familyID) {
+        this.familyID = familyID;
+    }
+
+    /**
      * Returns a readable representation of the owner.
      *
      * <p>The representation includes the owner's ID and name.</p>
