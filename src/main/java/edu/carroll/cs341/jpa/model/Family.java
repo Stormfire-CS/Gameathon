@@ -125,7 +125,6 @@ public class Family {
         builder.append("familyName = ").append(familyName);
         return builder.toString();
     }
-
     
     @Override
     public boolean equals(Object o) {
