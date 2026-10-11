@@ -39,15 +39,4 @@ public class LoginController {
         attrs.addAttribute("username", loginForm.getUsername());
         return "redirect:/homePage";
     }
-
-    @GetMapping("/loginSuccess")
-    public String loginSuccess(String username, Model model) {
-        model.addAttribute("username", username);
-        return "loginSuccess";
-    }
-
-    @GetMapping("/loginFailure")
-    public String loginFailure() {
-        return "loginFailure";
-    }
 }
