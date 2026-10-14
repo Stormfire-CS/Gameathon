@@ -1,5 +1,6 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.UserService;
 import edu.carroll.cs341.web.form.LoginForm;
 import jakarta.validation.Valid;
@@ -76,7 +77,8 @@ public class LoginController {
         }
 
         // Check the submitted credentials against the user service.
-        if (!userService.validateUser(loginForm.getUsername(), loginForm.getPassword())) {
+        User user = userService.validateUser(loginForm.getUsername(), loginForm.getPassword());
+        if (user == null) {
             // Add a form-level error when the credentials are not recognized.
             result.addError(new ObjectError("globalError", "Username and password do not match known users"));
             return "login";

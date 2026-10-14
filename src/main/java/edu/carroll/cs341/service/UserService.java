@@ -1,5 +1,7 @@
 package edu.carroll.cs341.service;
 
+import edu.carroll.cs341.jpa.model.User;
+
 /**
  * Defines the service operations for managing user accounts.
  * This interface provides methods for validating login credentials,
@@ -24,7 +26,7 @@ public interface UserService {
      * @param password the password entered by the user
      * @return {@code true} if the credentials are valid; {@code false} otherwise
      */
-    boolean validateUser(String username, String password);
+    User validateUser(String username, String password);
 
     /**
      * Validates registration information and registers a new user if the
@@ -35,7 +37,7 @@ public interface UserService {
      * @param password2 the password entered for confirmation
      * @return {@code true} if registration succeeds; {@code false} otherwise
      */
-    boolean validateNewUser(String username, String password1, String password2);
+     User validateNewUser(String username, String password1, String password2);
 
     /**
      * Retrieves the database ID associated with a username.

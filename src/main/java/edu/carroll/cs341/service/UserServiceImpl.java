@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
      * password matches; {@code false} otherwise
      */
     @Override
-    public boolean validateUser(String username, String password) {
+    public User validateUser(String username, String password) {
         log.debug("validateUser: user '{}' attempted login", username);
 
         // Perform the lookup without distinguishing between uppercase and lowercase usernames.
@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
         // Require exactly one matching account to avoid ambiguous authentication results.
         if (users.size() != 1) {
             log.debug("validateUser: found {} users", users.size());
-            return false;
+            return null;
         }
         User u = users.getFirst();
         // XXX - Using Java's hashCode is wrong on SO many levels, but is good enough for demonstration purposes.
@@ -69,12 +69,12 @@ public class UserServiceImpl implements UserService {
         final String userProvidedHash = Integer.toString(password.hashCode());
         if (!u.getHashedPassword().equals(userProvidedHash)) {
             log.debug("validateUser: password !match");
-            return false;
+            return null;
         }
 
         // Authentication succeeds only after the stored and supplied hashes match.
         log.info("validateUser: successful login for {}", u.getUsername());
-        return true;
+        return u;
     }
 
     /**
@@ -88,20 +88,20 @@ public class UserServiceImpl implements UserService {
      * {@code false} if the username already exists or the passwords differ
      */
     @Override
-    public boolean validateNewUser(String username, String password1, String password2) {
+    public User validateNewUser(String username, String password1, String password2) {
         log.debug("validateNewUser: attempting to register username '{}'", username);
 
         // Check whether the requested username is already associated with an account.
         List<User> users = userRepo.findByUsernameIgnoreCase(username);
         if (!users.isEmpty()) {
             log.debug("validateNewUser: username '{}' already exists", username);
-            return false;
+            return null;
         }
 
         // Ensure the password confirmation matches before creating the account.
         if (!password1.equals(password2)) {
             log.debug("validateNewUser: passwords do not match for '{}'", username);
-            return false;
+            return null;
         }
 
         // Construct and save the new login record after validation succeeds.
@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
         userRepo.save(user);
 
         log.info("validateNewUser: successfully registered user '{}'", username);
-        return true;
+        return user;
     }
 
     /**
