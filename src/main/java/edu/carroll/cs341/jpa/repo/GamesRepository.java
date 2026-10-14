@@ -1,6 +1,7 @@
 package edu.carroll.cs341.jpa.repo;
 
 import edu.carroll.cs341.jpa.model.Game;
+import edu.carroll.cs341.jpa.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -58,11 +59,11 @@ public interface GamesRepository extends JpaRepository<Game, Long> {
      * which have no associated owner, and games added by the specified owner.
      * The results are ordered alphabetically by game name in ascending order.</p>
      *
-     * @param ownerIDOfAdder the ID of the owner whose added games should
+     * @param userWhoAdded the ID of the owner whose added games should
      *                       be included alongside automatically populated games
      * @return a list of automatically populated games and games added by
      *         the specified owner, ordered by game name; an empty list
      *         if no matching games are found
      */
-    List<Game> findByOwnerIDOfAdderIsNullOrOwnerIDOfAdderOrderByGameNameAsc(Long ownerIDOfAdder);
+    List<Game> findByUserWhoAddedIsNullOrUserWhoAddedOrderByGameNameAsc(User userWhoAdded);
 }
