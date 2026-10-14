@@ -1,6 +1,8 @@
 package edu.carroll.cs341.jpa.repo;
 
+import edu.carroll.cs341.jpa.model.Family;
 import edu.carroll.cs341.jpa.model.FamilyMembership;
+import edu.carroll.cs341.jpa.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -28,29 +30,29 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
     /**
      * Finds memberships belonging to a specified user with the given status.
      *
-     * @param userID the ID of the user
+     * @param user the ID of the user
      * @param status the membership status to search for
      * @return a list of memberships matching the user ID and status;
      *         an empty list if no matches are found
      */
-    List<FamilyMembership> findByUserIDAndStatus(Long userID, String status);
+    List<FamilyMembership> findByUserAndStatus(User user, String status);
 
     /**
      * Finds memberships associated with a specified family and status.
      *
-     * @param familyID the ID of the family
+     * @param family the ID of the family
      * @param status the membership status to search for
      * @return a list of memberships matching the family ID and status;
      *         an empty list if no matches are found
      */
-    List<FamilyMembership> findByFamilyIDAndStatus(Long familyID, String status);
+    List<FamilyMembership> findByFamilyAndStatus(Family family, String status);
 
     /**
      * Finds a membership associated with a specific family and user.
      *
-     * @param familyID the ID of the family
-     * @param userID the ID of the user
+     * @param family the ID of the family
+     * @param user the ID of the user
      * @return the matching membership, or {@code null} if no match is found
      */
-    FamilyMembership findByFamilyIDAndUserID(Long familyID, Long userID);
+    FamilyMembership findByFamilyAndUser(Family family, User user);
 }
