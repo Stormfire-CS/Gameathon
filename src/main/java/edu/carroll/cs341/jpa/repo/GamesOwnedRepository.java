@@ -1,6 +1,7 @@
 package edu.carroll.cs341.jpa.repo;
 
 import edu.carroll.cs341.jpa.model.GameOwned;
+import edu.carroll.cs341.jpa.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -27,18 +28,18 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
     /**
      * Finds all game ownership records associated with the specified owner.
      *
-     * @param ownerID the ID of the owner whose games are being retrieved
+     * @param user the ID of the owner whose games are being retrieved
      * @return a list of game ownership records for the specified owner;
      *         an empty list if no matching records are found
      */
-    List<GameOwned> findByOwnerID(Long ownerID);
+    List<GameOwned> findByUser(User user);
 
     /**
      * Finds the game ownership record associated with the specific ID.
      *
-     * @param gameOwnedID the ID of the owned game being retrieved
+     * @param gameOwned the ID of the owned game being retrieved
      * @return the matching game ownership record, or {@code null} if no
      * matching record is found
      */
-    GameOwned findByGameOwnedID(Long gameOwnedID);
+    GameOwned findByGameOwned(GameOwned gameOwned);
 }
