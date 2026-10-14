@@ -29,12 +29,14 @@ public class FamilyMembership {
     private Long membershipID;
 
     /** The ID of the family associated with this membership. */
-    @Column(name = "familyID", nullable = false)
-    private Long familyID;
+    @ManyToOne
+    @JoinColumn(name = "family", nullable = false)
+    private Family family;
 
     /** The ID of the user associated with this membership. */
-    @Column(name = "userID", nullable = false)
-    private Long userID;
+    @ManyToOne
+    @JoinColumn(name = "user", nullable = false)
+    private User user;
 
     /** The current status of the user's membership or join request. */
     @Column(name = "status", nullable = false)
@@ -52,13 +54,13 @@ public class FamilyMembership {
     /**
      * Creates a membership record for a specific family and user.
      *
-     * @param familyID the ID of the family associated with the membership
-     * @param userID the ID of the user associated with the membership
+     * @param family the ID of the family associated with the membership
+     * @param user the ID of the user associated with the membership
      * @param status the initial status of the membership
      */
-    public FamilyMembership(Long familyID, Long userID, String status) {
-        this.familyID = familyID;
-        this.userID = userID;
+    public FamilyMembership(Family family, User user, String status) {
+        this.family = family;
+        this.user = user;
         this.status = status;
     }
 
@@ -85,17 +87,17 @@ public class FamilyMembership {
      *
      * @return the family ID
      */
-    public Long getFamilyID() {
-        return familyID;
+    public Family getFamily() {
+        return family;
     }
 
     /**
      * Sets the ID of the associated family.
      *
-     * @param familyID the family ID to assign to the membership
+     * @param family the family ID to assign to the membership
      */
-    public void setFamilyID(Long familyID) {
-        this.familyID = familyID;
+    public void setFamily(Family family) {
+        this.family = family;
     }
 
     /**
@@ -103,17 +105,17 @@ public class FamilyMembership {
      *
      * @return the user ID
      */
-    public Long getUserID() {
-        return userID;
+    public User getUser() {
+        return user;
     }
 
     /**
      * Sets the ID of the associated user.
      *
-     * @param userID the user ID to assign to the membership
+     * @param user the user ID to assign to the membership
      */
-    public void setUserID(Long userID) {
-        this.userID = userID;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     /**
