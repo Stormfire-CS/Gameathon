@@ -2,10 +2,10 @@ package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.Family;
 import edu.carroll.cs341.jpa.model.FamilyMembership;
-import edu.carroll.cs341.jpa.model.Login;
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.FamiliesRepository;
 import edu.carroll.cs341.jpa.repo.FamilyMembershipRepository;
-import edu.carroll.cs341.jpa.repo.LoginRepository;
+import edu.carroll.cs341.jpa.repo.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -55,109 +55,76 @@ public class FamilyServiceImpl implements FamilyService {
     private final FamilyMembershipRepository membershipRepo;
 
     /** Repository used to retrieve login records for users. */
-    private final LoginRepository loginRepo;
+    private final UserRepository userRepo;
 
     /**
      * Creates the family service with its required repositories.
      *
      * @param familiesRepo repository for family records
      * @param membershipRepo repository for family membership records
-     * @param loginRepo repository for login records
+     * @param userRepo repository for login records
      */
-    public FamilyServiceImpl(FamiliesRepository familiesRepo, FamilyMembershipRepository membershipRepo, LoginRepository loginRepo) {
+    public FamilyServiceImpl(FamiliesRepository familiesRepo, FamilyMembershipRepository membershipRepo, UserRepository userRepo) {
         this.familiesRepo = familiesRepo;
         this.membershipRepo = membershipRepo;
-        this.loginRepo = loginRepo;
-    }
-
-    /**
-     * Finds a login record by username, ignoring differences in letter case.
-     *
-     * <p>The method returns {@code null} if the username is {@code null}
-     * or if the repository does not return exactly one matching user.</p>
-     *
-     * @param username the username to search for
-     * @return the matching login record, or {@code null} if no unique match
-     *         is found
-     */
-    private Login findUser(String username) {
-        // A null username cannot be used to look up a login record.
-        if (username == null) {
-            log.debug("findUser: username is null");
-            return null;
-        }
-
-        // The repository returns a list so the method can handle missing
-        // usernames and unexpected duplicate username records.
-        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
-
-        if (users.size() != 1) {
-            log.debug("findUser: found {} users for username '{}'", users.size(), username);
-            return null;
-        }
-
-        log.info("findUser: successfully found {}", username);
-
-        return users.getFirst();
+        this.userRepo = userRepo;
     }
 
     /**
      * Checks whether a user has an accepted family membership.
      *
-     * @param userID the ID of the user to check
+     * @param user the ID of the user to check
      * @return {@code true} if the user has an accepted membership;
      *         {@code false} otherwise
      */
-    private boolean hasAcceptedMembership(Long userID) {
+    private boolean hasAcceptedMembership(User user) {
         // A user with at least one accepted membership already belongs to a family.
-        return !membershipRepo.findByUserIDAndStatus(userID, ACCEPTED).isEmpty();
+        return !membershipRepo.findByUserAndStatus(user, ACCEPTED).isEmpty();
     }
 
     /**
      * Checks whether a user has a pending family membership request.
      *
-     * @param userID the ID of the user to check
+     * @param user the ID of the user to check
      * @return {@code true} if the user has a pending request;
      *         {@code false} otherwise
      */
-    private boolean hasPendingRequest(Long userID) {
+    private boolean hasPendingRequest(User user) {
         // Pending requests have not yet been approved or rejected by an administrator.
-        return !membershipRepo.findByUserIDAndStatus(userID, PENDING).isEmpty();
+        return !membershipRepo.findByUserAndStatus(user, PENDING).isEmpty();
     }
 
     /**
      * Retrieves the family associated with a user's accepted membership.
      *
-     * @param username the username of the user
+     * @param user the username of the user
      * @return the user's family, or {@code null} if the user cannot be found,
      *         has no accepted membership, or the associated family does not exist
      */
     @Override
-    public Family getFamilyForUser(String username) {
-        log.debug("getFamilyForUser: looking up family for '{}'", username);
-
-        Login user = findUser(username);
-
+    public Family getFamilyForUser(User user) {
         // Checks to ensure the user is not null.
         if (user == null) {
-            log.debug("getFamilyForUser: {} not found", username);
+            log.debug("getFamilyForUser: user is null");
             return null;
         }
 
-        // Only accepted memberships determine which family belongs to the user.
-        List<FamilyMembership> memberships = membershipRepo.findByUserIDAndStatus(user.getId(), ACCEPTED);
+        log.debug("getFamilyForUser: looking up family for '{}'", user.getUsername());
 
-        if (memberships.isEmpty()) {
-            log.info("getFamilyForUser: user {} has no membership", username);
+        // Only accepted memberships determine which family belongs to the user.
+        List<FamilyMembership> memberships = membershipRepo.findByUserAndStatus(user, ACCEPTED);
+
+        if (memberships.size() != 1) {
+            log.info("getFamilyForUser: user {} has {} membership('s)", user.getUsername(), memberships.size());
             return null;
         }
 
         // Use the first accepted membership to locate the corresponding family.
         FamilyMembership membership = memberships.getFirst();
-        Family family = familiesRepo.findById(membership.getFamilyID()).orElse(null);
+        Family family = membership.getFamily();
 
         if (family == null) {
-            log.debug("getFamilyForUser: family {} not found", membership.getFamilyID());
+            log.debug("getFamilyForUser: family not found for membership {}", membership.getMembershipID());
         }
 
         return family;
@@ -171,16 +138,14 @@ public class FamilyServiceImpl implements FamilyService {
      * {@code null}, the user already has an accepted membership, or a family
      * with the same name already exists.</p>
      *
-     * @param username the username of the user creating the family
+     * @param user the username of the user creating the family
      * @param familyName the proposed name of the family
      * @return {@code true} if the family and its initial membership are saved;
      *         {@code false} if validation fails
      */
     @Override
-    public boolean createFamily(String username, String familyName) {
-        log.debug("createFamily: user {} attempted to create family {}", username, familyName);
-
-        Login user = findUser(username);
+    public boolean createFamily(User user, String familyName) {
+        log.debug("createFamily: user {} attempted to create family {}", user.getUsername(), familyName);
 
         // Both a valid user and a supplied family name are required.
         if (user == null || familyName == null) {
@@ -189,8 +154,8 @@ public class FamilyServiceImpl implements FamilyService {
         }
 
         // Prevent users who already belong to a family from creating another one.
-        if (hasAcceptedMembership(user.getId())) {
-            log.debug("createFamily: user '{}' already belongs to a family", username);
+        if (hasAcceptedMembership(user)) {
+            log.debug("createFamily: user '{}' already belongs to a family", user.getUsername());
             return false;
         }
 
@@ -203,24 +168,18 @@ public class FamilyServiceImpl implements FamilyService {
             return false;
         }
 
-        // Family names must be unique, regardless of capitalization.
-        if (familiesRepo.existsByFamilyNameIgnoreCase(cleanedName)) {
-            log.debug("createFamily: family name '{}' already exists", cleanedName);
-            return false;
-        }
-
         // Assign the creator as the administrator of the new family.
-        Family family = new Family(cleanedName, user.getId());
+        Family family = new Family(cleanedName, user);
 
         // Save the family first so its generated ID is available for membership.
         family = familiesRepo.save(family);
 
         // The creator automatically becomes an accepted member of the family.
-        FamilyMembership membership = new FamilyMembership(family.getFamilyID(), user.getId(), ACCEPTED);
+        FamilyMembership membership = new FamilyMembership(family, user, ACCEPTED);
 
         membershipRepo.save(membership);
 
-        log.info("createFamily: user '{}' created family '{}'", username, cleanedName);
+        log.info("createFamily: user '{}' created family '{}'", user.getUsername(), family.getFamilyName());
 
         return true;
     }
@@ -232,40 +191,34 @@ public class FamilyServiceImpl implements FamilyService {
      * is invalid, the family does not exist, or the user already has an
      * accepted membership. A previously rejected request can be resubmitted.</p>
      *
-     * @param username the username of the user requesting membership
-     * @param familyID the ID of the family the user wants to join
+     * @param user the username of the user requesting membership
+     * @param family the ID of the family the user wants to join
      * @return {@code true} if the request is submitted or resubmitted;
      *         {@code false} if validation fails or an existing request is
      *         already pending or accepted
      */
     @Override
-    public boolean requestToJoinFamily(String username, Long familyID) {
-        log.debug("requestToJoinFamily: user '{}' requested family {}", username, familyID);
-
-        Login user = findUser(username);
-
+    public boolean requestToJoinFamily(User user, Family family) {
         // A valid user and family ID are required to submit a request.
-        if (user == null || familyID == null) {
-            log.debug("requestToJoinFamily: user: {} or family ID: {} is null", user, familyID);
+        if (user == null ) {
+            log.debug("requestToJoinFamily: user is null");
             return false;
         }
-
-        // Users who already belong to a family cannot request another membership.
-        if (hasAcceptedMembership(user.getId())) {
-            log.debug("requestToJoinFamily: user '{}' already belongs to a family", username);
-            return false;
-        }
-
-        // Confirm that the requested family exists before creating a membership.
-        Family family = familiesRepo.findById(familyID).orElse(null);
 
         if (family == null) {
-            log.debug("requestToJoinFamily: family {} not found", familyID);
+            log.debug("requestToJoinFamily: familyID is null");
+        }
+
+        log.debug("requestToJoinFamily: user '{}' requested to join family {}", user.getUsername(), family.getFamilyName());
+
+        // Users who already belong to a family cannot request another membership.
+        if (hasAcceptedMembership(user)) {
+            log.debug("requestToJoinFamily: user '{}' already belongs to a family", user.getUsername());
             return false;
         }
 
         // Check for an existing request from this user to this particular family.
-        FamilyMembership previousRequest = membershipRepo.findByFamilyIDAndUserID(familyID, user.getId());
+        FamilyMembership previousRequest = membershipRepo.findByFamilyAndUser(family, user);
 
         if (previousRequest != null) {
             // Pending requests are already awaiting a decision, and accepted
@@ -279,14 +232,14 @@ public class FamilyServiceImpl implements FamilyService {
             previousRequest.setStatus(PENDING);
             membershipRepo.save(previousRequest);
 
-            log.info("requestToJoinFamily: user '{}' resubmitted request to join family {}", username, familyID);
+            log.info("requestToJoinFamily: user '{}' resubmitted request to join family {}", user.getUsername(), family.getFamilyName());
             return true;
         }
 
         // Create a new pending membership when no previous request exists.
-        FamilyMembership request = new FamilyMembership(familyID, user.getId(), PENDING);
+        FamilyMembership request = new FamilyMembership(family, user, PENDING);
 
-        log.info("requestToJoinFamily: user successfully {} submitted request to join family {} for the first time", username, familyID);
+        log.info("requestToJoinFamily: user successfully {} submitted request to join family {} for the first time", user.getUsername(), family.getFamilyName());
         membershipRepo.save(request);
 
         return true;
@@ -296,34 +249,33 @@ public class FamilyServiceImpl implements FamilyService {
      * Retrieves pending membership requests for the family administered
      * by the specified user.
      *
-     * @param username the username of the family administrator
+     * @param user the username of the family administrator
      * @return a list of pending membership requests, or an empty list if
      *         the user cannot be found or does not administer a family
      */
     @Override
-    public List<FamilyMembership> getPendingRequests(String username) {
-        log.debug("getPendingRequests: retrieving requests for {}", username);
-
-        Login admin = findUser(username);
+    public List<FamilyMembership> getPendingRequests(User user) {
 
         // Return an empty list when the supplied username is not associated
         // with a valid login record.
-        if (admin == null) {
-            log.debug("getPendingRequests: admin was not found for username {}", username);
+        if (user == null) {
+            log.debug("getPendingRequests: user was null");
             return new LinkedList<>();
         }
 
+        log.debug("getPendingRequests: retrieving requests for {}", user.getUsername());
+
         // Locate the family administered by this user.
-        Family family = familiesRepo.findByFamilyAdminId(admin.getId());
+        Family family = familiesRepo.findByFamilyAdmin(user);
 
         // Users who do not administer a family have no requests to review.
         if (family == null) {
-            log.debug("getPendingRequests: user '{}' does not administer a family", username);
+            log.debug("getPendingRequests: user '{}' does not administer a family", user.getUsername());
             return new LinkedList<>();
         }
 
         // Only requests awaiting an administrator's decision are returned.
-        return membershipRepo.findByFamilyIDAndStatus(family.getFamilyID(), PENDING);
+        return membershipRepo.findByFamilyAndStatus(family, PENDING);
     }
 
     /**
@@ -335,53 +287,41 @@ public class FamilyServiceImpl implements FamilyService {
      * administer the family, or the requesting user already has an accepted
      * membership.</p>
      *
-     * @param username the username of the family administrator
-     * @param membershipID the ID of the membership request to accept
+     * @param user the username of the family administrator
+     * @param familyMembership the ID of the membership request to accept
      * @return {@code true} if the request is accepted and saved;
      *         {@code false} if validation fails
      */
     @Override
-    public boolean acceptRequest(String username, Long membershipID) {
-        log.debug("acceptRequest: user '{}' attempted to accept request {}", username, membershipID);
+    public boolean acceptRequest(User user, FamilyMembership familyMembership) {
+        log.debug("acceptRequest: user '{}' attempted to accept request from {}", user.getName(), familyMembership.getUser().getUsername());
 
-        Login admin = findUser(username);
-
-        // Both the administrator and request ID must be valid.
-        if (admin == null || membershipID == null) {
-            log.debug("acceptRequest: admin or membership ID is invalid");
-            return false;
-        }
-
-        // Only an existing pending request can be accepted.
-        FamilyMembership request = membershipRepo.findById(membershipID).orElse(null);
-
-        if (request == null || !PENDING.equals(request.getStatus())) {
-            log.debug("acceptRequest: request {} not found or not pending, is ()", membershipID);
+        if (!PENDING.equals(familyMembership.getStatus())) {
+            log.debug("acceptRequest: request not pending, is {}", familyMembership.getStatus());
             return false;
         }
 
         // Verify that the requesting user is administering the family
         // associated with this membership request.
-        Family family = familiesRepo.findById(request.getFamilyID()).orElse(null);
+        Family family = user.getFamily();
 
-
-        if (family == null || !family.getFamilyAdminId().equals(admin.getId())) {
-            log.debug("acceptRequest: user '{}' is not the family admin", username);
+        if (family == null || !family.getFamilyAdmin().equals(user)) {
+            log.debug("acceptRequest: user '{}' is not the family admin", user.getUsername());
             return false;
         }
 
         // A user cannot be accepted into another family if they already
         // have an accepted membership.
-        if (hasAcceptedMembership(request.getUserID())) {
-            log.debug("acceptRequest: user {} already belongs to a family", request.getUserID());
+        if (hasAcceptedMembership(familyMembership.getUser())) {
+            log.debug("acceptRequest: user {} already belongs to a family", familyMembership.getUser().getUsername());
             return false;
         }
 
         // Change the request status and persist the accepted membership.
-        request.setStatus(ACCEPTED);
-        membershipRepo.save(request);
+        familyMembership.setStatus(ACCEPTED);
+        membershipRepo.save(familyMembership);
 
-        log.info("acceptRequest: user successfully {} accepted membership request {}", username, membershipID);
+        log.info("acceptRequest: user successfully {} accepted membership request from {}", user.getUsername(), familyMembership.getUser().getUsername());
 
         return true;
     }
@@ -390,44 +330,37 @@ public class FamilyServiceImpl implements FamilyService {
      * Rejects a pending membership request if the specified user administers
      * the family associated with that request.
      *
-     * @param username the username of the family administrator
-     * @param membershipID the ID of the membership request to reject
+     * @param user the username of the family administrator
+     * @param familyMembership the ID of the membership request to reject
      * @return {@code true} if the request is rejected and saved;
      *         {@code false} if validation fails
      */
     @Override
-    public boolean rejectRequest(String username, Long membershipID) {
-        log.debug("rejectRequest: user {} attempted to reject request {}", username, membershipID);
+    public boolean rejectRequest(User user, FamilyMembership familyMembership) {
+        log.debug("rejectRequest: user {} attempted to reject request from {}", user.getUsername(), familyMembership.getUser().getUsername());
 
-        Login admin = findUser(username);
-
-        // Both the administrator and request ID must be valid.
-        if (admin == null || membershipID == null) {
-            log.debug("rejectRequest: admin or membership ID is invalid");
-            return false;
-        }
-
-        // Only an existing pending request can be rejected.
-        FamilyMembership request = membershipRepo.findById(membershipID).orElse(null);
-
-        if (request == null || !PENDING.equals(request.getStatus())) {
-            log.debug("rejectRequest: request {} not found or not pending", membershipID);
+        if (!PENDING.equals(familyMembership.getStatus())) {
+            log.debug("rejectRequest: request {} not pending, is {}", familyMembership.getMembershipID(), familyMembership.getStatus());
             return false;
         }
 
         // Confirm that the current user administers the family tied to the request.
-        Family family = familiesRepo.findById(request.getFamilyID()).orElse(null);
+        Family family = user.getFamily();
 
-        if (family == null || !family.getFamilyAdminId().equals(admin.getId())) {
-            log.debug("rejectRequest: user '{}' is not the family admin or no family found, family: {}", username, family);
+        if (family == null) {
+            log.debug("rejectRequest: no family found for user '{}'", user.getUsername());
+            return false;
+        }
+        if (!family.getFamilyAdmin().equals(user)) {
+            log.debug("rejectRequest: user '{}' is not the family admin", user.getUsername());
             return false;
         }
 
         // Mark the request as rejected so it is no longer pending.
-        request.setStatus(REJECTED);
-        membershipRepo.save(request);
+        familyMembership.setStatus(REJECTED);
+        membershipRepo.save(familyMembership);
 
-        log.info("rejectRequest: user successfully {} rejected membership request {}", username, membershipID);
+        log.info("rejectRequest: user successfully {} rejected membership request {} from user '{}'", user.getUsername(), familyMembership.getMembershipID(), familyMembership.getUser().getUsername());
 
         return true;
     }
@@ -435,29 +368,18 @@ public class FamilyServiceImpl implements FamilyService {
     /**
      * Checks whether the specified user administers the given family.
      *
-     * @param username the username of the user to check
-     * @param familyID the ID of the family to check
+     * @param user the username of the user to check
+     * @param family the ID of the family to check
      * @return {@code true} if the user administers the family;
      *         {@code false} otherwise
      */
     @Override
-    public boolean isFamilyAdmin(String username, Long familyID) {
-        log.debug("isFamilyAdmin: checking to see if {} administers family {}", username, familyID);
+    public boolean isFamilyAdmin(User user, Family family) {
+        log.debug("isFamilyAdmin: checking to see if {} administers family {}", user.getUsername(), family.getFamilyName());
 
-        Login user = findUser(username);
+        boolean isAdmin = family != null && family.getFamilyAdmin().equals(user);
 
-        // A valid user and family ID are required for the comparison.
-        if (user == null || familyID == null) {
-            log.debug("isFamilyAdmin: either username {} or familyID {} is false", username, familyID);
-            return false;
-        }
-
-        // Retrieve the family, then compare its administrator ID with the user's ID.
-        Family family = familiesRepo.findById(familyID).orElse(null);
-
-        boolean isAdmin = family != null && family.getFamilyAdminId().equals(user.getId());
-
-        log.info("isFamilyAdmin: user {} admins status is {}", username, isAdmin);
+        log.info("isFamilyAdmin: user {} admins status is {} for {} family", user.getUsername(), isAdmin, family.getFamilyName());
 
         return isAdmin;
     }
