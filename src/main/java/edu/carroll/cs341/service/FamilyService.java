@@ -2,6 +2,7 @@ package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.Family;
 import edu.carroll.cs341.jpa.model.FamilyMembership;
+import edu.carroll.cs341.jpa.model.User;
 
 import java.util.List;
 
@@ -26,71 +27,71 @@ public interface FamilyService {
     /**
      * Retrieves the family associated with a user's accepted membership.
      *
-     * @param username the username of the user whose family is being retrieved
+     * @param user the username of the user whose family is being retrieved
      * @return the user's family, or {@code null} if the user does not belong
      * to a family
      */
-    Family getFamilyForUser(String username);
+    Family getFamilyForUser(User user);
 
     /**
      * Creates a new family and establishes the creator's membership.
      *
-     * @param username the username of the user creating the family
+     * @param user the username of the user creating the family
      * @param familyName the name to assign to the new family
      * @return {@code true} if the family was created successfully;
      * {@code false} otherwise
      */
-    boolean createFamily(String username, String familyName);
+    boolean createFamily(User user, String familyName);
 
     /**
      * Submits a request for a user to join an existing family.
      *
-     * @param username the username of the user requesting membership
-     * @param familyID the ID of the family the user wants to join
+     * @param user the username of the user requesting membership
+     * @param family the ID of the family the user wants to join
      * @return {@code true} if the membership request was submitted successfully;
      * {@code false} otherwise
      */
-    boolean requestToJoinFamily(String username, Long familyID);
+    boolean requestToJoinFamily(User user, Family family);
 
     /**
      * Retrieves the pending membership requests for families administered
      * by the specified user.
      *
-     * @param username the username of the family administrator
+     * @param user the username of the family administrator
      * @return a list of pending membership requests, or an empty list if
      * no pending requests are available
      */
-    List<FamilyMembership> getPendingRequests(String username);
+    List<FamilyMembership> getPendingRequests(User user);
 
     /**
      * Accepts a pending membership request.
      *
-     * @param username the username of the family administrator handling
+     * @param user the username of the family administrator handling
      * the request
-     * @param membershipID the ID of the membership request to accept
+     * @param familyMembership the ID of the membership request to accept
      * @return {@code true} if the request was accepted successfully;
      * {@code false} otherwise
      */
-    boolean acceptRequest(String username, Long membershipID);
+    boolean acceptRequest(User user, FamilyMembership familyMembership);
 
     /**
      * Rejects a pending membership request.
      *
-     * @param username the username of the family administrator handling
+     * @param user the username of the family administrator handling
      * the request
-     * @param membershipID the ID of the membership request to reject
+     * @param familyMembership the ID of the membership request to reject
      * @return {@code true} if the request was rejected successfully;
      * {@code false} otherwise
      */
-    boolean rejectRequest(String username, Long membershipID);
+    boolean rejectRequest(User user, FamilyMembership familyMembership);
 
     /**
      * Checks whether the specified user administers the given family.
      *
-     * @param username the username of the user being checked
-     * @param familyID the ID of the family to check
+     * @param user the username of the user being checked
+     * @param family the ID of the family to check
      * @return {@code true} if the user is the family's administrator;
      * {@code false} otherwise
      */
-    boolean isFamilyAdmin(String username, Long familyID);
+    boolean isFamilyAdmin(User user, Family family);
 }
