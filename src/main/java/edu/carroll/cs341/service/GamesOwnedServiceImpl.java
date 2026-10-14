@@ -2,10 +2,10 @@ package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.GameOwned;
-import edu.carroll.cs341.jpa.model.Login;
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.GamesOwnedRepository;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
-import edu.carroll.cs341.jpa.repo.LoginRepository;
+import edu.carroll.cs341.jpa.repo.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
     private final GamesOwnedRepository gamesOwnedRepo;
 
     /** Repository for looking up user accounts. */
-    private final LoginRepository loginRepo;
+    private final UserRepository loginRepo;
 
     /** Repository for looking up games in the game catalog. */
     private final GamesRepository gamesRepo;
@@ -52,7 +52,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      * @param loginRepo repository for user account information
      * @param gamesRepo repository for game catalog records
      */
-    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, LoginRepository loginRepo, GamesRepository gamesRepo) {
+    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, UserRepository loginRepo, GamesRepository gamesRepo) {
         this.gamesOwnedRepo = gamesOwnedRepo;
         this.loginRepo = loginRepo;
         this.gamesRepo = gamesRepo;
@@ -63,34 +63,16 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      * If the username does not identify exactly one user, or the game
      * cannot be found, the operation ends without saving an ownership record.
      *
-     * @param username the username of the person adding the game
-     * @param gameID the ID of the game to add
+     * @param user the username of the person adding the game
+     * @param game the ID of the game to add
      * @param yearProduced the year the owned game was produced
      */
     @Override
-    public boolean addGameToCollection(String username, Long gameID, Integer yearProduced) {
-        log.debug("addGameToCollection: user {} attempted to add game {}", username, gameID);
-
-        // Require exactly one matching account before creating an ownership record.
-        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
-
-        if (users.size() != 1) {
-            log.debug("addGameToCollection: found {} users for username {}", users.size(), username);
-            return false;
-        }
-
-        Login user = users.getFirst();
-
-        // Verify that the requested game exists before associating it with the user.
-        Game game = gamesRepo.findByGameID(gameID);
-
-        if (game == null) {
-            log.debug("addGameToCollection: game {} was not found", gameID);
-            return false;
-        }
+    public boolean addGameToCollection(User user, Game game, Integer yearProduced) {
+        log.debug("addGameToCollection: user {} attempted to add game {}", user.getUsername(), game.getGameName());
 
         // Create the ownership record using the selected game and the user's ID.
-        GameOwned gameOwned = new GameOwned(game, user.getId());
+        GameOwned gameOwned = new GameOwned(game, user);
 
         // Store the production year as part of the owned game's information.
         gameOwned.setYearProduced(yearProduced);
@@ -98,7 +80,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         // Persist the ownership record so it can be retrieved later.
         gamesOwnedRepo.save(gameOwned);
 
-        log.info("addGameToCollection: user {} added game {}", username, gameID);
+        log.info("addGameToCollection: user {} added game {} with owned game ID: {} to their collection", user.getUsername(), game.getGameName(), gameOwned.getGameOwnedID());
         return true;
     }
 
@@ -107,66 +89,57 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      * If the username does not identify exactly one user, an empty list
      * is returned.
      *
-     * @param username the username whose owned games are being retrieved
+     * @param user the username whose owned games are being retrieved
      * @return a list of games owned by the user, or an empty list if the
      * user cannot be uniquely identified
      */
     @Override
-    public List<GameOwned> getGamesOwnedByUsername(String username) {
-        log.debug("getGamesOwnedByUsername: getting games for {}", username);
-
-        // Look up the account before querying ownership records by its ID.
-        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
-
-        if (users.size() != 1) {
-            log.debug("getGamesOwnedByUsername: found {} users for username '{}'", users.size(), username);
-            return new LinkedList<>();
-        }
+    public List<GameOwned> getGamesOwnedByUsername(User user) {
+        log.debug("getGamesOwnedByUsername: getting games for {}", user.getUsername());
 
         // Use the user's database ID to retrieve their ownership records.
-        Long ownerID = users.getFirst().getId();
-        List<GameOwned> games = gamesOwnedRepo.findByOwnerID(ownerID);
+        List<GameOwned> games = gamesOwnedRepo.findByUser(user);
 
-        log.info("getGamesOwnedByUsername: found {} owned games for '{}'", games.size(), username);
+        log.info("getGamesOwnedByUsername: found {} owned games for '{}'", games.size(), user.getUsername());
         return games;
     }
-
-    public boolean removeGameFromCollection(String username, Long gameOwnedID) {
-        log.debug("removeGameFromCollection: user {} attempted to remove game {} from collection", username, gameOwnedID);
-
-        // Require exactly one matching account before removing an ownership record.
-        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
-
-        if (users.size() != 1) {
-            log.debug("removeGameFromCollection: found {} users for username {}", users.size(), username);
-            return false;
-        }
-
-        Login user = users.getFirst();
-
-        // Verify that the requested game exists before removing it from the database.
-        GameOwned gameOwned = gamesOwnedRepo.findByGameOwnedID(gameOwnedID);
-
-        if (gameOwned == null) {
-            log.debug("removeGameFromCollection: game {} was not found", gameOwnedID);
-            return false;
-        }
-
-        // Verify that the user requesting to remove the game from their collection is the owner of the game.
-        if (!gameOwned.getOwnerID().equals(user.getId())) {
-            log.debug()
-        }
-        // Create the ownership record using the selected game and the user's ID.
-        GameOwned gameOwned = new GameOwned(game, user.getId());
-
-        // Store the production year as part of the owned game's information.
-        gameOwned.setYearProduced(yearProduced);
-
-        // Persist the ownership record so it can be retrieved later.
-        gamesOwnedRepo.save(gameOwned);
-
-        log.info("addGame: user {} added game {}", username, gameID);
-        return true;
-    }
+//
+//    public boolean removeGameFromCollection(String username, Long gameOwnedID) {
+//        log.debug("removeGameFromCollection: user {} attempted to remove game {} from collection", username, gameOwnedID);
+//
+//        // Require exactly one matching account before removing an ownership record.
+//        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
+//
+//        if (users.size() != 1) {
+//            log.debug("removeGameFromCollection: found {} users for username {}", users.size(), username);
+//            return false;
+//        }
+//
+//        Login user = users.getFirst();
+//
+//        // Verify that the requested game exists before removing it from the database.
+//        GameOwned gameOwned = gamesOwnedRepo.findByGameOwnedID(gameOwnedID);
+//
+//        if (gameOwned == null) {
+//            log.debug("removeGameFromCollection: game {} was not found", gameOwnedID);
+//            return false;
+//        }
+//
+//        // Verify that the user requesting to remove the game from their collection is the owner of the game.
+//        if (!gameOwned.getOwner().getOwnerID().equals(user.getId())) {
+//            log.debug()
+//        }
+//        // Create the ownership record using the selected game and the user's ID.
+//        GameOwned gameOwned = new GameOwned(game, user.getId());
+//
+//        // Store the production year as part of the owned game's information.
+//        gameOwned.setYearProduced(yearProduced);
+//
+//        // Persist the ownership record so it can be retrieved later.
+//        gamesOwnedRepo.save(gameOwned);
+//
+//        log.info("addGame: user {} added game {}", username, gameID);
+//        return true;
+//    }
 
 }
