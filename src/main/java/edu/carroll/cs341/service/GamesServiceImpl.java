@@ -1,9 +1,9 @@
 package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.Game;
-import edu.carroll.cs341.jpa.model.Login;
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
-import edu.carroll.cs341.jpa.repo.LoginRepository;
+import edu.carroll.cs341.jpa.repo.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,18 +36,18 @@ public class GamesServiceImpl implements GamesService {
     private final GamesRepository gamesRepo;
 
     /** Repository for looking up user accounts. */
-    final LoginRepository loginRepo;
+    final UserRepository userRepo;
 
     /**
      * Constructs the service with the repositories needed to manage games
      * and identify the users who add them.
      *
      * @param gamesRepo repository for game catalog operations
-     * @param loginRepo repository for user account lookups
+     * @param userRepo repository for user account lookups
      */
-    public GamesServiceImpl(GamesRepository gamesRepo, LoginRepository loginRepo) {
+    public GamesServiceImpl(GamesRepository gamesRepo, UserRepository userRepo) {
         this.gamesRepo = gamesRepo;
-        this.loginRepo = loginRepo;
+        this.userRepo = userRepo;
     }
 
     /**
@@ -55,15 +55,15 @@ public class GamesServiceImpl implements GamesService {
      * The results include games available to all users and games added
      * by the specified owner, sorted alphabetically by game name.
      *
-     * @param ownerID the ID of the owner whose available games are requested
+     * @param user the ID of the owner whose available games are requested
      * @return a list of available games sorted by name
      */
     @Override
-    public List<Game> getAvailableGames(Long ownerID) {
-        log.debug("getAvailableGames: getting games for the owner {}", ownerID);
+    public List<Game> getAvailableGames(User user) {
+        log.debug("getAvailableGames: getting games for the owner {}", user.getUsername());
 
         // Retrieve globally available games along with those added by this owner.
-        List<Game> games = gamesRepo.findByOwnerIDOfAdderIsNullOrOwnerIDOfAdderOrderByGameNameAsc(ownerID);
+        List<Game> games = gamesRepo.findByUserWhoAddedIsNullOrUserWhoAddedOrderByGameNameAsc(user);
 
         log.debug("getAvailableGames: found {} available games", games.size());
 
@@ -76,30 +76,20 @@ public class GamesServiceImpl implements GamesService {
      * The operation stops if the username does not identify exactly one
      * user or if a game with the same name already exists.
      *
-     * @param username the username of the person adding the game
+     * @param user the username of the person adding the game
      * @param gameName the name of the game to add
      * @param minPlayers the minimum number of players supported by the game
      * @param maxPlayers the maximum number of players supported by the game
      */
     @Override
-    public void addGame(String username, String gameName, Integer minPlayers, Integer maxPlayers) {
-        log.debug("addGame: user: {} attempted to add game: {}", username, gameName);
-
-        // Resolve the account first so the new game can be associated with its owner.
-        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
-
-        if (users.size() != 1) {
-            log.debug("addGame: found {} users for username {}", users.size(), username);
-            return;
-        }
-
-        Login user = users.getFirst();
+    public void addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers) {
+        log.debug("addGame: user: {} attempted to add game: {}", user.getUsername(), gameName);
 
         // Prevent adding another catalog entry with an existing game name.
         Game game = gamesRepo.findByGameNameIgnoreCase(gameName);
 
         if (game != null) {
-            if (game.getOwnerIDOfAdder() == null || game.getOwnerIDOfAdder().equals(user.getId())) {
+            if (game.getUserWhoAdded() == null || game.getUserWhoAdded().equals(user)) {
                 log.debug("addGame: game {} already exists and is available to user {}", gameName, user.getUsername());
                 return;
             }
@@ -111,11 +101,11 @@ public class GamesServiceImpl implements GamesService {
         // Store the supported player range and the ID of the user who added the game.
         newGame.setMaxPlayers(maxPlayers);
         newGame.setMinPlayers(minPlayers);
-        newGame.setOwnerIDOfAdder(user.getId());
+        newGame.setUserWhoAdded(user);
 
         // Save the new game to the catalog.
         gamesRepo.save(newGame);
 
-        log.info("addGame: user: {} added game: {}", username, gameName);
+        log.info("addGame: user: {} added game: {}", user.getUsername(), newGame.getGameName());
     }
 }
