@@ -1,6 +1,5 @@
 package edu.carroll.cs341.jpa.repo;
 
-import edu.carroll.cs341.jpa.model.Login;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
