@@ -30,12 +30,13 @@ public class Family {
     private Long familyID;
 
     /** The unique name assigned to the family. */
-    @Column(name = "familyName", nullable = false, unique = true)
+    @Column(name = "familyName", nullable = false)
     private String familyName;
 
     /** The ID of the user who administers the family. */
-    @Column(name = "familyAdmin", nullable = false)
-    private Long familyAdminId;
+    @OneToOne
+    @JoinColumn(name = "familyAdmin", nullable = false, unique = true)
+    private User familyAdmin;
 
     /**
      * Creates an empty Family object.
@@ -50,11 +51,11 @@ public class Family {
      * Creates a family with a name and an assigned administrator.
      *
      * @param familyName the name of the family
-     * @param familyAdminId the ID of the user who administers the family
+     * @param familyAdmin the ID of the user who administers the family
      */
-    public Family(String familyName, Long familyAdminId) {
+    public Family(String familyName, User familyAdmin) {
         this.familyName = familyName;
-        this.familyAdminId = familyAdminId;
+        this.familyAdmin = familyAdmin;
     }
 
     /**
@@ -98,17 +99,17 @@ public class Family {
      *
      * @return the administrator's user ID
      */
-    public Long getFamilyAdminId() {
-        return familyAdminId;
+    public User getFamilyAdmin() {
+        return familyAdmin;
     }
 
     /**
      * Sets the ID of the family administrator.
      *
-     * @param familyAdminId the user ID to assign as the administrator
+     * @param familyAdmin the user ID to assign as the administrator
      */
-    public void setFamilyAdminId(Long familyAdminId) {
-        this.familyAdminId = familyAdminId;
+    public void setFamilyAdminId(User familyAdmin) {
+        this.familyAdmin = familyAdmin;
     }
 
     /**
@@ -134,6 +135,6 @@ public class Family {
             return false;
 
         Family family = (Family) o;
-        return (familyID.equals(family.familyID));
+        return (familyName.equals(family.familyName) && familyAdmin.equals(family.familyAdmin));
     }
 }
