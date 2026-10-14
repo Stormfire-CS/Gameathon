@@ -42,8 +42,9 @@ public class Game {
     private Integer maxPlayers;
 
     /** The ID of the user who added the game, if it was added by a user. */
-    @Column(name = "owner_id_of_adder")
-    private Long ownerIDOfAdder;
+    @ManyToOne
+    @JoinColumn(name = "user_who_added")
+    private User userWhoAdded;
 
     /**
      * Creates an empty Game object.
@@ -140,17 +141,17 @@ public class Game {
      *
      * @return the owner's user ID, or {@code null} if no user is assigned
      */
-    public Long getOwnerIDOfAdder() {
-        return ownerIDOfAdder;
+    public User getUserWhoAdded() {
+        return userWhoAdded;
     }
 
     /**
      * Sets the ID of the user who added the game.
      *
-     * @param ownerIDOfAdder the user ID to associate with the game
+     * @param userWhoAdded the user ID to associate with the game
      */
-    public void setOwnerIDOfAdder(Long ownerIDOfAdder) {
-        this.ownerIDOfAdder = ownerIDOfAdder;
+    public void setUserWhoAdded(User userWhoAdded) {
+        this.userWhoAdded = userWhoAdded;
     }
 
     /**
@@ -182,7 +183,7 @@ public class Game {
             return false;
 
         Game game = (Game) o;
-        return (gameName.equals(game.gameName));
+        return (gameName.equals(game.gameName) && userWhoAdded.equals(game.userWhoAdded));
     }
 
 }
