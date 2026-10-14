@@ -1,6 +1,7 @@
 package edu.carroll.cs341.jpa.repo;
 
 import edu.carroll.cs341.jpa.model.Family;
+import edu.carroll.cs341.jpa.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -25,10 +26,10 @@ public interface FamiliesRepository extends JpaRepository<Family, Long> {
     /**
      * Finds a family associated with the specified administrator ID.
      *
-     * @param familyAdminId the ID of the family administrator
+     * @param familyAdmin the ID of the family administrator
      * @return the matching family, or {@code null} if no family is found
      */
-    Family findByFamilyAdminId(Long familyAdminId);
+    Family findByFamilyAdmin(User familyAdmin);
 
     /**
      * Checks whether a family with the specified name already exists,
