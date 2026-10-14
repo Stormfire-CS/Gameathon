@@ -7,12 +7,12 @@ import static org.aspectj.util.LangUtil.EOL;
 /**
  * Represents a game owned by a particular user.
  *
- * <p>This entity maps to the GamesOwned table and associates a user with a
- * game through a reference to the Game entity. It also stores the year the
- * game was produced, when that information is available.</p>
+ * <p>This entity maps to the GamesOwned table and associates an owner with
+ * a game through entity relationships. The gameID and ownerID columns
+ * reference the primary keys of the corresponding Game and Owner records.</p>
  *
- * <p>Each record has its own unique identifier and references the user who
- * owns the game and the game itself.</p>
+ * <p>Each record has its own unique identifier and stores the year the game
+ * was produced when that information is available.</p>
  *
  * <p><b>Sources Used:</b></p>
  * <ul>
@@ -30,14 +30,21 @@ public class GameOwned {
     @Id
     private Long gameOwnedID;
 
-    /** The game associated with this ownership record. */
+    /**
+     * Game associated with this ownership record.
+     * The gameID column references the primary key of the Game entity.
+     */
     @ManyToOne
     @JoinColumn(name = "gameID", nullable = false)
     private Game game;
 
-    /** The ID of the user who owns the game. */
-    @Column(name = "ownerID", nullable = false)
-    private Long ownerID;
+    /**
+     * Owner associated with this ownership record.
+     * The ownerID column references the primary key of the Owner entity.
+     */
+    @ManyToOne
+    @JoinColumn(name = "User", nullable = false)
+    private User user;
 
     /** The year the game was produced, if known. */
     @Column(name = "yearProduced")
@@ -56,11 +63,11 @@ public class GameOwned {
      * Creates an ownership record for a specific game and user.
      *
      * @param game the game being owned
-     * @param ownerID the ID of the user who owns the game
+     * @param user the owner who owns the game
      */
-    public GameOwned(Game game, Long ownerID) {
+    public GameOwned(Game game, User user) {
         this.game = game;
-        this.ownerID = ownerID;
+        this.user = user;
     }
 
     /**
@@ -100,21 +107,21 @@ public class GameOwned {
     }
 
     /**
-     * Retrieves the ID of the user who owns the game.
+     * Retrieves the owner associated with this ownership object.
      *
-     * @return the owner's user ID
+     * @return the associated Owner object
      */
-    public Long getOwnerID() {
-        return ownerID;
+    public User getOwner() {
+        return user;
     }
 
     /**
-     * Sets the ID of the user who owns the game.
+     * Sets the owner associated with this ownership record.
      *
-     * @param ownerID the user ID to associate with this record
+     * @param user the Owner object to associate with this record
      */
-    public void setOwnerID(Long ownerID) {
-        this.ownerID = ownerID;
+    public void setOwner(User user) {
+        this.user = user;
     }
 
     /**
@@ -149,21 +156,11 @@ public class GameOwned {
         builder.append("Game Owned ID = ").append(gameOwnedID).append(EOL);
         builder.append("Game ID = ").append(game.getGameID()).append(EOL);
         builder.append("Game Name = ").append(game.getGameName()).append(EOL);
-        builder.append("Owner ID = ").append(ownerID);
+        builder.append("Owner Name = ").append(user.getName());
         if (yearProduced != null) {
             builder.append("Publish Year = ").append(yearProduced).append(EOL);
         }
         return builder.toString();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-
-        final GameOwned gameOwned = (GameOwned) o;
-        return gameOwnedID.equals(gameOwned.gameOwnedID);
-    }
 }
