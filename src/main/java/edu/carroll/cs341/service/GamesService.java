@@ -1,6 +1,7 @@
 package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.Game;
+import edu.carroll.cs341.jpa.model.User;
 
 import java.util.List;
 
@@ -25,19 +26,19 @@ public interface GamesService {
     /**
      * Retrieves the games available to a specified owner.
      *
-     * @param ownerID the ID of the owner whose available games are requested
+     * @param user the ID of the owner whose available games are requested
      * @return a list of games available to the specified owner
      */
-    List<Game> getAvailableGames(Long ownerID);
+    List<Game> getAvailableGames(User user);
 
     /**
      * Adds a new game to the game catalog and associates it with the user
      * who submitted it.
      *
-     * @param username the username of the person adding the game
+     * @param user the username of the person adding the game
      * @param gameName the name of the game to add
      * @param minPlayers the minimum number of players supported by the game
      * @param maxPlayers the maximum number of players supported by the game
      */
-    void addGame(String username, String gameName, Integer minPlayers, Integer maxPlayers);
+    void addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers);
 }
