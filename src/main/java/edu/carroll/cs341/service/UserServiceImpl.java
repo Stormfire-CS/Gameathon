@@ -1,7 +1,7 @@
 package edu.carroll.cs341.service;
 
-import edu.carroll.cs341.jpa.model.Login;
-import edu.carroll.cs341.jpa.repo.LoginRepository;
+import edu.carroll.cs341.jpa.model.User;
+import edu.carroll.cs341.jpa.repo.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,15 +31,15 @@ public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     /** Repository used to look up and save user accounts. */
-    private final LoginRepository loginRepo;
+    private final UserRepository userRepo;
 
     /**
      * Constructs the service with the repository needed to manage user accounts.
      *
-     * @param loginRepo repository for retrieving and saving login records
+     * @param userRepo repository for retrieving and saving login records
      */
-    public UserServiceImpl(LoginRepository loginRepo) {
-        this.loginRepo = loginRepo;
+    public UserServiceImpl(UserRepository userRepo) {
+        this.userRepo = userRepo;
     }
 
     /**
@@ -56,14 +56,14 @@ public class UserServiceImpl implements UserService {
         log.debug("validateUser: user '{}' attempted login", username);
 
         // Perform the lookup without distinguishing between uppercase and lowercase usernames.
-        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
+        List<User> users = userRepo.findByUsernameIgnoreCase(username);
 
         // Require exactly one matching account to avoid ambiguous authentication results.
         if (users.size() != 1) {
             log.debug("validateUser: found {} users", users.size());
             return false;
         }
-        Login u = users.getFirst();
+        User u = users.getFirst();
         // XXX - Using Java's hashCode is wrong on SO many levels, but is good enough for demonstration purposes.
         // NEVER EVER do this in production code!
         final String userProvidedHash = Integer.toString(password.hashCode());
@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // Authentication succeeds only after the stored and supplied hashes match.
-        log.info("validateUser: successful login for {}", username);
+        log.info("validateUser: successful login for {}", u.getUsername());
         return true;
     }
 
@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
         log.debug("validateNewUser: attempting to register username '{}'", username);
 
         // Check whether the requested username is already associated with an account.
-        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
+        List<User> users = userRepo.findByUsernameIgnoreCase(username);
         if (!users.isEmpty()) {
             log.debug("validateNewUser: username '{}' already exists", username);
             return false;
@@ -105,8 +105,8 @@ public class UserServiceImpl implements UserService {
         }
 
         // Construct and save the new login record after validation succeeds.
-        Login user = new Login(username, password1);
-        loginRepo.save(user);
+        User user = new User(username, password1);
+        userRepo.save(user);
 
         log.info("validateNewUser: successfully registered user '{}'", username);
         return true;
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
         log.debug("getUserID: looking up ID for '{}'", username);
 
         // Look up the account using the same case-insensitive username matching.
-        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
+        List<User> users = userRepo.findByUsernameIgnoreCase(username);
 
         // Return null when no unique account can be identified.
         if (users.size() != 1) {
