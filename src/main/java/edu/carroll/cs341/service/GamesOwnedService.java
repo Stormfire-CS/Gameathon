@@ -1,6 +1,8 @@
 package edu.carroll.cs341.service;
 
+import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.GameOwned;
+import edu.carroll.cs341.jpa.model.User;
 
 import java.util.List;
 
@@ -24,20 +26,20 @@ public interface GamesOwnedService {
     /**
      * Retrieves all game ownership records associated with a username.
      *
-     * @param username the username whose owned games are being retrieved
+     * @param user the username whose owned games are being retrieved
      * @return a list of games owned by the specified user
      */
-    List<GameOwned> getGamesOwnedByUsername(String username);
+    List<GameOwned> getGamesOwnedByUsername(User user);
 
     /**
      * Adds a game to the specified user's collection.
      *
-     * @param username the username of the user adding the game
-     * @param gameID the ID of the game to add
+     * @param user the username of the user adding the game
+     * @param game the ID of the game to add
      * @param yearProduced the year the owned game was produced
      */
-    boolean addGameToCollection(String username, Long gameID, Integer yearProduced);
+    boolean addGameToCollection(User user, Game game, Integer yearProduced);
 
 
-    boolean removeGameFromCollection(String username, Long gameOwnedID);
+    //boolean removeGameFromCollection(String username, Long gameOwnedID);
 }
