@@ -35,9 +35,13 @@
     <logger name="org.hibernate" level="INFO" />
     <logger name="com.zaxxer.hikari" level="INFO" />
 
+    <!-- Services: show general application activity -->
+    <logger name="edu.carroll.cs341.jpa.service" level="DEBUG" />
+
     <!-- Default level is INFO -->
     <root level="INFO">
         <appender-ref ref="Console"/>
         <appender-ref ref="Logfile"/>
     </root>
+
 </configuration>
