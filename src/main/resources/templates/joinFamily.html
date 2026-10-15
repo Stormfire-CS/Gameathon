@@ -7,9 +7,9 @@
 <body>
 <h1>Join a Family</h1>
 <p>
-    Request to join family: <span th:text="${username}"></span>
+    Request to join family: <span th:text="${user.name}"></span>
 </p>
-<a th:href="@{/familyPage(username=${username})}">
+<a th:href="@{/familyPage}">
     <button type="button">Back to Family</button>
 </a>
 <p>
@@ -17,7 +17,6 @@
     They must first approve your request before you can become a member.
 </p>
 <form th:action="@{/requestToJoinFamily}" method="post">
-    <input type="hidden" name="username" th:value="${username}"/>
     <label for="familyID">Family ID:</label>
     <input type="number" id="familyID" name="familyID"/>
     <button type="submit">Request to Join</button>

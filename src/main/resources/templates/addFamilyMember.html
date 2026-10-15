@@ -7,10 +7,10 @@
 <body>
 <h1>Pending Family Requests</h1>
 <p>
-    Welcome Administer: <span th:text="${username}"></span>
+    Welcome Administer: <span th:text="${user.name}"></span>
 </p>
 
-<a th:href="@{/familyPage(username=${username})}">
+<a th:href="@{/familyPage}">
     <button type="button">Back to Family</button>
 </a>
 
@@ -21,24 +21,22 @@
 <table th:if="${!#lists.isEmpty(requests)}">
     <thead>
     <tr>
-        <th>User ID</th>
-        <th>Family ID</th>
+        <th>User</th>
+        <th>Username</th>
         <th>Action</th>
     </tr>
     </thead>
 
     <tbody>
     <tr th:each="request : ${requests}">
-        <td th:text="${request.userID}"></td>
-        <td th:text="${request.familyID}"></td>
+        <td th:text="${request.user.name}"></td>
+        <td th:text="${request.user.username}"></td>
         <td>
             <form th:action="@{/acceptFamilyMember}" method="post" style="display:inline">
-                <input type="hidden" name="username" th:value="${username}"/>
                 <input type="hidden" name="membershipID" th:value="${request.membershipID}"/>
                 <button type="submit">Accept</button>
             </form>
             <form th:action="@{/rejectFamilyMember}" method="post" style="display:inline">
-                <input type="hidden" name="username" th:value="${username}"/>
                 <input type="hidden" name="membershipID" th:value="${request.membershipID}"/>
                 <button type="submit">Reject</button>
             </form>

@@ -7,14 +7,13 @@
 <body>
 <h1>Create a Family</h1>
 <p>
-    Creating a family <span th:text="${username}"></span>
+    Creating a family <span th:text="${user.name}"></span>
 </p>
-<a th:href="@{/familyPage(username=${username})}">
+<a th:href="@{/familyPage}">
     <button type="button">Back to Family</button>
 </a>
 
 <form th:action="@{/createFamily}" method="post">
-    <input type="hidden" name="username" th:value="${username}"/>
     <label for="familyName">Family Name:</label>
     <input type="text" id="familyName" name="familyName" placeholder="Family Name"/>
     <button type="submit">Create Family</button>

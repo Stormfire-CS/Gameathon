@@ -12,6 +12,7 @@
     <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Username error</span><br/>
     <input type="password" th:field="*{password}" placeholder="Password"/>
     <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password error</span><br/>
+    <p>Click <a href="/signUpPage">sign up</a> to sign up</p>
     <button type="submit">Login</button>
 </form>
 </body>

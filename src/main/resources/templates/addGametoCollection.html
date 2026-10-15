@@ -6,18 +6,17 @@
 </head>
 <body>
 <h1>Gameathon</h1>
-<p>Please enter game information: <span th:text="${username}"></span></p>
-<a th:href="@{/ownerPage(username=${username})}">
+<p>Please enter game information: <span th:text="${user.name}"></span></p>
+<a th:href="@{/ownerPage}">
     <button type="button">My Stuff</button>
 </a>
-<a th:href="@{/viewGamesPage(username=${username})}">
+<a th:href="@{/viewGamesPage}">
     <button type="button">View My Games</button>
 </a>
-<a th:href="@{/addGamePage(username=${username})}">
+<a th:href="@{/addGamePage}">
     <button type="button">Don't See desired Game?</button>
 </a>
 <form th:action="@{/addGametoCollection}" method="post">
-    <input type="hidden" name="username" th:value="${username}"/>
     <label>Game Name:</label>
     <select name="gameID">
         <option value="">Select a Game</option>

@@ -6,12 +6,11 @@
 </head>
 <body>
 <h1>Add a New Game</h1>
-<p>Please enter the name of the game: <span th:text="${username}"></span></p>
-<a th:href="@{/addGametoCollectionPage(username=${username})}">
+<p>Please enter the name of the game: <span th:text="${user.name}"></span></p>
+<a th:href="@{/addGametoCollectionPage}">
     <button type="button">Back to Adding Game to Collection</button>
 </a>
 <form th:action="@{/addGame}" method="post">
-    <input type="hidden" name="username" th:value="${username}"/>
     <label>Game Name:</label>
     <input type="text" name="gameName" placeholder="Game Name"/>
     <label>Maximum Number of Players</label>

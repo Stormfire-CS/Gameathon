@@ -6,17 +6,17 @@
 </head>
 <body>
 <h1>Gameathon</h1>
-<p>Welcome to your stuff: <span th:text="${username}"></span></p>
-<a th:href="@{/homePage(username=${username})}">
+<p>Welcome to your stuff: <span th:text="${user.name}"></span></p>
+<a th:href="@{/homePage}">
     <button type="button">My Home</button>
 </a>
-<a th:href="@{/familyPage(username=${username})}">
+<a th:href="@{/familyPage}">
     <button type="button">My Family</button>
 </a>
-<a th:href="@{/viewGamesPage(username=${username})}">
+<a th:href="@{/viewGamesPage}">
     <button type="button">View My Games</button>
 </a>
-<a th:href="@{/addGametoCollectionPage(username=${username})}">
+<a th:href="@{/addGametoCollectionPage}">
     <button type="button">Add Game to My Games</button>
 </a>
 </body>
