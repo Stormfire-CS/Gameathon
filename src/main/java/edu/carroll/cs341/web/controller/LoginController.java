@@ -86,7 +86,7 @@ public class LoginController {
         }
 
         // Set the session to expire after 15 minutes of inactivity.
-        session.setMaxInactiveInterval(1 * 60);
+        session.setMaxInactiveInterval(10 * 60);
 
         // Store the logged-in User in the session.
         session.setAttribute("loggedInUser", user);
