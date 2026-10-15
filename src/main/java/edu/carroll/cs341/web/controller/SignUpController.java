@@ -1,7 +1,9 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.UserService;
 import edu.carroll.cs341.web.form.CreateUserForm;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -67,28 +69,33 @@ public class SignUpController {
      * @param createUserForm the submitted form containing the username
      *                       and both password entries
      * @param result the result of validating the submitted form
-     * @param attrs attributes to include in the redirect URL
+     * @param session attributes to include in the redirect URL
      * @return the sign-up view when validation fails, or a redirect
      *         to the home page when registration succeeds
      */
     @PostMapping("/signUpPage")
-    public String signUpPost(@Valid @ModelAttribute CreateUserForm createUserForm, BindingResult result, RedirectAttributes attrs) {
+    public String signUpPost(@Valid @ModelAttribute CreateUserForm createUserForm, BindingResult result, HttpSession session) {
 
         // Return to the form if any field-level validation rules fail.
         if (result.hasErrors()) {
             return "signUpPage";
         }
 
+        User user = userService.validateNewUser(createUserForm.getUsername(), createUserForm.getPassword1(), createUserForm.getPassword2());
+
         // Check whether the username is available and the passwords match.
-        if (!userService.validateNewUser(createUserForm.getUsername(), createUserForm.getPassword1(), createUserForm.getPassword2())) {
+        if (user == null) {
 
             // Add a form-level error when registration details are invalid.
             result.addError(new ObjectError("globalError", "Username already exists or passwords do not match"));
             return "signUpPage";
         }
 
-        // Pass the username to the home page through the redirect URL.
-        attrs.addAttribute("username", createUserForm.getUsername());
+        // Set the session to expire after 15 minutes of inactivity.
+        session.setMaxInactiveInterval(10 * 60);
+
+        // Store the logged-in User in the session.
+        session.setAttribute("loggedInUser", user);
 
         return "redirect:/homePage";
     }

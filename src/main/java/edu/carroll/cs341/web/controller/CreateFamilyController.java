@@ -1,6 +1,8 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,14 +42,21 @@ public class CreateFamilyController {
      * Displays the page for creating a new family.
      * Makes the username available to the view.
      *
-     * @param username the username of the person creating the family
+     * @param session the username of the person creating the family
      * @param model the model used to supply data to the view
      * @return the name of the Thymeleaf view for family creation
      */
     @GetMapping("/createFamilyPage")
-    public String createFamilyPage(String username, Model model) {
+    public String createFamilyPage(HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Make the username available to the view for use during submission.
-        model.addAttribute("username", username);
+        model.addAttribute("user", user);
 
         return "createFamily";
     }
@@ -57,16 +66,23 @@ public class CreateFamilyController {
      * After delegating the operation to the service, redirects the user
      * to the family page.
      *
-     * @param username the username of the person creating the family
+     * @param session the username of the person creating the family
      * @param familyName the name requested for the new family
      * @return a redirect to the family page
      */
     @PostMapping("/createFamily")
-    public String createFamily(String username, String familyName) {
+    public String createFamily(HttpSession session, String familyName) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Delegate family creation and validation to the service layer.
-        familyService.createFamily(username, familyName);
+        familyService.createFamily(user, familyName);
 
         // Redirect to the family page after processing the submission.
-        return "redirect:/familyPage?username=" + username;
+        return "redirect:/familyPage";
     }
 }

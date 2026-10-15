@@ -1,6 +1,10 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.Family;
+import edu.carroll.cs341.jpa.model.FamilyMembership;
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,17 +47,24 @@ public class AddFamilyMemberController {
      * Adds the username and pending requests to the model for use by
      * the {@code addFamilyMember} view.
      *
-     * @param username the username of the family administrator
+     * @param session the username of the family administrator
      * @param model the model used to supply data to the view
      * @return the name of the Thymeleaf view for managing family members
      */
     @GetMapping("/addFamilyPage")
-    public String addFamilyPage(String username, Model model) {
+    public String addFamilyPage(HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Make the username available to the view for subsequent actions.
-        model.addAttribute("username", username);
+        model.addAttribute("user", user);
 
         // Retrieve pending requests so the administrator can review them.
-        model.addAttribute("requests", familyService.getPendingRequests(username));
+        model.addAttribute("requests", familyService.getPendingRequests(user));
         return "addFamilyMember";
     }
 
@@ -61,33 +72,59 @@ public class AddFamilyMemberController {
      * Accepts a pending family membership request and redirects back to
      * the family membership management page.
      *
-     * @param username the username of the family administrator
+     * @param session the username of the family administrator
      * @param membershipID the ID of the membership request to accept
      * @return a redirect to the family membership management page
      */
     @PostMapping("/acceptFamilyMember")
-    public String acceptFamilyMember(String username, Long membershipID) {
+    public String acceptFamilyMember(HttpSession session, Long membershipID) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        FamilyMembership membership = familyService.getMembershipByID(membershipID);
+
+        if (membership == null) {
+            return "redirect:/addFamilyPage";
+        }
+
         // Delegate request validation and acceptance to the service layer.
-        familyService.acceptRequest(username, membershipID);
+        familyService.acceptRequest(user, membership);
 
         // Return to the request list so it can be refreshed.
-        return "redirect:/addFamilyPage?username=" + username;
+        return "redirect:/addFamilyPage";
     }
 
     /**
      * Rejects a pending family membership request and redirects back to
      * the family membership management page.
      *
-     * @param username the username of the family administrator
+     * @param session the username of the family administrator
      * @param membershipID the ID of the membership request to reject
      * @return a redirect to the family membership management page
      */
     @PostMapping("/rejectFamilyMember")
-    public String rejectFamilyMember(String username, Long membershipID) {
+    public String rejectFamilyMember(HttpSession session, Long membershipID) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        FamilyMembership membership = familyService.getMembershipByID(membershipID);
+
+        if (membership == null) {
+            return "redirect:/addFamilyPage";
+        }
+
         // Delegate request validation and rejection to the service layer.
-        familyService.rejectRequest(username, membershipID);
+        familyService.rejectRequest(user, membership);
 
         // Return to the request list so it can be refreshed.
-        return "redirect:/addFamilyPage?username=" + username;
+        return "redirect:/addFamilyPage";
     }
 }

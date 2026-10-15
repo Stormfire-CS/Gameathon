@@ -1,5 +1,7 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.User;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,14 +26,21 @@ public class HomeController {
      * Displays the application's home page.
      * Adds the username to the model so it can be accessed by the view.
      *
-     * @param username the username of the user viewing the home page
+     * @param session the username of the user viewing the home page
      * @param model the model used to supply data to the view
      * @return the name of the Thymeleaf view for the home page
      */
     @GetMapping("/homePage")
-    public String homePage(String username, Model model) {
+    public String homePage(HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Make the username available to the view for display and navigation.
-        model.addAttribute("username", username);
+        model.addAttribute("user", user);
 
         return "homePage";
     }

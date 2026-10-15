@@ -1,6 +1,8 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.GamesService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,14 +42,21 @@ public class AddGameController {
      * Displays the page for adding a new game.
      * Makes the username available to the view.
      *
-     * @param username the username of the person adding the game
+     * @param session the username of the person adding the game
      * @param model the model used to supply data to the view
      * @return the name of the Thymeleaf view for adding a game
      */
     @GetMapping("/addGamePage")
-    public String addGame(String username, Model model) {
+    public String addGame(HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Make the username available to the view for use during submission.
-        model.addAttribute("username", username);
+        model.addAttribute("user", user);
         return "addGame";
     }
 
@@ -56,19 +65,26 @@ public class AddGameController {
      * After delegating the operation to the service, redirects the user
      * to the page for adding a game to their collection.
      *
-     * @param username the username of the person adding the game
+     * @param session the username of the person adding the game
      * @param gameName the name of the game being added
      * @param minPlayers the minimum number of players supported by the game
      * @param maxPlayers the maximum number of players supported by the game
      * @return a redirect to the game collection page
      */
     @PostMapping("/addGame")
-    public String addGame(String username, String gameName, Integer minPlayers, Integer maxPlayers) {
+    public String addGame(HttpSession session, String gameName, Integer minPlayers, Integer maxPlayers) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Delegate game creation and validation to the service layer.
-        gamesService.addGame(username, gameName, minPlayers, maxPlayers);
+        gamesService.addGame(user, gameName, minPlayers, maxPlayers);
 
         // Redirect so the user can continue to the collection workflow.
-        return "redirect:/addGametoCollectionPage?username=" + username;
+        return "redirect:/addGametoCollectionPage";
     }
 
 

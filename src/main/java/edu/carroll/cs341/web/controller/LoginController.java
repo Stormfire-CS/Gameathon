@@ -3,6 +3,7 @@ package edu.carroll.cs341.web.controller;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.UserService;
 import edu.carroll.cs341.web.form.LoginForm;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -66,11 +67,11 @@ public class LoginController {
      * @param loginForm the submitted login form containing the username
      *                  and password
      * @param result the result of validating the submitted form
-     * @param attrs attributes to include in the redirect URL
+     * @param session attributes to include in the redirect URL
      * @return the login view when validation fails, or a redirect to the home page
      */
     @PostMapping("/login")
-    public String loginPost(@Valid @ModelAttribute LoginForm loginForm, BindingResult result, RedirectAttributes attrs) {
+    public String loginPost(@Valid @ModelAttribute LoginForm loginForm, BindingResult result, HttpSession session) {
         // Return to the form if any field-level validation rules fail.
         if (result.hasErrors()) {
             return "login";
@@ -84,9 +85,13 @@ public class LoginController {
             return "login";
         }
 
-        // Preserve the username as a redirect attribute for the home page.
-        attrs.addAttribute("username", loginForm.getUsername());
-        
+        // Set the session to expire after 15 minutes of inactivity.
+        session.setMaxInactiveInterval(1 * 60);
+
+        // Store the logged-in User in the session.
+        session.setAttribute("loggedInUser", user);
+
+
         return "redirect:/homePage";
     }
 }

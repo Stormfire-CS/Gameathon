@@ -1,8 +1,10 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.GamesOwnedService;
 import edu.carroll.cs341.service.GamesService;
 import edu.carroll.cs341.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,20 +56,24 @@ public class AddGametoCollectionController {
      * Displays the page for adding games to a user's collection.
      * Adds the username and the games available to that user to the model.
      *
-     * @param username the username of the person adding a game
+     * @param session the username of the person adding a game
      * @param model the model used to supply data to the view
      * @return the name of the Thymeleaf view for adding games to a collection
      */
     @GetMapping("/addGametoCollectionPage")
-    public String addGametoCollectionPage(String username, Model model) {
-        // Make the username available to the view for subsequent form submissions.
-        model.addAttribute("username", username);
+    public String addGametoCollectionPage(HttpSession session, Model model) {
 
-        // Retrieve the database ID needed to determine which games are available.
-        Long ownerID = userService.getUserID(username);
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        // Make the username available to the view for subsequent form submissions.
+        model.addAttribute("user", user);
 
         // Supply the available games to the view for the user to select from.
-        model.addAttribute("games", gamesService.getAvailableGames(ownerID));
+        model.addAttribute("games", gamesService.getAvailableGames(user));
         return "addGametoCollection";
     }
 
@@ -76,18 +82,25 @@ public class AddGametoCollectionController {
      * After delegating the ownership operation to the service, redirects
      * the user to the page displaying their games.
      *
-     * @param username the username of the person adding the game
+     * @param session the username of the person adding the game
      * @param gameID the ID of the game being added
      * @param yearProduced the year the owned game was produced
      * @return a redirect to the user's game collection page
      */
     @PostMapping("/addGametoCollection")
-    public String addGametoCollection(String username, Long gameID, Integer yearProduced) {
+    public String addGametoCollection(HttpSession session, Long gameID, Integer yearProduced) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Delegate creation and persistence of the ownership record to the service.
-        gamesOwnedService.addGame(username, gameID, yearProduced);
+        gamesOwnedService.addGameToCollection(user, gameID, yearProduced);
 
         // Redirect to the collection view after processing the submission.
-        return "redirect:/viewGamesPage?username=" + username;
+        return "redirect:/viewGamesPage";
     }
 
 }

@@ -1,5 +1,7 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.User;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,14 +25,21 @@ public class OwnerPageController {
      * Displays the owner page and adds the username to the model
      * so that it can be accessed by the view.
      *
-     * @param username the username of the user accessing the owner page
+     * @param session the username of the user accessing the owner page
      * @param model the model used to provide attributes to the view
      * @return the name of the owner page view
      */
     @GetMapping("/ownerPage")
-    public String ownerPage(String username, Model model) {
+    public String ownerPage(HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Make the username available to the owner page template.
-        model.addAttribute("username", username);
+        model.addAttribute("user", user);
         
         return "ownerPage";
     }

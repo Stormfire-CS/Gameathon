@@ -1,6 +1,9 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.Family;
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,14 +44,21 @@ public class JoinFamilyController {
      * Displays the page for requesting membership in an existing family.
      * Makes the username available to the view.
      *
-     * @param username the username of the user requesting to join a family
+     * @param session the username of the user requesting to join a family
      * @param model the model used to supply data to the view
      * @return the name of the Thymeleaf view for joining a family
      */
     @GetMapping("/joinFamilyPage")
-    public String joinFamilyPage(String username, Model model) {
+    public String joinFamilyPage(HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Make the username available to the view for subsequent form submissions.
-        model.addAttribute("username", username);
+        model.addAttribute("user", user);
 
         return "joinFamily";
     }
@@ -57,16 +67,23 @@ public class JoinFamilyController {
      * Processes a request to join a family and redirects the user
      * to the family page.
      *
-     * @param username the username of the user requesting membership
+     * @param session the username of the user requesting membership
      * @param familyID the ID of the family the user wants to join
      * @return a redirect to the family page
      */
     @PostMapping("/requestToJoinFamily")
-    public String requestToJoinFamily(String username, Long familyID) {
+    public String requestToJoinFamily(HttpSession session, Long familyID) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Delegate membership validation and request creation to the service layer.
-        familyService.requestToJoinFamily(username, familyID);
+        familyService.requestToJoinFamily(user, familyID);
         
         // Redirect so the user can view their family membership status.
-        return "redirect:/familyPage?username=" + username;
+        return "redirect:/familyPage";
     }
 }

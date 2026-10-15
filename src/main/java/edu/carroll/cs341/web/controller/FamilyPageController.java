@@ -1,7 +1,9 @@
 package edu.carroll.cs341.web.controller;
 
 import edu.carroll.cs341.jpa.model.Family;
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,24 +46,31 @@ public class FamilyPageController {
      * Retrieves the user's family, determines whether the user is a family
      * member, and checks whether the user administers that family.
      *
-     * @param username the username of the user viewing the family page
+     * @param session the username of the user viewing the family page
      * @param model the model used to supply data to the view
      * @return the name of the Thymeleaf view for the family page
      */
     @GetMapping("/familyPage")
-    public String familyPage(String username, Model model) {
+    public String familyPage(HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Make the username available to the view for display and subsequent actions.
-        model.addAttribute("username", username);
+        model.addAttribute("user", user);
 
         // Retrieve the family associated with the user's accepted membership.
-        Family family = familyService.getFamilyForUser(username);
+        Family family = familyService.getFamilyForUser(user);
         model.addAttribute("family", family);
 
         // A user is considered a family member when a family record is returned.
         model.addAttribute("isFamilyMember", family != null);
 
         // Only check administrator status when the user has an associated family.
-        model.addAttribute("isFamilyAdmin", family != null && familyService.isFamilyAdmin(username, family.getFamilyID()));
+        model.addAttribute("isFamilyAdmin", family != null && familyService.isFamilyAdmin(user, family));
         return "familyPage";
     }
 }

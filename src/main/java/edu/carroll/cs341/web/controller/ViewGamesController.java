@@ -1,6 +1,8 @@
 package edu.carroll.cs341.web.controller;
 
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.GamesOwnedService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,17 +40,24 @@ public class ViewGamesController {
      * Adds the username and the user's game collection to the model
      * so they can be accessed by the view.
      *
-     * @param username the username whose game collection will be displayed
+     * @param session the username whose game collection will be displayed
      * @param model the model used to provide attributes to the view
      * @return the name of the view-games page
      */
     @GetMapping("/viewGamesPage")
-    public String viewGamesPage(String username, Model model) {
+    public String viewGamesPage(HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         // Make the username available to the view.
-        model.addAttribute("username", username);
+        model.addAttribute("user", user);
 
         // Retrieve the games associated with this username and provide them to the view.
-        model.addAttribute("games", gamesOwnedService.getGamesOwnedByUsername(username));
+        model.addAttribute("games", gamesOwnedService.getGamesOwnedByUsername(user));
         
         return "viewGames";
     }
