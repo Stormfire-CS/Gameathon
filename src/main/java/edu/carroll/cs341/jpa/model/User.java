@@ -52,6 +52,7 @@ public class User {
      */
     public User(String username, String rawPassword) {
         this.username = username;
+        this.name = username;
         setRawPassword(rawPassword);
     }
 
@@ -89,7 +90,6 @@ public class User {
      */
     public void setUsername(String username) {
         this.username = username;
-        this.name = username;
     }
 
     /**
@@ -143,7 +143,7 @@ public class User {
      *
      * @param family the family ID to assign to the owner
      */
-    public void setFamily(Long family) {
+    public void setFamily(Family family) {
         this.family = family;
     }
 
