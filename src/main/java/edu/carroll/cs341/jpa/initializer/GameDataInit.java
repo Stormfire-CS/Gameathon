@@ -109,8 +109,7 @@ public class GameDataInit implements CommandLineRunner {
                         minPlayers = Integer.parseInt(data[1].trim());
                         maxPlayers = Integer.parseInt(data[2].trim());
                     } catch (NumberFormatException e) {
-                        log.error("Invalid player count at line {} for game '{}': '{}'.",
-                                lineNumber, gameName, line, e);
+                        log.error("Invalid player count at line {} for game '{}': '{}'.", lineNumber, gameName, line, e);
                         gamesFailed++;
                         continue;
                     }
@@ -121,6 +120,9 @@ public class GameDataInit implements CommandLineRunner {
                         gamesFailed++;
                         continue;
                     }
+
+                    game.setMinPlayers(minPlayers);
+                    game.setMaxPlayers(maxPlayers);
 
                     // Save the new game record to the database.
                     gamesRepo.save(game);
