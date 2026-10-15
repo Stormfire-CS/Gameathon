@@ -108,7 +108,7 @@ public class Family {
      *
      * @param familyAdmin the user ID to assign as the administrator
      */
-    public void setFamilyAdminId(User familyAdmin) {
+    public void setFamilyAdmin(User familyAdmin) {
         this.familyAdmin = familyAdmin;
     }
 
