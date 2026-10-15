@@ -33,13 +33,4 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
      *         an empty list if no matching records are found
      */
     List<GameOwned> findByUser(User user);
-
-    /**
-     * Finds the game ownership record associated with the specific ID.
-     *
-     * @param gameOwned the ID of the owned game being retrieved
-     * @return the matching game ownership record, or {@code null} if no
-     * matching record is found
-     */
-    GameOwned findByGameOwned(GameOwned gameOwned);
 }
