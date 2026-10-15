@@ -5,6 +5,7 @@
     <title>Owner Home</title>
 </head>
 <body>
+<div th:replace="~{fragments :: topBar}"></div>
 <h1>Gameathon</h1>
 <p>Welcome to your stuff: <span th:text="${user.name}"></span></p>
 <a th:href="@{/homePage}">

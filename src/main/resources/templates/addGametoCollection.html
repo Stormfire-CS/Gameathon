@@ -5,6 +5,7 @@
     <title>Add Game</title>
 </head>
 <body>
+<div th:replace="~{fragments :: topBar}"></div>
 <h1>Gameathon</h1>
 <p>Please enter game information: <span th:text="${user.name}"></span></p>
 <a th:href="@{/ownerPage}">

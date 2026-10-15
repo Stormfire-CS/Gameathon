@@ -5,6 +5,7 @@
     <title>View Games</title>
 </head>
 <body>
+<div th:replace="~{fragments :: topBar}"></div>
 <h1>Gameathon</h1>
 <p>Welcome to viewing your games: <span th:text="${user.name}"></span></p>
 <a th:href="@{/ownerPage}">

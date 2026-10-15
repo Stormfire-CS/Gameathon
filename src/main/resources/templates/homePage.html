@@ -5,6 +5,7 @@
     <title>Gameathon Home</title>
 </head>
 <body>
+<div th:replace="~{fragments :: topBar}"></div>
 <h1>Gameathon Home</h1>
 <p>Welcome Home: <span th:text="${user.name}"></span></p>
 <a th:href="@{/familyPage}">

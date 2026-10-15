@@ -5,6 +5,7 @@
     <title>Add Game Page</title>
 </head>
 <body>
+<div th:replace="~{fragments :: topBar}"></div>
 <h1>Add a New Game</h1>
 <p>Please enter the name of the game: <span th:text="${user.name}"></span></p>
 <a th:href="@{/addGametoCollectionPage}">
