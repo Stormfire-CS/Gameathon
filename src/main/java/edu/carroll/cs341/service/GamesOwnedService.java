@@ -35,10 +35,10 @@ public interface GamesOwnedService {
      * Adds a game to the specified user's collection.
      *
      * @param user the username of the user adding the game
-     * @param game the ID of the game to add
+     * @param gameID the ID of the game to add
      * @param yearProduced the year the owned game was produced
      */
-    boolean addGameToCollection(User user, Game game, Integer yearProduced);
+    boolean addGameToCollection(User user, Long gameID, Integer yearProduced);
 
 
     //boolean removeGameFromCollection(String username, Long gameOwnedID);

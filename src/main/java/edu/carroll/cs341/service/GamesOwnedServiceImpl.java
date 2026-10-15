@@ -39,7 +39,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
     private final GamesOwnedRepository gamesOwnedRepo;
 
     /** Repository for looking up user accounts. */
-    private final UserRepository loginRepo;
+    private final UserRepository userRepo;
 
     /** Repository for looking up games in the game catalog. */
     private final GamesRepository gamesRepo;
@@ -49,12 +49,12 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      * game ownership records.
      *
      * @param gamesOwnedRepo repository for user-owned games
-     * @param loginRepo repository for user account information
+     * @param userRepo repository for user account information
      * @param gamesRepo repository for game catalog records
      */
-    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, UserRepository loginRepo, GamesRepository gamesRepo) {
+    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, UserRepository userRepo, GamesRepository gamesRepo) {
         this.gamesOwnedRepo = gamesOwnedRepo;
-        this.loginRepo = loginRepo;
+        this.userRepo = userRepo;
         this.gamesRepo = gamesRepo;
     }
 
@@ -64,12 +64,20 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      * cannot be found, the operation ends without saving an ownership record.
      *
      * @param user the username of the person adding the game
-     * @param game the ID of the game to add
+     * @param gameID the ID of the game to add
      * @param yearProduced the year the owned game was produced
      */
     @Override
-    public boolean addGameToCollection(User user, Game game, Integer yearProduced) {
-        log.debug("addGameToCollection: user {} attempted to add game {}", user.getUsername(), game.getGameName());
+    public boolean addGameToCollection(User user, Long gameID, Integer yearProduced) {
+        log.debug("addGameToCollection: user {} attempted to add game with ID: {}", user.getUsername(), gameID);
+
+        // Verify that the requested game exists before associating it with the user.
+        Game game = gamesRepo.findByGameID(gameID);
+
+        if (game == null) {
+            log.debug("addGame: game {} was not found", gameID);
+            return false;
+        }
 
         // Create the ownership record using the selected game and the user's ID.
         GameOwned gameOwned = new GameOwned(game, user);
