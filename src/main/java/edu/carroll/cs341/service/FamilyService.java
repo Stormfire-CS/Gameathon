@@ -47,11 +47,11 @@ public interface FamilyService {
      * Submits a request for a user to join an existing family.
      *
      * @param user the username of the user requesting membership
-     * @param family the ID of the family the user wants to join
+     * @param familyID the ID of the family the user wants to join
      * @return {@code true} if the membership request was submitted successfully;
      * {@code false} otherwise
      */
-    boolean requestToJoinFamily(User user, Family family);
+    boolean requestToJoinFamily(User user, Long familyID);
 
     /**
      * Retrieves the pending membership requests for families administered
@@ -94,4 +94,6 @@ public interface FamilyService {
      * {@code false} otherwise
      */
     boolean isFamilyAdmin(User user, Family family);
+
+    FamilyMembership getMembershipByID(Long membershipID);
 }
