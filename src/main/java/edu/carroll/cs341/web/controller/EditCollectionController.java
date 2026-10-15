@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * </ul>
  */
 @Controller
-public class AddGametoCollectionController {
+public class EditCollectionController {
 
     /** Service used to retrieve games available in the catalog. */
     private final GamesService gamesService;
@@ -46,7 +46,7 @@ public class AddGametoCollectionController {
      * @param gamesOwnedService service for managing owned games
      * @param userService service for retrieving user information
      */
-    public AddGametoCollectionController(GamesService gamesService, GamesOwnedService gamesOwnedService, UserService userService) {
+    public EditCollectionController(GamesService gamesService, GamesOwnedService gamesOwnedService, UserService userService) {
         this.gamesService = gamesService;
         this.gamesOwnedService = gamesOwnedService;
         this.userService = userService;
@@ -60,7 +60,7 @@ public class AddGametoCollectionController {
      * @param model the model used to supply data to the view
      * @return the name of the Thymeleaf view for adding games to a collection
      */
-    @GetMapping("/addGametoCollectionPage")
+    @GetMapping("/editCollectionPage")
     public String addGametoCollectionPage(HttpSession session, Model model) {
 
         User user = (User) session.getAttribute("loggedInUser");
@@ -74,7 +74,10 @@ public class AddGametoCollectionController {
 
         // Supply the available games to the view for the user to select from.
         model.addAttribute("games", gamesService.getAvailableGames(user));
-        return "addGametoCollection";
+
+        model.addAttribute("ownedGames", gamesOwnedService.getGamesOwnedByUsername(user));
+
+        return "editCollection";
     }
 
     /**
@@ -87,7 +90,7 @@ public class AddGametoCollectionController {
      * @param yearProduced the year the owned game was produced
      * @return a redirect to the user's game collection page
      */
-    @PostMapping("/addGametoCollection")
+    @PostMapping("/addGameToCollection")
     public String addGametoCollection(HttpSession session, Long gameID, Integer yearProduced) {
 
         User user = (User) session.getAttribute("loggedInUser");
@@ -100,13 +103,11 @@ public class AddGametoCollectionController {
         gamesOwnedService.addGameToCollection(user, gameID, yearProduced);
 
         // Redirect to the collection view after processing the submission.
-        return "redirect:/viewGamesPage";
+        return "redirect:/editCollectionPage";
     }
 
     @PostMapping("/deleteGameFromCollection")
-    public String deleteGameFromCollection(
-            @RequestParam("gameOwnedID") Long gameOwnedID,
-            HttpSession session) {
+    public String deleteGameFromCollection(HttpSession session, Long gameOwnedID) {
 
         User user = (User) session.getAttribute("loggedInUser");
 
@@ -116,7 +117,7 @@ public class AddGametoCollectionController {
 
         gamesOwnedService.removeGameFromCollection(user, gameOwnedID);
 
-        return "redirect:/editGameCollectionPage";
+        return "redirect:/editCollectionPage";
     }
 
 }

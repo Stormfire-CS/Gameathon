@@ -17,7 +17,7 @@
 <a th:href="@{/addGamePage}">
     <button type="button">Don't See desired Game?</button>
 </a>
-<form th:action="@{/addGametoCollection}" method="post">
+<form th:action="@{/addGameToCollection}" method="post">
     <label>Game Name:</label>
     <select name="gameID">
         <option value="">Select a Game</option>
@@ -32,5 +32,35 @@
     <button type="submit">Add Game to Collection</button>
 
 </form>
+<hr>
+
+<h2>Your Games</h2>
+
+<table>
+    <tr>
+        <th>Game Name</th>
+        <th>Minimum Players |</th>
+        <th>Maximum Players |</th>
+        <th>Year Produced |</th>
+        <th>Action</th>
+    </tr>
+
+    <tr th:each="gameOwned : ${ownedGames}">
+        <td th:text="${gameOwned.game.gameName}"></td>
+        <td th:text="${gameOwned.game.minPlayers}"></td>
+        <td th:text="${gameOwned.game.maxPlayers}"></td>
+        <td th:text="${gameOwned.yearProduced}"></td>
+
+        <td>
+            <form th:action="@{/deleteGameFromCollection}" method="post">
+                <input type="hidden"
+                       name="gameOwnedID"
+                       th:value="${gameOwned.gameOwnedID}"/>
+
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+</table>
 </body>
 </html>
