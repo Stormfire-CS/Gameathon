@@ -11,16 +11,16 @@
 <a th:href="@{/ownerPage}">
     <button type="button">Back to My Stuff</button>
 </a>
-<a th:href="@{/addGametoCollectionPage}">
-    <button type="button">Add Game</button>
+<a th:href="@{/editCollectionPage}">
+    <button type="button">Edit Collection</button>
 </a>
 
 <h2>Games</h2>
 <table>
     <tr>
         <th>Game Name</th>
-        <th>Minimum Players</th>
-        <th>Maximum Players</th>
+        <th>Minimum Players |</th>
+        <th>Maximum Players |</th>
         <th>Year Produced</th>
     </tr>
     <tr th:each="gameOwned : ${games}">
