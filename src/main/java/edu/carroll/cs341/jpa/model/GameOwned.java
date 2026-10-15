@@ -35,7 +35,7 @@ public class GameOwned {
      * The gameID column references the primary key of the Game entity.
      */
     @ManyToOne
-    @JoinColumn(name = "gameID", nullable = false)
+    @JoinColumn(name = "game", nullable = false)
     private Game game;
 
     /**
