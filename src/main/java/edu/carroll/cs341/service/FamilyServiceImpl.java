@@ -6,6 +6,7 @@ import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.FamiliesRepository;
 import edu.carroll.cs341.jpa.repo.FamilyMembershipRepository;
 import edu.carroll.cs341.jpa.repo.UserRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -143,6 +144,7 @@ public class FamilyServiceImpl implements FamilyService {
      * @return {@code true} if the family and its initial membership are saved;
      *         {@code false} if validation fails
      */
+    @Transactional
     @Override
     public boolean createFamily(User user, String familyName) {
         log.debug("createFamily: user {} attempted to create family {}", user.getUsername(), familyName);
@@ -179,6 +181,9 @@ public class FamilyServiceImpl implements FamilyService {
 
         membershipRepo.save(membership);
 
+        user.setFamily(family);
+        userRepo.save(user);
+
         log.info("createFamily: user '{}' created family '{}'", user.getUsername(), family.getFamilyName());
 
         return true;
@@ -192,28 +197,37 @@ public class FamilyServiceImpl implements FamilyService {
      * accepted membership. A previously rejected request can be resubmitted.</p>
      *
      * @param user the username of the user requesting membership
-     * @param family the ID of the family the user wants to join
+     * @param familyID the ID of the family the user wants to join
      * @return {@code true} if the request is submitted or resubmitted;
      *         {@code false} if validation fails or an existing request is
      *         already pending or accepted
      */
     @Override
-    public boolean requestToJoinFamily(User user, Family family) {
+    public boolean requestToJoinFamily(User user, Long familyID) {
         // A valid user and family ID are required to submit a request.
         if (user == null ) {
             log.debug("requestToJoinFamily: user is null");
             return false;
         }
 
-        if (family == null) {
+        if (familyID == null) {
             log.debug("requestToJoinFamily: familyID is null");
+            return false;
         }
 
-        log.debug("requestToJoinFamily: user '{}' requested to join family {}", user.getUsername(), family.getFamilyName());
+        log.debug("requestToJoinFamily: user '{}' requested to join family with ID: {}", user.getUsername(), familyID);
 
         // Users who already belong to a family cannot request another membership.
         if (hasAcceptedMembership(user)) {
             log.debug("requestToJoinFamily: user '{}' already belongs to a family", user.getUsername());
+            return false;
+        }
+
+        // Confirm that the requested family exists before creating a membership.
+        Family family = familiesRepo.findById(familyID).orElse(null);
+
+        if (family == null) {
+            log.debug("requestToJoinFamily: family {} not found", familyID);
             return false;
         }
 
@@ -382,6 +396,21 @@ public class FamilyServiceImpl implements FamilyService {
         log.info("isFamilyAdmin: user {} admins status is {} for {} family", user.getUsername(), isAdmin, family.getFamilyName());
 
         return isAdmin;
+    }
+
+    /**
+     * Retrieves a family membership using its ID.
+     *
+     * @param membershipID the ID of the membership to retrieve
+     * @return the matching membership, or {@code null} if it does not exist
+     */
+    @Override
+    public FamilyMembership getMembershipByID(Long membershipID) {
+        if (membershipID == null) {
+            return null;
+        }
+
+        return membershipRepo.findById(membershipID).orElse(null);
     }
 }
 
