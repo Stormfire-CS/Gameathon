@@ -40,6 +40,5 @@ public interface GamesOwnedService {
      */
     boolean addGameToCollection(User user, Long gameID, Integer yearProduced);
 
-
-    //boolean removeGameFromCollection(String username, Long gameOwnedID);
+    boolean removeGameFromCollection(User user, Long gameOwnedID);
 }

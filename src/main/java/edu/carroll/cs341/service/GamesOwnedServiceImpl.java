@@ -111,43 +111,27 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         log.info("getGamesOwnedByUsername: found {} owned games for '{}'", games.size(), user.getUsername());
         return games;
     }
-//
-//    public boolean removeGameFromCollection(String username, Long gameOwnedID) {
-//        log.debug("removeGameFromCollection: user {} attempted to remove game {} from collection", username, gameOwnedID);
-//
-//        // Require exactly one matching account before removing an ownership record.
-//        List<Login> users = loginRepo.findByUsernameIgnoreCase(username);
-//
-//        if (users.size() != 1) {
-//            log.debug("removeGameFromCollection: found {} users for username {}", users.size(), username);
-//            return false;
-//        }
-//
-//        Login user = users.getFirst();
-//
-//        // Verify that the requested game exists before removing it from the database.
-//        GameOwned gameOwned = gamesOwnedRepo.findByGameOwnedID(gameOwnedID);
-//
-//        if (gameOwned == null) {
-//            log.debug("removeGameFromCollection: game {} was not found", gameOwnedID);
-//            return false;
-//        }
-//
-//        // Verify that the user requesting to remove the game from their collection is the owner of the game.
-//        if (!gameOwned.getOwner().getOwnerID().equals(user.getId())) {
-//            log.debug()
-//        }
-//        // Create the ownership record using the selected game and the user's ID.
-//        GameOwned gameOwned = new GameOwned(game, user.getId());
-//
-//        // Store the production year as part of the owned game's information.
-//        gameOwned.setYearProduced(yearProduced);
-//
-//        // Persist the ownership record so it can be retrieved later.
-//        gamesOwnedRepo.save(gameOwned);
-//
-//        log.info("addGame: user {} added game {}", username, gameID);
-//        return true;
-//    }
+
+    public boolean removeGameFromCollection(User user, Long gameOwnedID) {
+        log.debug("removeGameFromCollection: user {} attempted to remove game {} from collection", user.getUsername(), gameOwnedID);
+
+        // Verify that the requested game exists before removing it from the database.
+        GameOwned gameOwned = gamesOwnedRepo.findByGameOwnedID(gameOwnedID);
+
+        if (gameOwned == null) {
+            log.debug("removeGameFromCollection: game {} was not found", gameOwnedID);
+            return false;
+        }
+
+        // Verify that the user requesting to remove the game from their collection is the owner of the game.
+        if (!gameOwned.getOwner().equals(user)) {
+            log.debug("removeGameFromCollection: game {} is not owned by {}, is owned by {}", gameOwnedID, user.getUsername(), gameOwned.getOwner().getUsername());
+        }
+
+        gamesOwnedRepo.delete(gameOwned);
+
+        log.info("removeGameFromCollection: user {} removed game {} from their collection", user.getUsername(), gameOwned.getGame().getGameName());
+        return true;
+    }
 
 }
