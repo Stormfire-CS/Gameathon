@@ -33,4 +33,6 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
      *         an empty list if no matching records are found
      */
     List<GameOwned> findByUser(User user);
+
+    GameOwned findByGameOwnedID(Long gameOwnedID);
 }
