@@ -84,7 +84,7 @@ public class AddGameController {
         gamesService.addGame(user, gameName, minPlayers, maxPlayers);
 
         // Redirect so the user can continue to the collection workflow.
-        return "redirect:/addGametoCollectionPage";
+        return "redirect:/editCollectionPage";
     }
 
 
