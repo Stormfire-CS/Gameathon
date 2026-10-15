@@ -103,4 +103,20 @@ public class AddGametoCollectionController {
         return "redirect:/viewGamesPage";
     }
 
+    @PostMapping("/deleteGameFromCollection")
+    public String deleteGameFromCollection(
+            @RequestParam("gameOwnedID") Long gameOwnedID,
+            HttpSession session) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        gamesOwnedService.removeGameFromCollection(user, gameOwnedID);
+
+        return "redirect:/editGameCollectionPage";
+    }
+
 }
