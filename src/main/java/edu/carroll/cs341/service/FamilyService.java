@@ -102,4 +102,6 @@ public interface FamilyService {
     boolean removeFamilyMember(User user, Long membershipID);
 
     List<FamilyMembership> getFamilyMembers(User user);
+
+    boolean leaveFamily(User user);
 }

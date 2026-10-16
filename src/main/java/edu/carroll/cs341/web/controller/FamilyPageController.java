@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 /**
  * Handles web requests for displaying a user's family information.
@@ -71,6 +72,24 @@ public class FamilyPageController {
 
         // Only check administrator status when the user has an associated family.
         model.addAttribute("isFamilyAdmin", family != null && familyService.isFamilyAdmin(user, family));
+
+        // Retrieve every game owned by this family.
+        if (family != null) {
+            model.addAttribute("games", familyService.getGamesForFamily(family));
+        }
         return "familyPage";
+    }
+
+    @PostMapping("/leaveFamily")
+    public String leaveFamily(HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        familyService.leaveFamily(user);
+
+        return "redirect:/familyPage";
     }
 }

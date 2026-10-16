@@ -511,5 +511,52 @@ public class FamilyServiceImpl implements FamilyService {
 
         return membershipRepo.findByFamilyAndStatus(family, ACCEPTED);
     }
+
+    /**
+     * Allows a family member to leave their current family.
+     *
+     * @param user the user who wants to leave the family
+     * @return true if the user successfully leaves; false otherwise
+     */
+    @Transactional
+    @Override
+    public boolean leaveFamily(User user) {
+        if (user == null) {
+            log.debug("leaveFamily: user is null");
+            return false;
+        }
+
+        List<FamilyMembership> memberships = membershipRepo.findByUserAndStatus(user, ACCEPTED);
+
+        if (memberships.isEmpty()) {
+            log.debug("leaveFamily: user '{}' does not belong to a family", user.getUsername());
+            return false;
+        }
+
+        // Get the accepted membership and its associated family.
+        FamilyMembership membership = memberships.getFirst();
+        Family family = membership.getFamily();
+
+
+        if (family == null) {
+            log.debug("leaveFamily: user '{}' does not belong to a family", user.getUsername());
+            return false;
+        }
+
+        // The family administrator cannot leave while still administering it.
+        if (family.getFamilyAdmin().equals(user)) {
+            log.debug("leaveFamily: administrator '{}' cannot leave their own family", user.getUsername());
+            return false;
+        }
+
+        // Remove the membership and clear the user's family reference.
+        membershipRepo.delete(membership);
+        user.setFamily(null);
+        userRepo.save(user);
+
+        log.info("leaveFamily: user '{}' left family '{}'", user.getUsername(), family.getFamilyName());
+
+        return true;
+    }
 }
 

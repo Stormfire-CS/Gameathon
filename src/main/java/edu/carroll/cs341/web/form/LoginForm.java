@@ -20,7 +20,7 @@ public class LoginForm {
 
     /** Username entered by the user; must not be null and must contain at least six characters. */
     @NotNull
-    @Size(min = 6, message = "Username must be at least 2 characters long")
+    @Size(min = 2, message = "Username must be at least 2 characters long")
     private String username;
 
     /** Password entered by the user; must not be null and must contain at least eight characters. */

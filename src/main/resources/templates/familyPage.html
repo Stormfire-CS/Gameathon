@@ -33,16 +33,12 @@
 <div th:if="${isFamilyMember}">
     <h2>Your Family</h2>
     <p>
-        Family Name:
-        <span th:text="${family.familyName}"></span>
-    </p>
-    <p>
-        Family ID:
-        <span th:text="${family.familyID}"></span>
-    </p>
-    <p>
-        Family Administrator:
-        <span th:text="${family.familyAdmin.name}"></span>
+        Family Name: <span th:text="${family.familyName}"></span>
+        Family ID: <span th:text="${family.familyID}"></span>
+        Family Administrator: <span th:text="${family.familyAdmin.name}"></span>
+        <form th:action="@{/leaveFamily}" method="post">
+            <button type="submit">Leave Family</button>
+        </form>
     </p>
     <div th:if="${isFamilyAdmin}">
         <a th:href="@{/editFamilyPage}">
@@ -50,5 +46,33 @@
         </a>
     </div>
 </div>
+
+<h2>Games Owned by Your Family</h2>
+
+<div th:if="${#lists.isEmpty(games)}">
+    <p>Your family does not own any games yet.</p>
+</div>
+
+<table th:if="${not #lists.isEmpty(games)}">
+    <thead>
+    <tr>
+        <th>Game Name</th>
+        <th>Minimum Players</th>
+        <th>Maximum Players</th>
+        <th>Year Produced</th>
+        <th>Owner</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="game : ${games}">
+        <td th:text="${game.gameName}"></td>
+        <td th:text="${game.minPlayers}"></td>
+        <td th:text="${game.maxPlayers}"></td>
+        <td th:text="${game.yearProduced}"></td>
+        <td th:text="${game.owner.name}"></td>
+    </tr>
+    </tbody>
+</table>
+
 </body>
 </html>
