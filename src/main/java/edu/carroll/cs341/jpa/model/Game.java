@@ -10,9 +10,9 @@ import static org.aspectj.util.LangUtil.EOL;
  * Represents a game stored in the database.
  *
  * <p>This entity maps to the Games table and stores a game's unique identifier,
- * name, minimum and maximum player counts, and the ID of the user who added it.</p>
+ * name, minimum and maximum player counts, and the user who added it.</p>
  *
- * <p>The owner ID allows the application to distinguish games added by users
+ * <p>The user_who_added allows the application to distinguish games added by users
  * from games that are available to everyone.</p>
  *
  * <p><b>Sources Used:</b></p>
@@ -43,7 +43,7 @@ public class Game {
     @Column(name = "maxPlayers")
     private Integer maxPlayers;
 
-    /** The ID of the user who added the game, if it was added by a user. */
+    /** The user who added the game, if it was added by a user. */
     @ManyToOne
     @JoinColumn(name = "user_who_added")
     private User userWhoAdded;
@@ -139,18 +139,18 @@ public class Game {
     }
 
     /**
-     * Retrieves the ID of the user who added the game.
+     * Retrieves the user who added the game.
      *
-     * @return the owner's user ID, or {@code null} if no user is assigned
+     * @return the user, or {@code null} if no user is assigned
      */
     public User getUserWhoAdded() {
         return userWhoAdded;
     }
 
     /**
-     * Sets the ID of the user who added the game.
+     * Sets the user who added the game.
      *
-     * @param userWhoAdded the user ID to associate with the game
+     * @param userWhoAdded the user to associate with the game
      */
     public void setUserWhoAdded(User userWhoAdded) {
         this.userWhoAdded = userWhoAdded;
