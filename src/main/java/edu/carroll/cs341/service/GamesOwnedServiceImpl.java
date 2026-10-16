@@ -1,8 +1,7 @@
 package edu.carroll.cs341.service;
 
-import edu.carroll.cs341.jpa.model.Game;
-import edu.carroll.cs341.jpa.model.GameOwned;
-import edu.carroll.cs341.jpa.model.User;
+import edu.carroll.cs341.jpa.model.*;
+import edu.carroll.cs341.jpa.repo.FamilyMembershipRepository;
 import edu.carroll.cs341.jpa.repo.GamesOwnedRepository;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
 import edu.carroll.cs341.jpa.repo.UserRepository;
@@ -44,6 +43,8 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
     /** Repository for looking up games in the game catalog. */
     private final GamesRepository gamesRepo;
 
+    private final FamilyMembershipRepository membershipRepo;
+
     /**
      * Constructs the service with the repositories required to manage
      * game ownership records.
@@ -52,10 +53,11 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      * @param userRepo repository for user account information
      * @param gamesRepo repository for game catalog records
      */
-    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, UserRepository userRepo, GamesRepository gamesRepo) {
+    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, UserRepository userRepo, GamesRepository gamesRepo, FamilyMembershipRepository membershipRepo) {
         this.gamesOwnedRepo = gamesOwnedRepo;
         this.userRepo = userRepo;
         this.gamesRepo = gamesRepo;
+        this.membershipRepo = membershipRepo;
     }
 
     /**
@@ -124,14 +126,33 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         }
 
         // Verify that the user requesting to remove the game from their collection is the owner of the game.
-        if (!gameOwned.getOwner().equals(user)) {
-            log.debug("removeGameFromCollection: game {} is not owned by {}, is owned by {}", gameOwnedID, user.getUsername(), gameOwned.getOwner().getUsername());
+        if (!gameOwned.getUser().equals(user)) {
+            log.debug("removeGameFromCollection: game {} is not owned by {}, is owned by {}", gameOwnedID, user.getUsername(), gameOwned.getUser().getUsername());
         }
 
         gamesOwnedRepo.delete(gameOwned);
 
         log.info("removeGameFromCollection: user {} removed game {} from their collection", user.getUsername(), gameOwned.getGame().getGameName());
         return true;
+    }
+
+    @Override
+    public List<GameOwned> getGamesOwnedByFamily(Family family) {
+        if (family == null) {
+            return new LinkedList<>();
+        }
+
+        // Retrieve the accepted members of this family.
+        List<FamilyMembership> memberships = membershipRepo.findByFamilyAndStatus(family, "ACCEPTED");
+
+        List<User> users = new LinkedList<>();
+
+        for (FamilyMembership membership : memberships) {
+            users.add(membership.getUser());
+        }
+
+        // Retrieve all games owned by those users.
+        return gamesOwnedRepo.findByUserIn(users);
     }
 
 }

@@ -43,7 +43,7 @@ public class GameOwned {
      * The ownerID column references the primary key of the Owner entity.
      */
     @ManyToOne
-    @JoinColumn(name = "User", nullable = false)
+    @JoinColumn(name = "user", nullable = false)
     private User user;
 
     /** The year the game was produced, if known. */
@@ -111,7 +111,7 @@ public class GameOwned {
      *
      * @return the associated Owner object
      */
-    public User getOwner() {
+    public User getUser() {
         return user;
     }
 
@@ -120,7 +120,7 @@ public class GameOwned {
      *
      * @param user the Owner object to associate with this record
      */
-    public void setOwner(User user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

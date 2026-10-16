@@ -35,4 +35,6 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
     List<GameOwned> findByUser(User user);
 
     GameOwned findByGameOwnedID(Long gameOwnedID);
+
+    List<GameOwned> findByUserIn(List<User> users);
 }

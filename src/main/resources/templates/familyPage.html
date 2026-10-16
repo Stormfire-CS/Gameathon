@@ -36,43 +36,44 @@
         Family Name: <span th:text="${family.familyName}"></span>
         Family ID: <span th:text="${family.familyID}"></span>
         Family Administrator: <span th:text="${family.familyAdmin.name}"></span>
+    <div th:if="${!isFamilyAdmin}">
         <form th:action="@{/leaveFamily}" method="post">
             <button type="submit">Leave Family</button>
         </form>
-    </p>
+    </div>
     <div th:if="${isFamilyAdmin}">
         <a th:href="@{/editFamilyPage}">
-            <button type="button">Review Family Requests</button>
+            <button type="button">Edit Family and View Membership Requests</button>
         </a>
     </div>
+    </p>
+    <h2>Games Owned by Your Family</h2>
+
+    <div th:if="${#lists.isEmpty(games)}">
+        <p>Your family does not own any games yet.</p>
+    </div>
+
+    <table th:if="${not #lists.isEmpty(games)}">
+        <thead>
+        <tr>
+            <th>Game Name |</th>
+            <th>Minimum Players |</th>
+            <th>Maximum Players |</th>
+            <th>Year Produced |</th>
+            <th>Owner |</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="owned : ${games}">
+            <td th:text="${owned.game.gameName}"></td>
+            <td th:text="${owned.game.minPlayers}"></td>
+            <td th:text="${owned.game.maxPlayers}"></td>
+            <td th:text="${owned.yearProduced}"></td>
+            <td th:text="${owned.user.name}"></td>
+        </tr>
+        </tbody>
+    </table>
 </div>
-
-<h2>Games Owned by Your Family</h2>
-
-<div th:if="${#lists.isEmpty(games)}">
-    <p>Your family does not own any games yet.</p>
-</div>
-
-<table th:if="${not #lists.isEmpty(games)}">
-    <thead>
-    <tr>
-        <th>Game Name</th>
-        <th>Minimum Players</th>
-        <th>Maximum Players</th>
-        <th>Year Produced</th>
-        <th>Owner</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="game : ${games}">
-        <td th:text="${game.gameName}"></td>
-        <td th:text="${game.minPlayers}"></td>
-        <td th:text="${game.maxPlayers}"></td>
-        <td th:text="${game.yearProduced}"></td>
-        <td th:text="${game.owner.name}"></td>
-    </tr>
-    </tbody>
-</table>
 
 </body>
 </html>

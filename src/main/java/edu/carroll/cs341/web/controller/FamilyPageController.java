@@ -1,8 +1,10 @@
 package edu.carroll.cs341.web.controller;
 
 import edu.carroll.cs341.jpa.model.Family;
+import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyService;
+import edu.carroll.cs341.service.GamesOwnedService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,14 +34,17 @@ public class FamilyPageController {
     /** Service used to retrieve family information and check administrator permissions. */
     private final FamilyService familyService;
 
+    private final GamesOwnedService gamesOwnedService;
+
     /**
      * Constructs the controller with the service required to retrieve
      * family information and check family membership.
      *
      * @param familyService service for family-related operations
      */
-    public FamilyPageController(FamilyService familyService) {
+    public FamilyPageController(FamilyService familyService, GamesOwnedService gamesOwnedService) {
         this.familyService = familyService;
+        this.gamesOwnedService = gamesOwnedService;
     }
 
     /**
@@ -73,9 +78,8 @@ public class FamilyPageController {
         // Only check administrator status when the user has an associated family.
         model.addAttribute("isFamilyAdmin", family != null && familyService.isFamilyAdmin(user, family));
 
-        // Retrieve every game owned by this family.
         if (family != null) {
-            model.addAttribute("games", familyService.getGamesForFamily(family));
+            model.addAttribute("games", gamesOwnedService.getGamesOwnedByFamily(family));
         }
         return "familyPage";
     }

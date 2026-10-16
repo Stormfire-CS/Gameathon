@@ -1,5 +1,6 @@
 package edu.carroll.cs341.service;
 
+import edu.carroll.cs341.jpa.model.Family;
 import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.GameOwned;
 import edu.carroll.cs341.jpa.model.User;
@@ -41,4 +42,6 @@ public interface GamesOwnedService {
     boolean addGameToCollection(User user, Long gameID, Integer yearProduced);
 
     boolean removeGameFromCollection(User user, Long gameOwnedID);
+
+    List<GameOwned> getGamesOwnedByFamily(Family family);
 }
