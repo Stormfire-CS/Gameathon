@@ -90,6 +90,26 @@ public class UserServiceImpl implements UserService {
     public User validateNewUser(String username, String password1, String password2) {
         log.debug("validateNewUser: attempting to register username '{}'", username);
 
+        if (username == null) {
+            log.debug("validateNewUser: username is null");
+            return null;
+        }
+
+        if (username.isEmpty()) {
+            log.debug("validateNewUser: username is blank");
+            return null;
+        }
+
+        if (password1 == null || password2 == null) {
+            log.debug("validateNewUser: One or both passwords is null");
+            return null;
+        }
+
+        if (password1.isEmpty() || password2.isEmpty()) {
+            log.debug("validateNewUser: One or both passwords is blank");
+            return null;
+        }
+
         // Check whether the requested username is already associated with an account.
         List<User> users = userRepo.findByUsernameIgnoreCase(username);
         if (!users.isEmpty()) {

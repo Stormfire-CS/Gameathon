@@ -82,7 +82,7 @@ public class GamesServiceImpl implements GamesService {
      * @param maxPlayers the maximum number of players supported by the game
      */
     @Override
-    public void addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers) {
+    public boolean addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers) {
         log.debug("addGame: user: {} attempted to add game: {}", user.getUsername(), gameName);
 
         // Prevent adding another catalog entry with an existing game name.
@@ -91,7 +91,7 @@ public class GamesServiceImpl implements GamesService {
         if (game != null) {
             if (game.getUserWhoAdded() == null || game.getUserWhoAdded().equals(user)) {
                 log.debug("addGame: game {} already exists and is available to user {}", gameName, user.getUsername());
-                return;
+                return false;
             }
         }
 
@@ -107,5 +107,6 @@ public class GamesServiceImpl implements GamesService {
         gamesRepo.save(newGame);
 
         log.info("addGame: user: {} added game: {}", user.getUsername(), newGame.getGameName());
+        return true;
     }
 }

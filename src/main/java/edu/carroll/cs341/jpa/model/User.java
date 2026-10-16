@@ -8,7 +8,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
     /** The serialization version identifier. */
     private static final long serialVersionUID = 1L;

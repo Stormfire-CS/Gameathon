@@ -26,8 +26,8 @@ public interface GamesService {
     /**
      * Retrieves the games available to a specified owner.
      *
-     * @param user the ID of the owner whose available games are requested
-     * @return a list of games available to the specified owner
+     * @param user the user whose available games are requested
+     * @return a list of games available to the specified user
      */
     List<Game> getAvailableGames(User user);
 
@@ -35,10 +35,10 @@ public interface GamesService {
      * Adds a new game to the game catalog and associates it with the user
      * who submitted it.
      *
-     * @param user the username of the person adding the game
+     * @param user the user who is adding the game
      * @param gameName the name of the game to add
      * @param minPlayers the minimum number of players supported by the game
      * @param maxPlayers the maximum number of players supported by the game
      */
-    void addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers);
+    boolean addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers);
 }
