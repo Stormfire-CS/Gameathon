@@ -10,7 +10,7 @@ import static org.aspectj.util.LangUtil.EOL;
  * Represents a game owned by a particular user.
  *
  * <p>This entity maps to the GamesOwned table and associates an owner with
- * a game through entity relationships. The gameID and ownerID columns
+ * a game through entity relationships. The game and user columns
  * reference the primary keys of the corresponding Game and Owner records.</p>
  *
  * <p>Each record has its own unique identifier and stores the year the game
@@ -34,15 +34,13 @@ public class GameOwned {
 
     /**
      * Game associated with this ownership record.
-     * The gameID column references the primary key of the Game entity.
      */
     @ManyToOne
     @JoinColumn(name = "game", nullable = false)
     private Game game;
 
     /**
-     * Owner associated with this ownership record.
-     * The ownerID column references the primary key of the Owner entity.
+     * User associated with this ownership record.
      */
     @ManyToOne
     @JoinColumn(name = "user", nullable = false)
@@ -109,18 +107,18 @@ public class GameOwned {
     }
 
     /**
-     * Retrieves the owner associated with this ownership object.
+     * Retrieves the user associated with this ownership object.
      *
-     * @return the associated Owner object
+     * @return the associated User object
      */
     public User getUser() {
         return user;
     }
 
     /**
-     * Sets the owner associated with this ownership record.
+     * Sets the user associated with this ownership record.
      *
-     * @param user the Owner object to associate with this record
+     * @param user the User object to associate with this record
      */
     public void setUser(User user) {
         this.user = user;
