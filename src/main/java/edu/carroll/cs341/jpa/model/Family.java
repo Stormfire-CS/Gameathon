@@ -2,6 +2,8 @@ package edu.carroll.cs341.jpa.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 import static org.aspectj.util.LangUtil.EOL;
 
 /**
@@ -136,5 +138,10 @@ public class Family {
 
         Family family = (Family) o;
         return (familyName.equals(family.familyName) && familyAdmin.equals(family.familyAdmin));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(familyName, familyAdmin.getUsername());
     }
 }
