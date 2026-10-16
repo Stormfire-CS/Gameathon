@@ -39,12 +39,4 @@ public interface UserService {
      */
      User validateNewUser(String username, String password1, String password2);
 
-    /**
-     * Retrieves the database ID associated with a username.
-     *
-     * @param username the username whose ID is requested
-     * @return the user's ID if the account can be uniquely identified;
-     * {@code null} otherwise
-     */
-    Long getUserID(String username);
 }

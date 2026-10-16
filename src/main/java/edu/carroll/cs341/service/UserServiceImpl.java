@@ -110,31 +110,4 @@ public class UserServiceImpl implements UserService {
         log.info("validateNewUser: successfully registered user '{}'", username);
         return user;
     }
-
-    /**
-     * Retrieves the database ID associated with a username.
-     *
-     * @param username the username whose user ID is requested
-     * @return the user's ID if exactly one matching account exists;
-     * {@code null} otherwise
-     */
-    @Override
-    public Long getUserID(String username) {
-        log.debug("getUserID: looking up ID for '{}'", username);
-
-        // Look up the account using the same case-insensitive username matching.
-        List<User> users = userRepo.findByUsernameIgnoreCase(username);
-
-        // Return null when no unique account can be identified.
-        if (users.size() != 1) {
-            log.debug("getUserID: found {} users for '{}'", users.size(), username);
-            return null;
-        }
-
-        Long userID = users.getFirst().getId();
-
-        log.debug("getUserID: found ID {} for '{}'", userID, username);
-
-        return userID;
-    }
 }
