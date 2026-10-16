@@ -6,6 +6,50 @@
 </head>
 <body>
 <div th:replace="~{fragments :: topBar}"></div>
+<h2>Change Family Name</h2>
+<form th:action="@{/renameFamily}" method="post">
+    <label for="familyName">New Family Name:</label>
+    <input type="text" id="familyName" name="familyName" required>
+    <button type="submit">Rename Family</button>
+</form>
+
+<h2>Current Family Members</h2>
+
+<table th:if="${!#lists.isEmpty(members)}">
+    <thead>
+    <tr>
+        <th>Name |</th>
+        <th>Username |</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="member : ${members}">
+        <td th:text="${member.user.name}"></td>
+        <td th:text="${member.user.username}"></td>
+        <td>
+            <span th:if="${member.user == user}">
+                Administrator
+            </span>
+
+            <form th:unless="${member.user == user}"
+                  th:action="@{/removeFamilyMember}"
+                  method="post">
+                <input type="hidden"
+                       name="membershipID"
+                       th:value="${member.membershipID}"/>
+                <button type="submit">Remove Member</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<p th:if="${#lists.isEmpty(members)}">
+    There are no current family members.
+</p>
+
 <h1>Pending Family Requests</h1>
 <p>
     Welcome Administer: <span th:text="${user.name}"></span>
@@ -22,7 +66,7 @@
 <table th:if="${!#lists.isEmpty(requests)}">
     <thead>
     <tr>
-        <th>User</th>
+        <th>Users Name  | </th>
         <th>Username</th>
         <th>Action</th>
     </tr>

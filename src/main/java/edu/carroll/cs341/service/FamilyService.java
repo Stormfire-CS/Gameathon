@@ -96,4 +96,10 @@ public interface FamilyService {
     boolean isFamilyAdmin(User user, Family family);
 
     FamilyMembership getMembershipByID(Long membershipID);
+
+    boolean renameFamily(User user, String familyName);
+
+    boolean removeFamilyMember(User user, Long membershipID);
+
+    List<FamilyMembership> getFamilyMembers(User user);
 }

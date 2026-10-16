@@ -1,6 +1,5 @@
 package edu.carroll.cs341.web.controller;
 
-import edu.carroll.cs341.jpa.model.Family;
 import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyService;
@@ -27,7 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * </ul>
  */
 @Controller
-public class AddFamilyMemberController {
+public class EditFamilyController {
 
     /** Service used to retrieve and manage family membership requests. */
     private final FamilyService familyService;
@@ -38,7 +37,7 @@ public class AddFamilyMemberController {
      *
      * @param familyService service for family and membership operations
      */
-    public AddFamilyMemberController(FamilyService familyService) {
+    public EditFamilyController(FamilyService familyService) {
         this.familyService = familyService;
     }
 
@@ -51,7 +50,7 @@ public class AddFamilyMemberController {
      * @param model the model used to supply data to the view
      * @return the name of the Thymeleaf view for managing family members
      */
-    @GetMapping("/addFamilyPage")
+    @GetMapping("/editFamilyPage")
     public String addFamilyPage(HttpSession session, Model model) {
 
         User user = (User) session.getAttribute("loggedInUser");
@@ -63,9 +62,12 @@ public class AddFamilyMemberController {
         // Make the username available to the view for subsequent actions.
         model.addAttribute("user", user);
 
+        model.addAttribute("members", familyService.getFamilyMembers(user));
+        model.addAttribute("family", familyService.getFamilyForUser(user));
+
         // Retrieve pending requests so the administrator can review them.
         model.addAttribute("requests", familyService.getPendingRequests(user));
-        return "addFamilyMember";
+        return "editFamily";
     }
 
     /**
@@ -95,7 +97,7 @@ public class AddFamilyMemberController {
         familyService.acceptRequest(user, membership);
 
         // Return to the request list so it can be refreshed.
-        return "redirect:/addFamilyPage";
+        return "redirect:/editFamilyPage";
     }
 
     /**
@@ -125,6 +127,32 @@ public class AddFamilyMemberController {
         familyService.rejectRequest(user, membership);
 
         // Return to the request list so it can be refreshed.
-        return "redirect:/addFamilyPage";
+        return "redirect:/editFamilyPage";
+    }
+
+    @PostMapping("/renameFamily")
+    public String renameFamily(HttpSession session, String familyName) {
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        familyService.renameFamily(user, familyName);
+
+        return "redirect:/editFamilyPage";
+    }
+
+    @PostMapping("/removeFamilyMember")
+    public String removeFamilyMember(HttpSession session, Long membershipID) {
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        familyService.removeFamilyMember(user, membershipID);
+
+        return "redirect:/editFamilyPage";
     }
 }

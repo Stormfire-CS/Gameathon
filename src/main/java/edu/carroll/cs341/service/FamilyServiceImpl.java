@@ -412,5 +412,104 @@ public class FamilyServiceImpl implements FamilyService {
 
         return membershipRepo.findById(membershipID).orElse(null);
     }
+
+    @Override
+    public boolean renameFamily(User user, String familyName) {
+        if (user == null) {
+            log.debug("renameFamily: user is null");
+            return false;
+        }
+
+        if (familyName == null || familyName.trim().isEmpty()) {
+            log.debug("renameFamily: family name is null or empty");
+            return false;
+        }
+
+        // Find the family administered by this user.
+        Family family = familiesRepo.findByFamilyAdmin(user);
+
+        if (family == null || !family.getFamilyAdmin().equals(user)) {
+            log.debug("renameFamily: user '{}' is not the family admin", user.getUsername());
+            return false;
+        }
+
+        // Update the family name.
+        family.setFamilyName(familyName.trim());
+        familiesRepo.save(family);
+
+        log.info("renameFamily: user '{}' renamed their family to '{}'",
+                user.getUsername(), familyName.trim());
+
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean removeFamilyMember(User user, Long membershipID) {
+        if (user == null) {
+            log.debug("removeFamilyMember: user is null");
+            return false;
+        }
+        if(membershipID == null) {
+            log.debug("removeFamilyMember: membershipID is null");
+            return false;
+        }
+        log.info("removeFamilyMember: user {} is attempting to remove family member with membershipID: {}", user.getUsername(), membershipID);
+
+        // Confirm that the current user administers a family.
+        Family family = familiesRepo.findByFamilyAdmin(user);
+
+        if (family == null || !family.getFamilyAdmin().equals(user)) {
+            log.debug("removeFamilyMember: user '{}' is not the family admin", user.getUsername());
+            return false;
+        }
+
+        // Find the membership record.
+        FamilyMembership membership = membershipRepo.findById(membershipID).orElse(null);
+
+        if (membership == null) {
+            log.debug("removeFamilyMember: membership {} was not found", membershipID);
+            return false;
+        }
+
+        // Only remove accepted members of this administrator's family.
+        if (!family.equals(membership.getFamily()) || !ACCEPTED.equals(membership.getStatus())) {
+            log.debug("removeFamilyMember: user {} with membership ID {} is not an accepted member of this family", membership.getUser().getUsername(), membershipID);
+            return false;
+        }
+
+        // Do not allow the administrator to remove themselves.
+        if (membership.getUser().equals(user)) {
+            log.debug("removeFamilyMember: administrator cannot remove themselves");
+            return false;
+        }
+
+        // Remove the member's accepted membership.
+        membershipRepo.delete(membership);
+
+        log.info("removeFamilyMember: user '{}' removed '{}' from family '{}'", user.getUsername(), membership.getUser().getUsername(), family.getFamilyName());
+
+        return true;
+    }
+
+    @Override
+    public List<FamilyMembership> getFamilyMembers(User user) {
+        if (user == null) {
+            return new LinkedList<>();
+        }
+
+        Family family = familiesRepo.findByFamilyAdmin(user);
+
+        // Non-admin members should also be able to see their own family members.
+        if (family == null) {
+            family = getFamilyForUser(user);
+        }
+
+        if (family == null) {
+            return new LinkedList<>();
+        }
+
+        return membershipRepo.findByFamilyAndStatus(family, ACCEPTED);
+    }
 }
 
