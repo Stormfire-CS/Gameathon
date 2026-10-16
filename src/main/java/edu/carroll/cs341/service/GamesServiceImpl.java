@@ -83,6 +83,16 @@ public class GamesServiceImpl implements GamesService {
      */
     @Override
     public boolean addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers) {
+        if (gameName == null) {
+            log.debug("addGame: game name was null");
+            return false;
+        }
+
+        if (user == null) {
+            log.debug("addGame: user was null");
+            return false;
+        }
+
         log.debug("addGame: user: {} attempted to add game: {}", user.getUsername(), gameName);
 
         // Prevent adding another catalog entry with an existing game name.
@@ -93,6 +103,17 @@ public class GamesServiceImpl implements GamesService {
                 log.debug("addGame: game {} already exists and is available to user {}", gameName, user.getUsername());
                 return false;
             }
+        }
+        if (maxPlayers != null && minPlayers != null) {
+            if (maxPlayers < minPlayers) {
+                log.debug("addGame: max players {} was less than min players {}", maxPlayers, minPlayers);
+                return false;
+            }
+        }
+
+        if ((maxPlayers != null && maxPlayers < 0) || (minPlayers != null && minPlayers < 0)) {
+            log.debug("addGame: max player {} or min player {} was less than zero", maxPlayers, minPlayers);
+            return false;
         }
 
         // Create the new game record after confirming the name is not already used.
