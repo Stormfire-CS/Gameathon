@@ -8,7 +8,7 @@ import java.util.Objects;
  * Represents a user's membership or join request for a family.
  *
  * <p>This entity maps to the FamilyMembership table and stores the membership
- * identifier, the ID of the associated family, the ID of the user, and the
+ * identifier, the family it is associated with, the user it is associated with, and the
  * current membership status.</p>
  *
  * <p>The status field can be used to track whether a user's request to join
@@ -30,12 +30,12 @@ public class FamilyMembership {
     @GeneratedValue
     private Long membershipID;
 
-    /** The ID of the family associated with this membership. */
+    /** The family associated with this membership. */
     @ManyToOne
     @JoinColumn(name = "family", nullable = false)
     private Family family;
 
-    /** The ID of the user associated with this membership. */
+    /** The user associated with this membership. */
     @ManyToOne
     @JoinColumn(name = "user", nullable = false)
     private User user;
@@ -56,8 +56,8 @@ public class FamilyMembership {
     /**
      * Creates a membership record for a specific family and user.
      *
-     * @param family the ID of the family associated with the membership
-     * @param user the ID of the user associated with the membership
+     * @param family the family associated with the membership
+     * @param user the user associated with the membership
      * @param status the initial status of the membership
      */
     public FamilyMembership(Family family, User user, String status) {
@@ -85,36 +85,36 @@ public class FamilyMembership {
     }
 
     /**
-     * Retrieves the ID of the associated family.
+     * Retrieves the associated family.
      *
-     * @return the family ID
+     * @return the family
      */
     public Family getFamily() {
         return family;
     }
 
     /**
-     * Sets the ID of the associated family.
+     * Sets the associated family.
      *
-     * @param family the family ID to assign to the membership
+     * @param family the family to assign to the membership
      */
     public void setFamily(Family family) {
         this.family = family;
     }
 
     /**
-     * Retrieves the ID of the associated user.
+     * Retrieves the associated user.
      *
-     * @return the user ID
+     * @return the user
      */
     public User getUser() {
         return user;
     }
 
     /**
-     * Sets the ID of the associated user.
+     * Sets the associated user.
      *
-     * @param user the user ID to assign to the membership
+     * @param user the user to assign to the membership
      */
     public void setUser(User user) {
         this.user = user;
