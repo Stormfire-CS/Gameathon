@@ -15,8 +15,8 @@ import java.util.List;
  *
  * <p>It also defines query methods for checking whether a game exists,
  * finding games by name or ID, and retrieving the games visible to a
- * particular owner. The visible games include those automatically
- * populated in the database and those added by that specific owner.</p>
+ * particular user. The visible games include those automatically
+ * populated in the database and those added by that specific user.</p>
  *
  * <p><b>Sources Used:</b></p>
  * <ul>
@@ -59,10 +59,10 @@ public interface GamesRepository extends JpaRepository<Game, Long> {
      * which have no associated owner, and games added by the specified owner.
      * The results are ordered alphabetically by game name in ascending order.</p>
      *
-     * @param userWhoAdded the ID of the owner whose added games should
+     * @param userWhoAdded the user whose added games should
      *                       be included alongside automatically populated games
      * @return a list of automatically populated games and games added by
-     *         the specified owner, ordered by game name; an empty list
+     *         the specified user, ordered by game name; an empty list
      *         if no matching games are found
      */
     List<Game> findByUserWhoAddedIsNullOrUserWhoAddedOrderByGameNameAsc(User userWhoAdded);
