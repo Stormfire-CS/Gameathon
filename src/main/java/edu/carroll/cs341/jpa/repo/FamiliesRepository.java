@@ -11,8 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * persistence operations for {@link Family} objects, using {@link Long}
  * as the type of the entity's primary key.</p>
  *
- * <p>It also defines query methods for finding a family by its administrator
- * ID and checking whether a family name already exists, ignoring case.</p>
+ * <p>It also defines query methods for finding a family by its administrator.</p>
  *
  * <p><b>Sources Used:</b></p>
  * <ul>
@@ -24,9 +23,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface FamiliesRepository extends JpaRepository<Family, Long> {
 
     /**
-     * Finds a family associated with the specified administrator ID.
+     * Finds a family associated with the specified administrator.
      *
-     * @param familyAdmin the ID of the family administrator
+     * @param familyAdmin the family administrator
      * @return the matching family, or {@code null} if no family is found
      */
     Family findByFamilyAdmin(User familyAdmin);
