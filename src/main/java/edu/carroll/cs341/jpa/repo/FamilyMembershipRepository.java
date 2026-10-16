@@ -15,8 +15,7 @@ import java.util.List;
  * {@link Long} as the type of the entity's primary key.</p>
  *
  * <p>It also defines query methods for retrieving family memberships by
- * user, family, and membership status, as well as finding a specific
- * membership by its family and user IDs.</p>
+ * user, family, and membership status.</p>
  *
  * <p><b>Sources Used:</b></p>
  * <ul>
@@ -30,9 +29,9 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
     /**
      * Finds memberships belonging to a specified user with the given status.
      *
-     * @param user the ID of the user
+     * @param user the user
      * @param status the membership status to search for
-     * @return a list of memberships matching the user ID and status;
+     * @return a list of memberships matching the user and status;
      *         an empty list if no matches are found
      */
     List<FamilyMembership> findByUserAndStatus(User user, String status);
@@ -40,9 +39,9 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
     /**
      * Finds memberships associated with a specified family and status.
      *
-     * @param family the ID of the family
+     * @param family the family
      * @param status the membership status to search for
-     * @return a list of memberships matching the family ID and status;
+     * @return a list of memberships matching the family and status;
      *         an empty list if no matches are found
      */
     List<FamilyMembership> findByFamilyAndStatus(Family family, String status);
@@ -50,8 +49,8 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
     /**
      * Finds a membership associated with a specific family and user.
      *
-     * @param family the ID of the family
-     * @param user the ID of the user
+     * @param family the family
+     * @param user the user
      * @return the matching membership, or {@code null} if no match is found
      */
     FamilyMembership findByFamilyAndUser(Family family, User user);
