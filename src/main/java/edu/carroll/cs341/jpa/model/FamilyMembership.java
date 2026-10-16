@@ -2,6 +2,8 @@ package edu.carroll.cs341.jpa.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 /**
  * Represents a user's membership or join request for a family.
  *
@@ -134,5 +136,21 @@ public class FamilyMembership {
      */
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        FamilyMembership familyMembership= (FamilyMembership) o;
+        return (family.equals(familyMembership.family) && user.equals(familyMembership.user) && status.equals(familyMembership.status));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(family.getFamilyName(), user.getUsername(), status);
     }
 }
