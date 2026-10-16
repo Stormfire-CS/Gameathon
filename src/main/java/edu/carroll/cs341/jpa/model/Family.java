@@ -142,6 +142,6 @@ public class Family {
 
     @Override
     public int hashCode() {
-        return Objects.hash(familyName, familyAdmin.getUsername());
+        return Objects.hash(familyName, familyAdmin);
     }
 }

@@ -151,6 +151,6 @@ public class FamilyMembership {
 
     @Override
     public int hashCode() {
-        return Objects.hash(family.getFamilyName(), user.getUsername(), status);
+        return Objects.hash(family, user, status);
     }
 }

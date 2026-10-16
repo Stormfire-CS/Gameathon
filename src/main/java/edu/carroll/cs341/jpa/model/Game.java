@@ -2,6 +2,8 @@ package edu.carroll.cs341.jpa.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 import static org.aspectj.util.LangUtil.EOL;
 
 /**
@@ -183,7 +185,12 @@ public class Game {
             return false;
 
         Game game = (Game) o;
-        return (gameName.equals(game.gameName) && userWhoAdded.equals(game.userWhoAdded));
+        return (gameName.equals(game.gameName) && Objects.equals(userWhoAdded, game.userWhoAdded));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameName, userWhoAdded);
     }
 
 }
