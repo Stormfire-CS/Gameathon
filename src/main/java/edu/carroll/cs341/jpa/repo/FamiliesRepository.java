@@ -30,13 +30,4 @@ public interface FamiliesRepository extends JpaRepository<Family, Long> {
      * @return the matching family, or {@code null} if no family is found
      */
     Family findByFamilyAdmin(User familyAdmin);
-
-    /**
-     * Checks whether a family with the specified name already exists,
-     * ignoring differences in letter case.
-     *
-     * @param familyName the family name to check
-     * @return {@code true} if a matching family exists; {@code false} otherwise
-     */
-    boolean existsByFamilyNameIgnoreCase(String familyName);
 }
