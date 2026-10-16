@@ -2,6 +2,8 @@ package edu.carroll.cs341.jpa.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 import static org.aspectj.util.LangUtil.EOL;
 
 /**
@@ -161,6 +163,22 @@ public class GameOwned {
             builder.append("Publish Year = ").append(yearProduced).append(EOL);
         }
         return builder.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        GameOwned gameOwned = (GameOwned) o;
+        return (game.equals(gameOwned.game) && user.equals(gameOwned.user) && yearProduced.equals(gameOwned.yearProduced));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(game, user, yearProduced);
     }
 
 }
