@@ -2,6 +2,7 @@ package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.UserRepository;
+import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -64,10 +65,8 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         User u = users.getFirst();
-        // XXX - Using Java's hashCode is wrong on SO many levels, but is good enough for demonstration purposes.
-        // NEVER EVER do this in production code!
-        final String userProvidedHash = Integer.toString(password.hashCode());
-        if (!u.getHashedPassword().equals(userProvidedHash)) {
+
+        if (!BCrypt.checkpw(password, u.getHashedPassword())) {
             log.debug("validateUser: password !match");
             return null;
         }

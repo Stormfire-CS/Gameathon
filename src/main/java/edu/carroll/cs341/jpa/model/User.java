@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.util.Objects;
 
+import org.mindrot.jbcrypt.BCrypt;
+
+
 @Entity
 @Table(name = "user")
 public class User {
@@ -183,7 +186,6 @@ public class User {
     }
 
     public void setRawPassword(String rawPassword) {
-        // XXX - This should *NEVER* be done in a real project
-        this.hashedPassword = Integer.toString(rawPassword.hashCode());
+        this.hashedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
     }
 }
