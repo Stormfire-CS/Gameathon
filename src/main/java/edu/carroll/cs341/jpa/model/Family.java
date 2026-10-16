@@ -10,7 +10,7 @@ import static org.aspectj.util.LangUtil.EOL;
  * Represents a family stored in the database.
  *
  * <p>This entity maps to the Families table and stores the family's unique
- * identifier, name, and the ID of the user who administers the family.</p>
+ * identifier, name, and the user who administers the family.</p>
  *
  * <p>The family name must be unique and cannot be null. Each family must also
  * have an administrator assigned to it.</p>
@@ -35,7 +35,7 @@ public class Family {
     @Column(name = "familyName", nullable = false)
     private String familyName;
 
-    /** The ID of the user who administers the family. */
+    /** The user who administers the family. */
     @OneToOne
     @JoinColumn(name = "familyAdmin", nullable = false, unique = true)
     private User familyAdmin;
@@ -53,7 +53,7 @@ public class Family {
      * Creates a family with a name and an assigned administrator.
      *
      * @param familyName the name of the family
-     * @param familyAdmin the ID of the user who administers the family
+     * @param familyAdmin the user who administers the family
      */
     public Family(String familyName, User familyAdmin) {
         this.familyName = familyName;
@@ -97,18 +97,18 @@ public class Family {
     }
 
     /**
-     * Retrieves the ID of the family administrator.
+     * Retrieves the user who is the family administrator.
      *
-     * @return the administrator's user ID
+     * @return the user who administrates
      */
     public User getFamilyAdmin() {
         return familyAdmin;
     }
 
     /**
-     * Sets the ID of the family administrator.
+     * Sets the user who is the family administrator.
      *
-     * @param familyAdmin the user ID to assign as the administrator
+     * @param familyAdmin the user to assign as the family administrator
      */
     public void setFamilyAdmin(User familyAdmin) {
         this.familyAdmin = familyAdmin;
