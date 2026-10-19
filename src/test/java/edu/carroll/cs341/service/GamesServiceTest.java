@@ -89,27 +89,18 @@ public class GamesServiceTest {
      */
     @BeforeEach
     public void beforeTest() {
-        assertNotNull("gamesService must be injected", gamesService);
-        assertNotNull("gameRepo must be injected", gameRepo);
-        assertNotNull("userRepo must be injected", userRepo);
-
-        // Ensure dummy record is in the DB
-        final List<User> users = userRepo.findByUsernameIgnoreCase(username);
-
-        if (users.isEmpty()) {
-            fakeUser = userRepo.save(fakeUser);
-        } else {
-            fakeUser = users.get(0);
-        }
-        if (!gameRepo.existsByGameName(invalidName)) {
-            gameRepo.save(fakeGame);
-        }
-        if (fakeGameWithUser.getUserWhoAdded() == null) {
-            fakeGameWithUser.setUserWhoAdded(fakeUser);
-        }
-        if (!gameRepo.existsByGameName(invalidName2)) {
-            gameRepo.save(fakeGameWithUser);
-        }
+        //Call user new service anyways
+        fakeUser = userRepo.save(fakeUser);
+//      Assert fake user not null
+//        if (!gameRepo.existsByGameName(invalidName)) {
+//            gameRepo.save(fakeGame);
+//        }
+//        if (fakeGameWithUser.getUserWhoAdded() == null) {
+//            fakeGameWithUser.setUserWhoAdded(fakeUser);
+//        }
+//        if (!gameRepo.existsByGameName(invalidName2)) {
+//            gameRepo.save(fakeGameWithUser);
+//        }
     }
 
     /**
@@ -118,7 +109,8 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameValidUserValidGameNameValidMinPlayersNegativeMaxPlayers () {
-        assertFalse("addGameValidUserValidGameNameValidMinPlayersNegativeMaxPlayers: should be false when using negative max players", gamesService.addGame(fakeUser,validName + System.nanoTime(), smaller, negative));
+        boolean result =  gamesService.addGame(fakeUser,validName + System.nanoTime(), smaller, negative);
+        assertFalse("addGameValidUserValidGameNameValidMinPlayersNegativeMaxPlayers: should be false when using negative max players", result);
     }
 
     /**

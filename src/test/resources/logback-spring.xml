@@ -13,7 +13,7 @@
     <!--- Spring boot has a lot of startup noise as well -->
     <logger name="org.springframework" level="WARN" />
 
-    <!-- Increase verbosity for local classes during testing -->
+    <!-- Increase logging for local classes during testing and debugging-->
     <logger name="edu.carroll.cs341" level="DEBUG" />
 
     <!-- Default level is INFO -->
