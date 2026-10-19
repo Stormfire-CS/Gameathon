@@ -11,13 +11,23 @@
 <a th:href="@{/editCollectionPage}">
     <button type="button">Back to Adding Game to Collection</button>
 </a>
-<form th:action="@{/addGame}" method="post">
-    <label>Game Name:</label>
-    <input type="text" name="gameName" placeholder="Game Name"/>
-    <label>Maximum Number of Players</label>
-    <input type="number" name="maxPlayers" placeholder="Max # of Players"/>
-    <label>Minimum Number of Players</label>
-    <input type="number" name="minPlayers" placeholder="Minimum # of Players"/>
+<form th:action="@{/addGame}" th:object="${createGameForm}" method="post">
+    <label for="gameName">Game Name:</label>
+    <input type="text" id="gameName" th:field="*{gameName}" placeholder="Game Name"/>
+    <span th:if="${#fields.hasErrors('gameName')}" th:errors="*{gameName}"></span><br/>
+
+    <label for="minPlayers">Minimum Number of Players:</label>
+    <input type="number" id="minPlayers" th:field="*{minPlayers}" placeholder="Minimum # of Players"/>
+    <span th:if="${#fields.hasErrors('minPlayers')}" th:errors="*{minPlayers}"></span><br/>
+
+    <label for="maxPlayers">Maximum Number of Players:</label>
+    <input type="number" id="maxPlayers" th:field="*{maxPlayers}" placeholder="Maximum # of Players"/>
+    <span th:if="${#fields.hasErrors('maxPlayers')}" th:errors="*{maxPlayers}"></span><br/>
+
+    <span th:if="${#fields.hasErrors('playerCountValid')}" th:errors="*{playerCountValid}"></span><br/>
+    
+    <span th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></span>
+
     <button type="submit">Add Game to Database</button>
 </form>
 </body>

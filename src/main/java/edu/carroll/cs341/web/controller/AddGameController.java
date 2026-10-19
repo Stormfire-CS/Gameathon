@@ -2,10 +2,15 @@ package edu.carroll.cs341.web.controller;
 
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.GamesService;
+import edu.carroll.cs341.web.form.CreateGameForm;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 /**
@@ -57,6 +62,8 @@ public class AddGameController {
 
         // Make the username available to the view for use during submission.
         model.addAttribute("user", user);
+
+        model.addAttribute("createGameForm", new CreateGameForm());
         return "addGame";
     }
 
@@ -66,13 +73,15 @@ public class AddGameController {
      * to the page for adding a game to their collection.
      *
      * @param session the username of the person adding the game
-     * @param gameName the name of the game being added
-     * @param minPlayers the minimum number of players supported by the game
-     * @param maxPlayers the maximum number of players supported by the game
      * @return a redirect to the game collection page
      */
     @PostMapping("/addGame")
-    public String addGame(HttpSession session, String gameName, Integer minPlayers, Integer maxPlayers) {
+    public String addGame(
+            @Valid @ModelAttribute CreateGameForm createGameForm,
+            BindingResult result,
+            HttpSession session,
+            Model model
+    ) {
 
         User user = (User) session.getAttribute("loggedInUser");
 
@@ -80,8 +89,26 @@ public class AddGameController {
             return "redirect:/login";
         }
 
-        // Delegate game creation and validation to the service layer.
-        gamesService.addGame(user, gameName, minPlayers, maxPlayers);
+        if (result.hasErrors()) {
+            model.addAttribute("user", user);
+            return "addGame";
+        }
+
+        boolean added = gamesService.addGame(
+                user,
+                createGameForm.getGameName(),
+                createGameForm.getMinPlayers(),
+                createGameForm.getMaxPlayers()
+        );
+
+        if (!added) {
+            result.addError(new ObjectError(
+                    "globalError",
+                    "The game could not be added. Check that the game doesn't already exist."
+            ));
+            model.addAttribute("user", user);
+            return "addGame";
+        }
 
         // Redirect so the user can continue to the collection workflow.
         return "redirect:/editCollectionPage";
