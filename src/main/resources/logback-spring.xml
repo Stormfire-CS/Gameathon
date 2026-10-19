@@ -36,7 +36,7 @@
     <logger name="com.zaxxer.hikari" level="INFO" />
 
     <!-- Services: show general application activity -->
-    <logger name="edu.carroll.cs341.jpa.service" level="DEBUG" />
+    <logger name="edu.carroll.cs341.service" level="DEBUG" />
 
     <!-- Default level is INFO -->
     <root level="INFO">
