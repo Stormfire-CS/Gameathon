@@ -1,10 +1,15 @@
 package edu.carroll.cs341.jpa.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Objects;
-
-import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * Represents a user account in the application.
@@ -20,27 +25,39 @@ import org.mindrot.jbcrypt.BCrypt;
 @Table(name = "users")
 public class User {
 
-    /** The serialization version identifier. */
+    /**
+     * The serialization version identifier.
+     */
     private static final long serialVersionUID = 1L;
 
-    /** The unique database identifier for this login record. */
+    /**
+     * The unique database identifier for this login record.
+     */
     @Id
     @GeneratedValue
     private Long userID;
 
-    /** The unique username associated with this login. */
+    /**
+     * The unique username associated with this login.
+     */
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    /** The stored password value associated with this login. */
+    /**
+     * The stored password value associated with this login.
+     */
     @Column(name = "password", nullable = false)
     private String hashedPassword;
 
-    /** The name of the owner. */
+    /**
+     * The name of the owner.
+     */
     @Column(name = "name", nullable = false, unique = false)
     private String name;
 
-    /** The family associated with this user, if any. */
+    /**
+     * The family associated with this user, if any.
+     */
     @ManyToOne
     @JoinColumn(name = "family", nullable = true)
     private Family family;
@@ -60,7 +77,7 @@ public class User {
      * <p>The supplied password is passed to {@link #setRawPassword(String)}
      * for storage.</p>
      *
-     * @param username the username for the user
+     * @param username    the username for the user
      * @param rawPassword the password supplied by the user
      */
     public User(String username, String rawPassword) {
@@ -123,10 +140,14 @@ public class User {
         this.hashedPassword = hashedPassword;
     }
 
-    /** The platform-specific line separator used when formatting output. */
+    /**
+     * The platform-specific line separator used when formatting output.
+     */
     private static final String EOL = System.lineSeparator();
 
-    /** The tab character used to indent formatted output. */
+    /**
+     * The tab character used to indent formatted output.
+     */
     private static final String TAB = "\t";
 
     public String getName() {

@@ -1,6 +1,10 @@
 package edu.carroll.cs341.jpa.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import java.util.Date;
 
@@ -27,16 +31,22 @@ import static org.aspectj.util.LangUtil.EOL;
 @Table(name = "GamesPlayed")
 public class GamePlayed {
 
-    /** The unique identifier assigned to this game-play record. */
+    /**
+     * The unique identifier assigned to this game-play record.
+     */
     @Id
     @GeneratedValue
     private Long gamePlayedID;
 
-    /** The ID of the owned game associated with this play session. */
+    /**
+     * The ID of the owned game associated with this play session.
+     */
     @Column(name = "ownedGameID", nullable = false)
     private Long ownedGameID;
 
-    /** The date on which the game was played. */
+    /**
+     * The date on which the game was played.
+     */
     @Column(name = "datePlayed", nullable = false)
     private Date datePlayed;
 
@@ -53,7 +63,7 @@ public class GamePlayed {
      * Creates a game-play record for an owned game on a specified date.
      *
      * @param ownedGameID the ID of the owned game that was played
-     * @param datePlayed the date on which the game was played
+     * @param datePlayed  the date on which the game was played
      */
     public GamePlayed(Long ownedGameID, Date datePlayed) {
         this.ownedGameID = ownedGameID;

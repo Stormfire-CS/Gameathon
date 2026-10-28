@@ -1,6 +1,12 @@
 package edu.carroll.cs341.jpa.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import java.util.Objects;
 
@@ -25,22 +31,30 @@ import java.util.Objects;
 @Table(name = "FamilyMembership")
 public class FamilyMembership {
 
-    /** The unique identifier assigned to this membership record. */
+    /**
+     * The unique identifier assigned to this membership record.
+     */
     @Id
     @GeneratedValue
     private Long membershipID;
 
-    /** The family associated with this membership. */
+    /**
+     * The family associated with this membership.
+     */
     @ManyToOne
     @JoinColumn(name = "family", nullable = false)
     private Family family;
 
-    /** The user associated with this membership. */
+    /**
+     * The user associated with this membership.
+     */
     @ManyToOne
     @JoinColumn(name = "user", nullable = false)
     private User user;
 
-    /** The current status of the user's membership or join request. */
+    /**
+     * The current status of the user's membership or join request.
+     */
     @Column(name = "status", nullable = false)
     private String status;
 
@@ -57,7 +71,7 @@ public class FamilyMembership {
      * Creates a membership record for a specific family and user.
      *
      * @param family the family associated with the membership
-     * @param user the user associated with the membership
+     * @param user   the user associated with the membership
      * @param status the initial status of the membership
      */
     public FamilyMembership(Family family, User user, String status) {
@@ -145,7 +159,7 @@ public class FamilyMembership {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        FamilyMembership familyMembership= (FamilyMembership) o;
+        FamilyMembership familyMembership = (FamilyMembership) o;
         return (family.equals(familyMembership.family) && user.equals(familyMembership.user) && status.equals(familyMembership.status));
     }
 

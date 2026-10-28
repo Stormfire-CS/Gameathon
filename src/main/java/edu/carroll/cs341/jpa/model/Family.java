@@ -32,16 +32,22 @@ import static org.aspectj.util.LangUtil.EOL;
 @Table(name = "Families")
 public class Family {
 
-    /** The unique identifier assigned to the family by the database. */
+    /**
+     * The unique identifier assigned to the family by the database.
+     */
     @Id
     @GeneratedValue
     private Long familyID;
 
-    /** The unique name assigned to the family. */
+    /**
+     * The unique name assigned to the family.
+     */
     @Column(name = "familyName", nullable = false)
     private String familyName;
 
-    /** The user who administers the family. */
+    /**
+     * The user who administers the family.
+     */
     @OneToOne
     @JoinColumn(name = "familyAdmin", nullable = false, unique = true)
     private User familyAdmin;
@@ -58,7 +64,7 @@ public class Family {
     /**
      * Creates a family with a name and an assigned administrator.
      *
-     * @param familyName the name of the family
+     * @param familyName  the name of the family
      * @param familyAdmin the user who administers the family
      */
     public Family(String familyName, User familyAdmin) {
@@ -134,7 +140,7 @@ public class Family {
         builder.append("familyName = ").append(familyName);
         return builder.toString();
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o)

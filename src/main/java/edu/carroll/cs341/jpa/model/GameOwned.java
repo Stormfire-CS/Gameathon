@@ -1,6 +1,12 @@
 package edu.carroll.cs341.jpa.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import java.util.Objects;
 
@@ -27,7 +33,9 @@ import static org.aspectj.util.LangUtil.EOL;
 @Table(name = "GamesOwned")
 public class GameOwned {
 
-    /** The unique identifier assigned to this game ownership record. */
+    /**
+     * The unique identifier assigned to this game ownership record.
+     */
     @GeneratedValue
     @Id
     private Long gameOwnedID;
@@ -46,7 +54,9 @@ public class GameOwned {
     @JoinColumn(name = "user", nullable = false)
     private User user;
 
-    /** The year the game was produced, if known. */
+    /**
+     * The year the game was produced, if known.
+     */
     @Column(name = "yearProduced")
     private Integer yearProduced;
 

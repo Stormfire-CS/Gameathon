@@ -1,6 +1,10 @@
 package edu.carroll.cs341.jpa.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import static org.aspectj.util.LangUtil.EOL;
 
@@ -24,16 +28,22 @@ import static org.aspectj.util.LangUtil.EOL;
 @Table(name = "GamePlayers")
 public class GamePlayer {
 
-    /** The unique identifier assigned to this game player. */
+    /**
+     * The unique identifier assigned to this game player.
+     */
     @Id
     @GeneratedValue
     private Long gamePlayerID;
 
-    /** The name of the game player. */
+    /**
+     * The name of the game player.
+     */
     @Column(name = "name", nullable = false)
     private String name;
 
-    /** The ID of the owner associated with this game player, if any. */
+    /**
+     * The ID of the owner associated with this game player, if any.
+     */
     @Column(name = "ownerID", unique = true)
     private Long ownerID;
 

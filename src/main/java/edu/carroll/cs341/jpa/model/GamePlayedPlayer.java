@@ -1,6 +1,10 @@
 package edu.carroll.cs341.jpa.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import static org.aspectj.util.LangUtil.EOL;
 
@@ -25,20 +29,28 @@ import static org.aspectj.util.LangUtil.EOL;
 @Table(name = "GamePlayedPlayers")
 public class GamePlayedPlayer {
 
-    /** The unique identifier assigned to this player participation record. */
+    /**
+     * The unique identifier assigned to this player participation record.
+     */
     @Id
     @GeneratedValue
     private Long gamePlayedPlayerID;
 
-    /** The ID of the player associated with this game-play record. */
+    /**
+     * The ID of the player associated with this game-play record.
+     */
     @Column(name = "playerID", nullable = false, unique = true)
     private Long playerID;
 
-    /** The player's score for the game, if it has been recorded. */
+    /**
+     * The player's score for the game, if it has been recorded.
+     */
     @Column(name = "score")
     private Integer score;
 
-    /** Whether the player won the game, if the result has been recorded. */
+    /**
+     * Whether the player won the game, if the result has been recorded.
+     */
     @Column(name = "didWin")
     private Boolean didWin;
 
@@ -118,7 +130,7 @@ public class GamePlayedPlayer {
      * Retrieves whether the player won the game.
      *
      * @return {@code true} if the player won, {@code false} if they did not,
-     *         or {@code null} if the result has not been recorded
+     * or {@code null} if the result has not been recorded
      */
     public Boolean getDidWin() {
         return didWin;

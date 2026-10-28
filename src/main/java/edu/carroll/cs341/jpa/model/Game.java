@@ -1,6 +1,12 @@
 package edu.carroll.cs341.jpa.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import java.util.Objects;
 
@@ -26,24 +32,34 @@ import static org.aspectj.util.LangUtil.EOL;
 @Table(name = "Games")
 public class Game {
 
-    /** The unique identifier assigned to the game by the database. */
+    /**
+     * The unique identifier assigned to the game by the database.
+     */
     @Id
     @GeneratedValue
     private Long gameID;
 
-    /** The name of the game. */
+    /**
+     * The name of the game.
+     */
     @Column(name = "gameName", nullable = false)
     private String gameName;
 
-    /** The minimum number of players required to play the game. */
+    /**
+     * The minimum number of players required to play the game.
+     */
     @Column(name = "minPlayers")
     private Integer minPlayers;
 
-    /** The maximum number of players allowed to play the game. */
+    /**
+     * The maximum number of players allowed to play the game.
+     */
     @Column(name = "maxPlayers")
     private Integer maxPlayers;
 
-    /** The user who added the game, if it was added by a user. */
+    /**
+     * The user who added the game, if it was added by a user.
+     */
     @ManyToOne
     @JoinColumn(name = "user_who_added")
     private User userWhoAdded;
