@@ -152,6 +152,15 @@ public class FamilyMembership {
         this.status = status;
     }
 
+    /**
+     * Compares this family membership with another object for equality.
+     *
+     * <p>Two family memberships are considered equal when their family, user and status
+     * match.</p>
+     *
+     * @param o the object to compare with this family membership
+     * @return true if the objects represent equal family memberships; false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -163,6 +172,11 @@ public class FamilyMembership {
         return (family.equals(familyMembership.family) && user.equals(familyMembership.user) && status.equals(familyMembership.status));
     }
 
+    /**
+     * Calculates a hash code using the family user and status.
+     *
+     * @return the hash code for this family membership
+     */
     @Override
     public int hashCode() {
         return Objects.hash(family, user, status);

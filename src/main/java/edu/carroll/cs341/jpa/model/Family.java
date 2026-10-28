@@ -42,14 +42,14 @@ public class Family {
     /**
      * The unique name assigned to the family.
      */
-    @Column(name = "familyName", nullable = false)
+    @Column(name = "family_name", nullable = false)
     private String familyName;
 
     /**
      * The user who administers the family.
      */
     @OneToOne
-    @JoinColumn(name = "familyAdmin", nullable = false, unique = true)
+    @JoinColumn(name = "family_admin", nullable = false, unique = true)
     private User familyAdmin;
 
     /**
@@ -141,6 +141,15 @@ public class Family {
         return builder.toString();
     }
 
+    /**
+     * Compares this family with another object for equality.
+     *
+     * <p>Two families are considered equal when their family name and family admin
+     * match.</p>
+     *
+     * @param o the object to compare with this family
+     * @return true if the objects represent equal families; false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -152,6 +161,11 @@ public class Family {
         return (familyName.equals(family.familyName) && familyAdmin.equals(family.familyAdmin));
     }
 
+    /**
+     * Calculates a hash code using the family name and the family admin.
+     *
+     * @return the hash code for this family
+     */
     @Override
     public int hashCode() {
         return Objects.hash(familyName, familyAdmin);

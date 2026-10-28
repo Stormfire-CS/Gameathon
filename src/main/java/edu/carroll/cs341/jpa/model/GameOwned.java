@@ -173,6 +173,15 @@ public class GameOwned {
         return builder.toString();
     }
 
+    /**
+     * Compares this game with another object for equality.
+     *
+     * <p>Two owned games are considered equal when their game, user and year produced
+     * match.</p>
+     *
+     * @param o the object to compare with this owned game
+     * @return true if the objects represent equal owned games; false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -184,6 +193,11 @@ public class GameOwned {
         return (game.equals(gameOwned.game) && user.equals(gameOwned.user) && yearProduced.equals(gameOwned.yearProduced));
     }
 
+    /**
+     * Calculates a hash code using the game, the user, and the year produced.
+     *
+     * @return the hash code for this owned game
+     */
     @Override
     public int hashCode() {
         return Objects.hash(game, user, yearProduced);

@@ -42,19 +42,19 @@ public class Game {
     /**
      * The name of the game.
      */
-    @Column(name = "gameName", nullable = false)
+    @Column(name = "game_name", nullable = false)
     private String gameName;
 
     /**
      * The minimum number of players required to play the game.
      */
-    @Column(name = "minPlayers")
+    @Column(name = "min_players")
     private Integer minPlayers;
 
     /**
      * The maximum number of players allowed to play the game.
      */
-    @Column(name = "maxPlayers")
+    @Column(name = "max_players")
     private Integer maxPlayers;
 
     /**
@@ -193,6 +193,15 @@ public class Game {
         return builder.toString();
     }
 
+    /**
+     * Compares this game with another object for equality.
+     *
+     * <p>Two games are considered equal when their game name user who added
+     * match.</p>
+     *
+     * @param o the object to compare with this game
+     * @return true if the objects represent equal games; false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -204,6 +213,11 @@ public class Game {
         return (gameName.equals(game.gameName) && Objects.equals(userWhoAdded, game.userWhoAdded));
     }
 
+    /**
+     * Calculates a hash code using the game name and the user who added.
+     *
+     * @return the hash code for this game
+     */
     @Override
     public int hashCode() {
         return Objects.hash(gameName, userWhoAdded);
