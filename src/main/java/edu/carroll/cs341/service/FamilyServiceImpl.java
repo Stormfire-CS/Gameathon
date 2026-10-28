@@ -178,7 +178,6 @@ public class FamilyServiceImpl implements FamilyService {
 
         // The creator automatically becomes an accepted member of the family.
         FamilyMembership membership = new FamilyMembership(family, user, ACCEPTED);
-
         membershipRepo.save(membership);
 
         user.setFamily(family);
@@ -318,7 +317,6 @@ public class FamilyServiceImpl implements FamilyService {
         // Verify that the requesting user is administering the family
         // associated with this membership request.
         Family family = user.getFamily();
-
         if (family == null || !family.getFamilyAdmin().equals(user)) {
             log.debug("acceptRequest: user '{}' is not the family admin", user.getUsername());
             return false;

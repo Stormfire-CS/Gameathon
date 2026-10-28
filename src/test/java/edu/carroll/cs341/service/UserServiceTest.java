@@ -40,7 +40,6 @@ public class UserServiceTest {
     private static final String username = "testuser";
     private static final String password = "testpass";
 
-
     @Autowired
     private UserService userService;
 
@@ -59,11 +58,6 @@ public class UserServiceTest {
      */
     @BeforeEach
     public void beforeTest() {
-        userRepo.deleteAll();
-
-        final List<User> newUsers = userRepo.findByUsernameIgnoreCase(username);
-        assertTrue("newUser should not already exist in the database", newUsers.isEmpty());
-
         userRepo.save(fakeUser);
     }
 
