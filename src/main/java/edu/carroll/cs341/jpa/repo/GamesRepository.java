@@ -32,7 +32,7 @@ public interface GamesRepository extends JpaRepository<Game, Long> {
      *
      * @param gameName the name of the game to check
      * @return {@code true} if a game with that name exists;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean existsByGameName(String gameName);
 
@@ -60,10 +60,10 @@ public interface GamesRepository extends JpaRepository<Game, Long> {
      * The results are ordered alphabetically by game name in ascending order.</p>
      *
      * @param userWhoAdded the user whose added games should
-     *                       be included alongside automatically populated games
+     *                     be included alongside automatically populated games
      * @return a list of automatically populated games and games added by
-     *         the specified user, ordered by game name; an empty list
-     *         if no matching games are found
+     * the specified user, ordered by game name; an empty list
+     * if no matching games are found
      */
     List<Game> findByUserWhoAddedIsNullOrUserWhoAddedOrderByGameNameAsc(User userWhoAdded);
 }

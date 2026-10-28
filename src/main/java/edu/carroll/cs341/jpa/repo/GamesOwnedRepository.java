@@ -33,7 +33,7 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
      *
      * @param user the user whose game ownership records are being retrieved
      * @return a list of game ownership records for the specified user;
-     *         an empty list if no matching records are found
+     * an empty list if no matching records are found
      */
     List<GameOwned> findByUser(User user);
 
@@ -50,7 +50,7 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
      *
      * @param users the list of users whose game ownership records are being retrieved
      * @return a list of matching game ownership records;
-     *         an empty list if no matching records are found
+     * an empty list if no matching records are found
      */
     List<GameOwned> findByUserIn(List<User> users);
 }

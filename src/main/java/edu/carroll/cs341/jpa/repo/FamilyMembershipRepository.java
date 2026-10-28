@@ -29,10 +29,10 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
     /**
      * Finds memberships belonging to a specified user with the given status.
      *
-     * @param user the user
+     * @param user   the user
      * @param status the membership status to search for
      * @return a list of memberships matching the user and status;
-     *         an empty list if no matches are found
+     * an empty list if no matches are found
      */
     List<FamilyMembership> findByUserAndStatus(User user, String status);
 
@@ -42,7 +42,7 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
      * @param family the family
      * @param status the membership status to search for
      * @return a list of memberships matching the family and status;
-     *         an empty list if no matches are found
+     * an empty list if no matches are found
      */
     List<FamilyMembership> findByFamilyAndStatus(Family family, String status);
 
@@ -50,7 +50,7 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
      * Finds a membership associated with a specific family and user.
      *
      * @param family the family
-     * @param user the user
+     * @param user   the user
      * @return the matching membership, or {@code null} if no match is found
      */
     FamilyMembership findByFamilyAndUser(Family family, User user);

@@ -34,7 +34,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      *
      * @param username the username to search for
      * @return a list of matching user records; an empty list if no matches
-     *         are found
+     * are found
      */
     List<User> findByUsernameIgnoreCase(String username);
 
