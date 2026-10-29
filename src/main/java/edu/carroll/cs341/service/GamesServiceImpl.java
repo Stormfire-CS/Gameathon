@@ -4,6 +4,7 @@ import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
 import edu.carroll.cs341.jpa.repo.UserRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,13 @@ public class GamesServiceImpl implements GamesService {
      */
     @Override
     public List<Game> getAvailableGames(User user) {
-        log.debug("getAvailableGames: getting games for the owner {}", user.getUsername());
+
+        log.info("getAvailableGames: getting games for the owner {}", user);
+
+        // Ensure user is not null
+        if (user == null) {
+            log.error("getAvailableGames: user was null");
+        }
 
         // Retrieve globally available games along with those added by this owner.
         List<Game> games = gamesRepo.findByUserWhoAddedIsNullOrUserWhoAddedOrderByGameNameAsc(user);
@@ -81,23 +88,24 @@ public class GamesServiceImpl implements GamesService {
      * @param minPlayers the minimum number of players supported by the game
      * @param maxPlayers the maximum number of players supported by the game
      */
+    @Transactional
     @Override
     public boolean addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers) {
-        if (gameName == null) {
-            log.debug("addGame: game name was null");
-            return false;
-        }
+
+        log.debug("addGame: user: {} attempted to add game: {}", user, gameName);
 
         if (user == null) {
-            log.debug("addGame: user was null");
+            log.error("addGame: user was null");
             return false;
         }
 
-        log.debug("addGame: user: {} attempted to add game: {}", user.getUsername(), gameName);
+        if (gameName == null) {
+            log.error("addGame: game name was null");
+            return false;
+        }
 
         // Prevent adding another catalog entry with an existing game name.
         Game game = gamesRepo.findByGameNameIgnoreCase(gameName);
-
         if (game != null) {
             if (game.getUserWhoAdded() == null || game.getUserWhoAdded().equals(user)) {
                 log.debug("addGame: game {} already exists and is available to user {}", gameName, user.getUsername());
