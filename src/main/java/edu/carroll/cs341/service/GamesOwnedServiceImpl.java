@@ -1,10 +1,15 @@
 package edu.carroll.cs341.service;
 
-import edu.carroll.cs341.jpa.model.*;
+import edu.carroll.cs341.jpa.model.Family;
+import edu.carroll.cs341.jpa.model.FamilyMembership;
+import edu.carroll.cs341.jpa.model.Game;
+import edu.carroll.cs341.jpa.model.GameOwned;
+import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.FamilyMembershipRepository;
 import edu.carroll.cs341.jpa.repo.GamesOwnedRepository;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
 import edu.carroll.cs341.jpa.repo.UserRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,9 +19,9 @@ import java.util.List;
 
 /**
  * Implements the service operations for managing games owned by users.
- * This class handles adding games to a user's collection and retrieving
- * the games associated with a particular username.
- *
+ * This class handles adding and removing games from a user's collection
+ * and retrieving games associated with a user or family.
+ * <p>
  * The service uses repositories to look up user accounts and game records,
  * and to persist and retrieve ownership records. It also logs relevant
  * events to assist with debugging and monitoring service operations.
@@ -31,18 +36,29 @@ import java.util.List;
 @Service
 public class GamesOwnedServiceImpl implements GamesOwnedService {
 
-    /** Logger used to record service activity and debugging information. */
+    /**
+     * Logger used to record service activity and debugging information.
+     */
     private static final Logger log = LoggerFactory.getLogger(GamesOwnedServiceImpl.class);
 
-    /** Repository for saving and retrieving user-owned game records. */
+    /**
+     * Repository for saving and retrieving user-owned game records.
+     */
     private final GamesOwnedRepository gamesOwnedRepo;
 
-    /** Repository for looking up user accounts. */
+    /**
+     * Repository for looking up user accounts.
+     */
     private final UserRepository userRepo;
 
-    /** Repository for looking up games in the game catalog. */
+    /**
+     * Repository for looking up games in the game catalog.
+     */
     private final GamesRepository gamesRepo;
 
+    /**
+     * Repository for retrieving family membership records.
+     */
     private final FamilyMembershipRepository membershipRepo;
 
     /**
@@ -50,8 +66,9 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      * game ownership records.
      *
      * @param gamesOwnedRepo repository for user-owned games
-     * @param userRepo repository for user account information
-     * @param gamesRepo repository for game catalog records
+     * @param userRepo       repository for user account information
+     * @param gamesRepo      repository for game catalog records
+     * @param membershipRepo repository for family membership records
      */
     public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, UserRepository userRepo, GamesRepository gamesRepo, FamilyMembershipRepository membershipRepo) {
         this.gamesOwnedRepo = gamesOwnedRepo;
@@ -62,22 +79,36 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
 
     /**
      * Adds a game to the specified user's collection.
-     * If the username does not identify exactly one user, or the game
-     * cannot be found, the operation ends without saving an ownership record.
+     * If the game cannot be found, the operation ends without saving
+     * an ownership record.
      *
-     * @param user the username of the person adding the game
-     * @param gameID the ID of the game to add
+     * @param user         the user adding the game
+     * @param gameID       the ID of the game to add
      * @param yearProduced the year the owned game was produced
+     * @return true if the game was added successfully, or false if the game
+     * could not be found
      */
+    @Transactional
     @Override
     public boolean addGameToCollection(User user, Long gameID, Integer yearProduced) {
-        log.debug("addGameToCollection: user {} attempted to add game with ID: {}", user.getUsername(), gameID);
+        log.info("addGameToCollection: user {} attempted to add game with ID: {}", user, gameID);
+
+        // Verify the user exists
+        if (user == null) {
+            log.error("addGameToCollection: user was null");
+            return false;
+        }
+
+        // Verify that a gameID was given
+        if (gameID == null) {
+            log.error("addGameToCollection: gameID was null");
+            return false;
+        }
 
         // Verify that the requested game exists before associating it with the user.
         Game game = gamesRepo.findByGameID(gameID);
-
         if (game == null) {
-            log.debug("addGame: game {} was not found", gameID);
+            log.debug("addGameToCollection: game {} was not found", gameID);
             return false;
         }
 
@@ -90,23 +121,24 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         // Persist the ownership record so it can be retrieved later.
         gamesOwnedRepo.save(gameOwned);
 
-        log.info("addGameToCollection: user {} added game {} with owned game ID: {} to their collection", user.getUsername(), game.getGameName(), gameOwned.getGameOwnedID());
+        log.debug("addGameToCollection: user {} added game {} with owned game ID: {} to their collection", user, game, gameOwned.getGameOwnedID());
         return true;
     }
 
     /**
-     * Retrieves all game ownership records associated with a username.
-     * If the username does not identify exactly one user, an empty list
-     * is returned.
+     * Retrieves all game ownership records associated with a user.
      *
-     * @param user the username whose owned games are being retrieved
-     * @return a list of games owned by the user, or an empty list if the
-     * user cannot be uniquely identified
+     * @param user the user whose owned games are being retrieved
+     * @return a list of games owned by the user
      */
     @Override
     public List<GameOwned> getGamesOwnedByUsername(User user) {
-        log.debug("getGamesOwnedByUsername: getting games for {}", user.getUsername());
+        log.info("getGamesOwnedByUsername: getting games for {}", user);
 
+        if (user == null) {
+            log.error("getGamesOwnedByUsername: user was null");
+            return new LinkedList<>();
+        }
         // Use the user's database ID to retrieve their ownership records.
         List<GameOwned> games = gamesOwnedRepo.findByUser(user);
 
@@ -114,31 +146,67 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         return games;
     }
 
+    /**
+     * Removes a game ownership record from the specified user's collection.
+     * The record is only removed if it exists and belongs to the specified user.
+     *
+     * @param user        the user requesting the removal
+     * @param gameOwnedID the ID of the game ownership record to remove
+     * @return true if the record was removed successfully, or false if the
+     * record was not found or does not belong to the specified user
+     */
+    @Transactional
+    @Override
     public boolean removeGameFromCollection(User user, Long gameOwnedID) {
-        log.debug("removeGameFromCollection: user {} attempted to remove game {} from collection", user.getUsername(), gameOwnedID);
+        log.info("removeGameFromCollection: user {} attempted to remove game {} from collection", user, gameOwnedID);
+
+        // Verify the user exists
+        if (user == null) {
+            log.error("removeGameFromCollection: user was null");
+            return false;
+        }
+
+        // Verify that a gameOwnedID was given
+        if (gameOwnedID == null) {
+            log.error("removeGameFromCollection: gameOwnedID was null");
+            return false;
+        }
 
         // Verify that the requested game exists before removing it from the database.
         GameOwned gameOwned = gamesOwnedRepo.findByGameOwnedID(gameOwnedID);
 
         if (gameOwned == null) {
-            log.debug("removeGameFromCollection: game {} was not found", gameOwnedID);
+            log.warn("removeGameFromCollection: game {} was not found", gameOwnedID);
             return false;
         }
 
         // Verify that the user requesting to remove the game from their collection is the owner of the game.
         if (!gameOwned.getUser().equals(user)) {
-            log.debug("removeGameFromCollection: game {} is not owned by {}, is owned by {}", gameOwnedID, user.getUsername(), gameOwned.getUser().getUsername());
+            log.warn("removeGameFromCollection: game {} is not owned by {}, is owned by {}", gameOwnedID, user, gameOwned.getUser());
+            return false;
         }
 
         gamesOwnedRepo.delete(gameOwned);
 
-        log.info("removeGameFromCollection: user {} removed game {} from their collection", user.getUsername(), gameOwned.getGame().getGameName());
+        log.debug("removeGameFromCollection: user {} removed game {} from their collection", user, gameOwned.getGame());
         return true;
     }
 
+    /**
+     * Retrieves all game ownership records belonging to accepted members
+     * of the specified family.
+     *
+     * @param family the family whose members' owned games are being retrieved
+     * @return a list of games owned by accepted family members, or an empty
+     * list if the family is null
+     */
     @Override
     public List<GameOwned> getGamesOwnedByFamily(Family family) {
+        log.info("getGamesOwnedByFamily: attempting to retrieve games for family: {}", family);
+
+        // Ensures the family is not null
         if (family == null) {
+            log.error("getGamesOwnedByFamily: family was null");
             return new LinkedList<>();
         }
 
