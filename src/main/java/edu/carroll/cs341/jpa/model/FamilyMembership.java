@@ -10,6 +10,8 @@ import jakarta.persistence.Table;
 
 import java.util.Objects;
 
+import static org.aspectj.util.LangUtil.EOL;
+
 /**
  * Represents a user's membership or join request for a family.
  *
@@ -150,6 +152,24 @@ public class FamilyMembership {
      */
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    /**
+     * Returns a readable representation of the family membership.
+     *
+     * <p>The representation includes the membership ID, the family and user associated with it,
+     * and the status of the membership.</p>
+     *
+     * @return a string containing the family memberships identifying information
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Family membership: membership ID = ").append(membershipID).append(EOL);
+        builder.append("family = ").append(family);
+        builder.append("user = ").append(user);
+        builder.append("status = ").append(status);
+        return builder.toString();
     }
 
     /**

@@ -194,7 +194,6 @@ public class User {
         StringBuilder builder = new StringBuilder();
         builder.append("Login @ ").append(super.toString()).append("[").append(EOL);
         builder.append(TAB).append("username=").append(username).append(EOL);
-        builder.append(TAB).append("hashedPassword=").append("****").append(EOL);
         builder.append("]").append(EOL);
         return builder.toString();
     }
