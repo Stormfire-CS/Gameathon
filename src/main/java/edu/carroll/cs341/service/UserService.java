@@ -37,6 +37,6 @@ public interface UserService {
      * @param password2 the password entered for confirmation
      * @return {@code true} if registration succeeds; {@code false} otherwise
      */
-     User validateNewUser(String username, String password1, String password2);
+     User newUser(String username, String password1, String password2);
 
 }

@@ -12,7 +12,6 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Handles web requests related to creating new user accounts.
@@ -81,7 +80,7 @@ public class SignUpController {
             return "signUpPage";
         }
 
-        User user = userService.validateNewUser(createUserForm.getUsername(), createUserForm.getPassword1(), createUserForm.getPassword2());
+        User user = userService.newUser(createUserForm.getUsername(), createUserForm.getPassword1(), createUserForm.getPassword2());
 
         // Check whether the username is available and the passwords match.
         if (user == null) {

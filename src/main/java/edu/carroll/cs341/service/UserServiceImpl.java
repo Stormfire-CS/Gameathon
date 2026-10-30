@@ -2,6 +2,7 @@ package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.UserRepository;
+import jakarta.transaction.Transactional;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,8 +87,9 @@ public class UserServiceImpl implements UserService {
      * @return {@code true} if the account was registered successfully;
      * {@code false} if the username already exists or the passwords differ
      */
+    @Transactional
     @Override
-    public User validateNewUser(String username, String password1, String password2) {
+    public User newUser(String username, String password1, String password2) {
         log.debug("validateNewUser: attempting to register username '{}'", username);
 
         if (username == null) {
