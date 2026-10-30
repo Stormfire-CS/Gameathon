@@ -1,0 +1,749 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>C:/Users/maxko/git/Gameathon/src/main/java/edu/carroll/cs341</OriginalElement>
+  <nodes>
+    <node x="2456.25" y="454.5">edu.carroll.cs341.web.controller.OwnerPageController</node>
+    <node x="3084.75" y="250.0">edu.carroll.cs341.jpa.model.Game</node>
+    <node x="5555.583333333333" y="1841.5">edu.carroll.cs341.web.controller.IndexController</node>
+    <node x="358.0" y="1781.0">edu.carroll.cs341.web.controller.EditCollectionController</node>
+    <node x="2961.5833333333335" y="1817.0">edu.carroll.cs341.jpa.initializer.GameDataInit</node>
+    <node x="4523.583333333333" y="1841.5">edu.carroll.cs341.GameathonApplication</node>
+    <node x="-287.0" y="1841.5">edu.carroll.cs341.web.controller.LogoutController</node>
+    <node x="1077.25" y="1394.5">edu.carroll.cs341.web.controller.CreateFamilyController</node>
+    <node x="1212.75" y="358.0">edu.carroll.cs341.web.form.CreateUserForm</node>
+    <node x="-45.0" y="1601.0">edu.carroll.cs341.service.FamilyServiceImpl</node>
+    <node x="1893.75" y="1074.0">edu.carroll.cs341.web.controller.LoginController</node>
+    <node x="3029.75" y="1086.5">edu.carroll.cs341.service.GamesService</node>
+    <node x="841.5" y="-201.0">edu.carroll.cs341.jpa.model.Family</node>
+    <node x="1355.25" y="1817.0">edu.carroll.cs341.web.controller.JoinFamilyController</node>
+    <node x="611.75" y="966.5">edu.carroll.cs341.service.FamilyService</node>
+    <node x="3002.75" y="1395.0">edu.carroll.cs341.jpa.repo.GamesOwnedRepository</node>
+    <node x="3730.75" y="990.0">edu.carroll.cs341.web.form.CreateGameForm</node>
+    <node x="802.0" y="1781.0">edu.carroll.cs341.web.controller.EditFamilyController</node>
+    <node x="1769.75" y="442.5">edu.carroll.cs341.service.UserService</node>
+    <node x="1455.75" y="453.5">edu.carroll.cs341.web.controller.HomeController</node>
+    <node x="613.75" y="285.0">edu.carroll.cs341.jpa.model.FamilyMembership</node>
+    <node x="95.75" y="1074.5">edu.carroll.cs341.jpa.repo.FamilyMembershipRepository</node>
+    <node x="931.75" y="202.0">edu.carroll.cs341.jpa.model.User</node>
+    <node x="5205.583333333333" y="1829.0">edu.carroll.cs341.web.controller.ViewGamesController</node>
+    <node x="3402.75" y="930.0">edu.carroll.cs341.jpa.model.GameOwned</node>
+    <node x="1034.75" y="1074.0">edu.carroll.cs341.web.controller.SignUpController</node>
+    <node x="4160.583333333333" y="1805.0">edu.carroll.cs341.web.controller.FamilyPageController</node>
+    <node x="3223.5833333333335" y="1745.0">edu.carroll.cs341.service.GamesOwnedServiceImpl</node>
+    <node x="3647.583333333333" y="1817.0">edu.carroll.cs341.web.controller.AddGameController</node>
+    <node x="12.166666666666686" y="454.5">edu.carroll.cs341.jpa.repo.FamiliesRepository</node>
+    <node x="4781.583333333333" y="1805.5">edu.carroll.cs341.service.GamesOwnedService</node>
+    <node x="1725.25" y="1805.0">edu.carroll.cs341.service.UserServiceImpl</node>
+    <node x="2220.25" y="394.0">edu.carroll.cs341.web.form.LoginForm</node>
+    <node x="2588.5833333333335" y="1793.0">edu.carroll.cs341.service.GamesServiceImpl</node>
+    <node x="1505.75" y="1098.5">edu.carroll.cs341.jpa.repo.UserRepository</node>
+    <node x="2358.75" y="1062.5">edu.carroll.cs341.jpa.repo.GamesRepository</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="edu.carroll.cs341.web.controller.EditCollectionController" target="edu.carroll.cs341.service.GamesService" relationship="TO_ONE">
+      <point x="197.0" y="-0.0" />
+      <point x="787.0" y="1873.0" />
+      <point x="787.0" y="1771.0" />
+      <point x="2302.75" y="1771.0" />
+      <point x="2302.75" y="1531.0" />
+      <point x="3347.75" y="1531.0" />
+      <point x="3347.75" y="1188.5" />
+      <point x="3287.0" y="1188.5" />
+      <point x="85.75" y="43.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.jpa.model.Game" relationship="DEPENDENCY">
+      <point x="98.5" y="-128.0" />
+      <point x="3519.0833333333335" y="1735.0" />
+      <point x="555.75" y="1735.0" />
+      <point x="555.75" y="1561.0" />
+      <point x="3655.75" y="1561.0" />
+      <point x="3655.75" y="920.0" />
+      <point x="3201.25" y="920.0" />
+      <point x="0.0" y="236.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.AddGameController" target="edu.carroll.cs341.web.form.CreateGameForm" relationship="DEPENDENCY">
+      <point x="120.75" y="-56.0" />
+      <point x="4009.833333333333" y="1807.0" />
+      <point x="3994.25" y="1807.0" />
+      <point x="3994.25" y="1440.5" />
+      <point x="3844.75" y="1440.5" />
+      <point x="0.0" y="140.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.CreateFamilyController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="82.0" y="-56.0" />
+      <point x="1323.25" y="1374.5" />
+      <point x="1490.75" y="1374.5" />
+      <point x="1490.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.jpa.model.FamilyMembership" relationship="DEPENDENCY">
+      <point x="98.5" y="-128.0" />
+      <point x="3519.0833333333335" y="1735.0" />
+      <point x="555.75" y="1735.0" />
+      <point x="555.75" y="860.0" />
+      <point x="876.25" y="860.0" />
+      <point x="876.25" y="810.0" />
+      <point x="727.75" y="810.0" />
+      <point x="0.0" y="201.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.UserServiceImpl" target="edu.carroll.cs341.jpa.repo.UserRepository" relationship="TO_ONE">
+      <point x="-89.0" y="-68.0" />
+      <point x="1769.75" y="1328.5" />
+      <point x="141.5" y="1328.5" />
+      <point x="141.5" y="1318.5" />
+      <point x="1674.75" y="1318.5" />
+      <point x="0.0" y="31.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.jpa.repo.GamesOwnedRepository" relationship="TO_ONE">
+      <point x="-98.5" y="-128.0" />
+      <point x="3322.0833333333335" y="1591.0" />
+      <point x="318.25" y="1591.0" />
+      <point x="318.25" y="1521.0" />
+      <point x="3167.75" y="1521.0" />
+      <point x="0.0" y="55.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.jpa.repo.GamesRepository" relationship="TO_ONE">
+      <point x="-98.5" y="-128.0" />
+      <point x="3322.0833333333335" y="1591.0" />
+      <point x="318.25" y="1591.0" />
+      <point x="318.25" y="1521.0" />
+      <point x="2282.75" y="1521.0" />
+      <point x="2282.75" y="1385.0" />
+      <point x="2645.75" y="1385.0" />
+      <point x="0.0" y="67.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.GamesOwnedRepository" target="edu.carroll.cs341.jpa.model.GameOwned" relationship="DEPENDENCY">
+      <point x="0.0" y="-55.5" />
+      <point x="3167.75" y="1355.0" />
+      <point x="3521.75" y="1355.0" />
+      <point x="0.0" y="200.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyServiceImpl" target="edu.carroll.cs341.jpa.repo.UserRepository" relationship="TO_ONE">
+      <point x="0.0" y="-272.0" />
+      <point x="141.5" y="1318.5" />
+      <point x="1674.75" y="1318.5" />
+      <point x="0.0" y="31.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.SignUpController" target="edu.carroll.cs341.web.form.CreateUserForm" relationship="DEPENDENCY">
+      <point x="-110.25" y="-56.0" />
+      <point x="1145.0" y="900.0" />
+      <point x="1319.25" y="900.0" />
+      <point x="0.0" y="128.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.EditCollectionController" target="edu.carroll.cs341.service.GamesOwnedService" relationship="TO_ONE">
+      <point x="197.0" y="-0.0" />
+      <point x="767.0" y="1873.0" />
+      <point x="767.0" y="2021.0" />
+      <point x="4766.583333333333" y="2021.0" />
+      <point x="4766.583333333333" y="1873.0" />
+      <point x="-197.0" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.jpa.repo.UserRepository" relationship="TO_ONE">
+      <point x="-98.5" y="-128.0" />
+      <point x="3322.0833333333335" y="1591.0" />
+      <point x="318.25" y="1591.0" />
+      <point x="318.25" y="1521.0" />
+      <point x="1630.25" y="1521.0" />
+      <point x="1630.25" y="1328.5" />
+      <point x="141.5" y="1328.5" />
+      <point x="141.5" y="1318.5" />
+      <point x="1674.75" y="1318.5" />
+      <point x="0.0" y="31.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.LoginController" target="edu.carroll.cs341.service.UserService" relationship="TO_ONE">
+      <point x="-98.5" y="-56.0" />
+      <point x="89.0" y="43.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.ViewGamesController" target="edu.carroll.cs341.service.GamesOwnedService" relationship="TO_ONE">
+      <point x="-80.0" y="-44.0" />
+      <point x="5285.583333333333" y="1785.5" />
+      <point x="4766.583333333333" y="1785.5" />
+      <point x="4766.583333333333" y="1873.0" />
+      <point x="-197.0" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.UserRepository" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-31.5" />
+      <point x="1674.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.GamesOwnedRepository" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-55.5" />
+      <point x="3167.75" y="1365.0" />
+      <point x="3014.75" y="1365.0" />
+      <point x="3014.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.GamesRepository" target="edu.carroll.cs341.jpa.model.Game" relationship="DEPENDENCY">
+      <point x="0.0" y="-67.5" />
+      <point x="2645.75" y="732.0" />
+      <point x="3201.25" y="732.0" />
+      <point x="0.0" y="236.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.FamilyMembershipRepository" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-55.5" />
+      <point x="318.25" y="1064.5" />
+      <point x="535.25" y="1064.5" />
+      <point x="535.25" y="850.0" />
+      <point x="855.25" y="850.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.EditCollectionController" target="edu.carroll.cs341.service.UserService" relationship="TO_ONE">
+      <point x="197.0" y="-0.0" />
+      <point x="787.0" y="1873.0" />
+      <point x="787.0" y="1771.0" />
+      <point x="2302.75" y="1771.0" />
+      <point x="2302.75" y="1054.0" />
+      <point x="1992.25" y="1054.0" />
+      <point x="89.0" y="43.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesServiceImpl" target="edu.carroll.cs341.service.GamesService" relationship="REALIZATION">
+      <point x="114.33333333333334" y="-80.0" />
+      <point x="2874.416666666667" y="1581.0" />
+      <point x="2987.75" y="1581.0" />
+      <point x="2987.75" y="1375.0" />
+      <point x="3115.5" y="1375.0" />
+      <point x="-85.75" y="43.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.EditFamilyController" target="edu.carroll.cs341.service.FamilyService" relationship="TO_ONE">
+      <point x="86.75" y="-92.0" />
+      <point x="1062.25" y="1384.5" />
+      <point x="1159.25" y="1384.5" />
+      <point x="1159.25" y="1308.5" />
+      <point x="891.5" y="1308.5" />
+      <point x="93.25" y="163.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.FamilyPageController" target="edu.carroll.cs341.service.FamilyService" relationship="TO_ONE">
+      <point x="156.5" y="-0.0" />
+      <point x="4488.583333333333" y="1873.0" />
+      <point x="4488.583333333333" y="1551.0" />
+      <point x="1420.25" y="1551.0" />
+      <point x="1420.25" y="1384.5" />
+      <point x="1159.25" y="1384.5" />
+      <point x="1159.25" y="1308.5" />
+      <point x="891.5" y="1308.5" />
+      <point x="93.25" y="163.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyServiceImpl" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="-124.33333333333337" y="-272.0" />
+      <point x="17.166666666666686" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="98.5" y="-128.0" />
+      <point x="3519.0833333333335" y="1735.0" />
+      <point x="555.75" y="1735.0" />
+      <point x="555.75" y="1561.0" />
+      <point x="2343.75" y="1561.0" />
+      <point x="2343.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.EditFamilyController" target="edu.carroll.cs341.jpa.model.FamilyMembership" relationship="DEPENDENCY">
+      <point x="-86.75" y="-92.0" />
+      <point x="888.75" y="1460.5" />
+      <point x="596.75" y="1460.5" />
+      <point x="596.75" y="860.0" />
+      <point x="876.25" y="860.0" />
+      <point x="876.25" y="810.0" />
+      <point x="727.75" y="810.0" />
+      <point x="0.0" y="201.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.UserService" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="-89.0" y="43.5" />
+      <point x="1814.25" y="790.0" />
+      <point x="916.75" y="790.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.FamilyPageController" target="edu.carroll.cs341.service.GamesOwnedService" relationship="TO_ONE">
+      <point x="156.5" y="-0.0" />
+      <point x="4508.583333333333" y="1873.0" />
+      <point x="4508.583333333333" y="1795.5" />
+      <point x="4766.583333333333" y="1795.5" />
+      <point x="4766.583333333333" y="1873.0" />
+      <point x="-197.0" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.AddGameController" target="edu.carroll.cs341.service.GamesService" relationship="TO_ONE">
+      <point x="-120.75" y="-56.0" />
+      <point x="3768.333333333333" y="1735.0" />
+      <point x="3615.75" y="1735.0" />
+      <point x="3615.75" y="1365.0" />
+      <point x="3347.75" y="1365.0" />
+      <point x="3347.75" y="1188.5" />
+      <point x="3287.0" y="1188.5" />
+      <point x="85.75" y="43.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.GamesRepository" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-67.5" />
+      <point x="2645.75" y="830.0" />
+      <point x="855.25" y="830.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyServiceImpl" target="edu.carroll.cs341.jpa.model.FamilyMembership" relationship="DEPENDENCY">
+      <point x="-124.33333333333337" y="-272.0" />
+      <point x="17.166666666666686" y="1460.5" />
+      <point x="37.166666666666686" y="1460.5" />
+      <point x="37.166666666666686" y="860.0" />
+      <point x="876.25" y="860.0" />
+      <point x="876.25" y="810.0" />
+      <point x="727.75" y="810.0" />
+      <point x="0.0" y="201.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyServiceImpl" target="edu.carroll.cs341.jpa.model.Family" relationship="DEPENDENCY">
+      <point x="-124.33333333333337" y="-272.0" />
+      <point x="17.166666666666686" y="1460.5" />
+      <point x="-2.8333333333333144" y="1460.5" />
+      <point x="-2.8333333333333144" y="147.0" />
+      <point x="896.75" y="147.0" />
+      <point x="-55.25" y="164.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedService" target="edu.carroll.cs341.jpa.model.GameOwned" relationship="DEPENDENCY">
+      <point x="0.0" y="-67.5" />
+      <point x="4978.583333333333" y="1775.5" />
+      <point x="3675.75" y="1775.5" />
+      <point x="3675.75" y="1460.5" />
+      <point x="3635.75" y="1460.5" />
+      <point x="3635.75" y="1345.0" />
+      <point x="3521.75" y="1345.0" />
+      <point x="0.0" y="200.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.jpa.model.Family" relationship="DEPENDENCY">
+      <point x="98.5" y="-128.0" />
+      <point x="3519.0833333333335" y="1735.0" />
+      <point x="555.75" y="1735.0" />
+      <point x="555.75" y="1561.0" />
+      <point x="4014.75" y="1561.0" />
+      <point x="4014.75" y="147.0" />
+      <point x="896.75" y="147.0" />
+      <point x="-55.25" y="164.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.AddGameController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="120.75" y="-56.0" />
+      <point x="4009.833333333333" y="1807.0" />
+      <point x="3994.25" y="1807.0" />
+      <point x="3994.25" y="1765.5" />
+      <point x="3973.75" y="1765.5" />
+      <point x="3973.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.LoginController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="98.5" y="-56.0" />
+      <point x="2189.25" y="1064.0" />
+      <point x="2323.25" y="1064.0" />
+      <point x="2323.25" y="840.0" />
+      <point x="855.25" y="840.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesServiceImpl" target="edu.carroll.cs341.jpa.repo.UserRepository" relationship="TO_ONE">
+      <point x="-114.33333333333337" y="-80.0" />
+      <point x="2645.75" y="1581.0" />
+      <point x="2625.75" y="1581.0" />
+      <point x="2625.75" y="1328.5" />
+      <point x="141.5" y="1328.5" />
+      <point x="141.5" y="1318.5" />
+      <point x="1674.75" y="1318.5" />
+      <point x="0.0" y="31.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesService" target="edu.carroll.cs341.jpa.model.Game" relationship="DEPENDENCY">
+      <point x="0.0" y="-43.5" />
+      <point x="0.0" y="236.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.LoginController" target="edu.carroll.cs341.web.form.LoginForm" relationship="DEPENDENCY">
+      <point x="98.5" y="-56.0" />
+      <point x="2189.25" y="1064.0" />
+      <point x="2323.25" y="1064.0" />
+      <point x="0.0" y="92.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.ViewGamesController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="80.0" y="-44.0" />
+      <point x="5445.583333333333" y="1460.5" />
+      <point x="4296.083333333333" y="1460.5" />
+      <point x="4296.083333333333" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.JoinFamilyController" target="edu.carroll.cs341.service.FamilyService" relationship="TO_ONE">
+      <point x="-85.0" y="-56.0" />
+      <point x="1440.25" y="1384.5" />
+      <point x="1159.25" y="1384.5" />
+      <point x="1159.25" y="1308.5" />
+      <point x="891.5" y="1308.5" />
+      <point x="93.25" y="163.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.UserServiceImpl" target="edu.carroll.cs341.service.UserService" relationship="REALIZATION">
+      <point x="0.0" y="-68.0" />
+      <point x="1858.75" y="900.0" />
+      <point x="1903.25" y="900.0" />
+      <point x="0.0" y="43.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.Family" target="edu.carroll.cs341.jpa.model.User" relationship="TO_ONE">
+      <point x="55.25" y="164.0" />
+      <point x="1007.25" y="137.0" />
+      <point x="1057.25" y="137.0" />
+      <point x="0.0" y="-284.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.User" target="edu.carroll.cs341.jpa.model.Family" relationship="TO_ONE">
+      <point x="0.0" y="-284.0" />
+      <point x="1057.25" y="167.0" />
+      <point x="1007.25" y="167.0" />
+      <point x="55.25" y="164.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.FamilyMembership" target="edu.carroll.cs341.jpa.model.User" relationship="TO_ONE">
+      <point x="114.0" y="-0.0" />
+      <point x="876.75" y="486.0" />
+      <point x="876.75" y="187.0" />
+      <point x="1057.25" y="187.0" />
+      <point x="0.0" y="-284.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.GameOwned" target="edu.carroll.cs341.jpa.model.User" relationship="TO_ONE">
+      <point x="0.0" y="-200.0" />
+      <point x="3521.75" y="742.0" />
+      <point x="3500.75" y="742.0" />
+      <point x="3500.75" y="157.0" />
+      <point x="1057.25" y="157.0" />
+      <point x="0.0" y="-284.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesServiceImpl" target="edu.carroll.cs341.jpa.repo.GamesRepository" relationship="TO_ONE">
+      <point x="-114.33333333333337" y="-80.0" />
+      <point x="0.0" y="67.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.SignUpController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="-110.25" y="-56.0" />
+      <point x="1145.0" y="870.0" />
+      <point x="855.25" y="870.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.service.GamesOwnedService" relationship="REALIZATION">
+      <point x="0.0" y="128.0" />
+      <point x="3420.5833333333335" y="2011.0" />
+      <point x="4978.583333333333" y="2011.0" />
+      <point x="0.0" y="67.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.FamilyMembershipRepository" target="edu.carroll.cs341.jpa.model.Family" relationship="DEPENDENCY">
+      <point x="0.0" y="-55.5" />
+      <point x="318.25" y="1064.5" />
+      <point x="535.25" y="1064.5" />
+      <point x="535.25" y="697.0" />
+      <point x="598.75" y="697.0" />
+      <point x="598.75" y="147.0" />
+      <point x="896.75" y="147.0" />
+      <point x="-55.25" y="164.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyServiceImpl" target="edu.carroll.cs341.jpa.repo.FamiliesRepository" relationship="TO_ONE">
+      <point x="0.0" y="-272.0" />
+      <point x="141.5" y="1460.5" />
+      <point x="80.75" y="1460.5" />
+      <point x="80.75" y="900.0" />
+      <point x="136.66666666666669" y="900.0" />
+      <point x="0.0" y="31.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.UserServiceImpl" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="89.0" y="-68.0" />
+      <point x="1947.75" y="1581.0" />
+      <point x="1878.75" y="1581.0" />
+      <point x="1878.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.FamiliesRepository" target="edu.carroll.cs341.jpa.model.Family" relationship="DEPENDENCY">
+      <point x="124.5" y="-0.0" />
+      <point x="558.75" y="486.0" />
+      <point x="558.75" y="147.0" />
+      <point x="896.75" y="147.0" />
+      <point x="-55.25" y="164.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.EditFamilyController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="-86.75" y="-92.0" />
+      <point x="888.75" y="1460.5" />
+      <point x="999.75" y="1460.5" />
+      <point x="999.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.jpa.repo.FamilyMembershipRepository" relationship="TO_ONE">
+      <point x="-98.5" y="-128.0" />
+      <point x="3322.0833333333335" y="1591.0" />
+      <point x="318.25" y="1591.0" />
+      <point x="0.0" y="55.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyServiceImpl" target="edu.carroll.cs341.jpa.repo.FamilyMembershipRepository" relationship="TO_ONE">
+      <point x="0.0" y="-272.0" />
+      <point x="141.5" y="1460.5" />
+      <point x="161.5" y="1460.5" />
+      <point x="161.5" y="1440.5" />
+      <point x="318.25" y="1440.5" />
+      <point x="0.0" y="55.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.Game" target="edu.carroll.cs341.jpa.model.User" relationship="TO_ONE">
+      <point x="-116.5" y="-0.0" />
+      <point x="2904.0" y="486.0" />
+      <point x="2904.0" y="177.0" />
+      <point x="1057.25" y="177.0" />
+      <point x="0.0" y="-284.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.FamiliesRepository" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="124.5" y="-0.0" />
+      <point x="578.75" y="486.0" />
+      <point x="578.75" y="177.0" />
+      <point x="916.75" y="177.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.HomeController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="32.5" />
+      <point x="1597.75" y="780.0" />
+      <point x="916.75" y="780.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesServiceImpl" target="edu.carroll.cs341.jpa.model.Game" relationship="DEPENDENCY">
+      <point x="0.0" y="-80.0" />
+      <point x="2760.0833333333335" y="1783.0" />
+      <point x="2947.75" y="1783.0" />
+      <point x="2947.75" y="1571.0" />
+      <point x="2967.75" y="1571.0" />
+      <point x="2967.75" y="920.0" />
+      <point x="3201.25" y="920.0" />
+      <point x="0.0" y="236.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.FamilyPageController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-68.0" />
+      <point x="4317.083333333333" y="1470.5" />
+      <point x="3715.75" y="1470.5" />
+      <point x="3715.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.repo.FamilyMembershipRepository" target="edu.carroll.cs341.jpa.model.FamilyMembership" relationship="DEPENDENCY">
+      <point x="0.0" y="-55.5" />
+      <point x="318.25" y="1064.5" />
+      <point x="535.25" y="1064.5" />
+      <point x="535.25" y="880.0" />
+      <point x="876.25" y="880.0" />
+      <point x="876.25" y="810.0" />
+      <point x="727.75" y="810.0" />
+      <point x="0.0" y="201.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.EditCollectionController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-92.0" />
+      <point x="555.0" y="1581.0" />
+      <point x="-22.833333333333314" y="1581.0" />
+      <point x="-22.833333333333314" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.FamilyMembership" target="edu.carroll.cs341.jpa.model.Family" relationship="TO_ONE">
+      <point x="114.0" y="-0.0" />
+      <point x="856.75" y="486.0" />
+      <point x="856.75" y="167.0" />
+      <point x="1007.25" y="167.0" />
+      <point x="55.25" y="164.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.OwnerPageController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="31.5" />
+      <point x="2599.75" y="810.0" />
+      <point x="916.75" y="810.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.GameOwned" target="edu.carroll.cs341.jpa.model.Game" relationship="TO_ONE">
+      <point x="0.0" y="-200.0" />
+      <point x="3521.75" y="742.0" />
+      <point x="3069.75" y="742.0" />
+      <point x="3069.75" y="486.0" />
+      <point x="-116.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.FamilyPageController" target="edu.carroll.cs341.jpa.model.Family" relationship="DEPENDENCY">
+      <point x="0.0" y="-68.0" />
+      <point x="4317.083333333333" y="147.0" />
+      <point x="896.75" y="147.0" />
+      <point x="-55.25" y="164.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.initializer.GameDataInit" target="edu.carroll.cs341.jpa.model.Game" relationship="DEPENDENCY">
+      <point x="58.0" y="-56.0" />
+      <point x="3135.5833333333335" y="1581.0" />
+      <point x="3387.75" y="1581.0" />
+      <point x="3387.75" y="920.0" />
+      <point x="3201.25" y="920.0" />
+      <point x="0.0" y="236.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedService" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-67.5" />
+      <point x="4978.583333333333" y="1775.5" />
+      <point x="3675.75" y="1775.5" />
+      <point x="3675.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesService" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-43.5" />
+      <point x="3201.25" y="820.0" />
+      <point x="855.25" y="820.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.initializer.GameDataInit" target="edu.carroll.cs341.jpa.repo.GamesRepository" relationship="TO_ONE">
+      <point x="-58.0" y="-56.0" />
+      <point x="3019.5833333333335" y="1541.0" />
+      <point x="3367.75" y="1541.0" />
+      <point x="3367.75" y="1385.0" />
+      <point x="2645.75" y="1385.0" />
+      <point x="0.0" y="67.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.JoinFamilyController" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="85.0" y="-56.0" />
+      <point x="1610.25" y="1364.5" />
+      <point x="1019.75" y="1364.5" />
+      <point x="1019.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyService" target="edu.carroll.cs341.jpa.model.Family" relationship="DEPENDENCY">
+      <point x="0.0" y="-163.5" />
+      <point x="798.25" y="956.5" />
+      <point x="855.25" y="956.5" />
+      <point x="855.25" y="900.0" />
+      <point x="896.75" y="900.0" />
+      <point x="-55.25" y="164.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyServiceImpl" target="edu.carroll.cs341.service.FamilyService" relationship="REALIZATION">
+      <point x="124.33333333333334" y="-272.0" />
+      <point x="265.83333333333337" y="1460.5" />
+      <point x="576.25" y="1460.5" />
+      <point x="576.25" y="1440.5" />
+      <point x="705.0" y="1440.5" />
+      <point x="-93.25" y="163.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.CreateFamilyController" target="edu.carroll.cs341.service.FamilyService" relationship="TO_ONE">
+      <point x="-82.0" y="-56.0" />
+      <point x="1159.25" y="1308.5" />
+      <point x="891.5" y="1308.5" />
+      <point x="93.25" y="163.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyService" target="edu.carroll.cs341.jpa.model.FamilyMembership" relationship="DEPENDENCY">
+      <point x="0.0" y="-163.5" />
+      <point x="798.25" y="956.5" />
+      <point x="855.25" y="956.5" />
+      <point x="855.25" y="890.0" />
+      <point x="876.25" y="890.0" />
+      <point x="876.25" y="810.0" />
+      <point x="727.75" y="810.0" />
+      <point x="0.0" y="201.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedServiceImpl" target="edu.carroll.cs341.jpa.model.GameOwned" relationship="DEPENDENCY">
+      <point x="98.5" y="-128.0" />
+      <point x="3519.0833333333335" y="1735.0" />
+      <point x="555.75" y="1735.0" />
+      <point x="555.75" y="1561.0" />
+      <point x="3521.75" y="1561.0" />
+      <point x="0.0" y="200.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.FamilyService" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-163.5" />
+      <point x="798.25" y="956.5" />
+      <point x="855.25" y="956.5" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesOwnedService" target="edu.carroll.cs341.jpa.model.Family" relationship="DEPENDENCY">
+      <point x="0.0" y="-67.5" />
+      <point x="4978.583333333333" y="1775.5" />
+      <point x="3675.75" y="1775.5" />
+      <point x="3675.75" y="1460.5" />
+      <point x="3695.75" y="1460.5" />
+      <point x="3695.75" y="147.0" />
+      <point x="896.75" y="147.0" />
+      <point x="-55.25" y="164.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.service.GamesServiceImpl" target="edu.carroll.cs341.jpa.model.User" relationship="DEPENDENCY">
+      <point x="0.0" y="-80.0" />
+      <point x="2760.0833333333335" y="1783.0" />
+      <point x="2947.75" y="1783.0" />
+      <point x="2947.75" y="910.0" />
+      <point x="855.25" y="910.0" />
+      <point x="855.25" y="800.0" />
+      <point x="916.75" y="800.0" />
+      <point x="916.75" y="486.0" />
+      <point x="-125.5" y="-0.0" />
+    </edge>
+    <edge source="edu.carroll.cs341.web.controller.SignUpController" target="edu.carroll.cs341.service.UserService" relationship="TO_ONE">
+      <point x="110.25" y="-56.0" />
+      <point x="1365.5" y="1054.0" />
+      <point x="1992.25" y="1054.0" />
+      <point x="89.0" y="43.5" />
+    </edge>
+  </edges>
+  <RemovedNodes />
+  <RemovedEdges />
+  <settings layout="Hierarchic Compact" zoom="0.4020854052710095" showDependencies="true" x="1763.8690173526566" y="1077.0775929661809" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

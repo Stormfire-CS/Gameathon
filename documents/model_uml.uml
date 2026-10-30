@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>edu.carroll.cs341.jpa.model</OriginalElement>
+  <nodes>
+    <node x="268.02227563490305" y="452.7093029029131">edu.carroll.cs341.jpa.model.FamilyMembership</node>
+    <node x="322.1821548709563" y="51.22527797438369">edu.carroll.cs341.jpa.model.Family</node>
+    <node x="-97.26916290811954" y="-13.596281946941332">edu.carroll.cs341.jpa.model.User</node>
+    <node x="263.8562549872623" y="912.9309696469447">edu.carroll.cs341.jpa.model.GameOwned</node>
+    <node x="-68.80995847234742" y="619.8975081396128">edu.carroll.cs341.jpa.model.Game</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="edu.carroll.cs341.jpa.model.FamilyMembership" target="edu.carroll.cs341.jpa.model.Family" relationship="TO_ONE">
+      <point x="-2.756349030619276E-4" y="-200.00030290291312" />
+      <point x="382.022" y="416.0" />
+      <point x="432.682" y="416.0" />
+      <point x="-1.5487095629396208E-4" y="163.99972202561634" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.Family" target="edu.carroll.cs341.jpa.model.User" relationship="TO_ONE">
+      <point x="-110.5001548709563" y="-2.7797438369248084E-4" />
+      <point x="171.231" y="215.225" />
+      <point x="171.231" y="588.0" />
+      <point x="28.231" y="588.0" />
+      <point x="1.6290811954178253E-4" y="284.0002819469413" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.User" target="edu.carroll.cs341.jpa.model.Family" relationship="TO_ONE">
+      <point x="125.50016290811953" y="-236.67871805305867" />
+      <point x="560.682" y="33.724999999999994" />
+      <point x="560.682" y="416.0" />
+      <point x="432.682" y="416.0" />
+      <point x="-1.5487095629396208E-4" y="163.99972202561634" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.Game" target="edu.carroll.cs341.jpa.model.User" relationship="TO_ONE">
+      <point x="-4.152765258425006E-5" y="-235.99950813961277" />
+      <point x="47.69" y="588.0" />
+      <point x="28.231" y="588.0" />
+      <point x="1.6290811954178253E-4" y="284.0002819469413" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.GameOwned" target="edu.carroll.cs341.jpa.model.Game" relationship="TO_ONE">
+      <point x="-119.0" y="-28.533461507331936" />
+      <point x="116.49999999999999" y="228.5" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.FamilyMembership" target="edu.carroll.cs341.jpa.model.User" relationship="TO_ONE">
+      <point x="-114.00027563490306" y="-3.029029131766947E-4" />
+      <point x="181.69" y="652.709" />
+      <point x="181.69" y="588.0" />
+      <point x="28.231" y="588.0" />
+      <point x="1.6290811954178253E-4" y="284.0002819469413" />
+    </edge>
+    <edge source="edu.carroll.cs341.jpa.model.GameOwned" target="edu.carroll.cs341.jpa.model.User" relationship="TO_ONE">
+      <point x="-119.00025498726228" y="3.035305530829646E-5" />
+      <point x="181.69" y="1112.931" />
+      <point x="181.69" y="588.0" />
+      <point x="28.231" y="588.0" />
+      <point x="1.6290811954178253E-4" y="284.0002819469413" />
+    </edge>
+  </edges>
+  <RemovedNodes />
+  <RemovedEdges />
+  <settings layout="Hierarchic Compact" zoom="0.520861172976986" showDependencies="true" x="338.6468072976055" y="696.1204389965792" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
