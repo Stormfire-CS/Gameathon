@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * Handles web requests for creating a new family.
  * This controller displays the family creation page and processes
  * submissions to create a family through the family service.
- *
+ * <p>
  * The controller passes the username to the view and delegates family
  * creation and its associated business logic to {@link FamilyService}.
  *
@@ -26,7 +26,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class CreateFamilyController {
 
-    /** Service used to create families and manage family-related operations. */
+    /**
+     * Service used to create families and manage family-related operations.
+     */
     private final FamilyService familyService;
 
     /**
@@ -43,7 +45,7 @@ public class CreateFamilyController {
      * Makes the username available to the view.
      *
      * @param session the username of the person creating the family
-     * @param model the model used to supply data to the view
+     * @param model   the model used to supply data to the view
      * @return the name of the Thymeleaf view for family creation
      */
     @GetMapping("/createFamilyPage")
@@ -66,7 +68,7 @@ public class CreateFamilyController {
      * After delegating the operation to the service, redirects the user
      * to the family page.
      *
-     * @param session the username of the person creating the family
+     * @param session    the username of the person creating the family
      * @param familyName the name requested for the new family
      * @return a redirect to the family page
      */

@@ -25,8 +25,8 @@ public class OwnerPageController {
      * Displays the owner page and adds the username to the model
      * so that it can be accessed by the view.
      *
-     * @param session the username of the user accessing the owner page
-     * @param model the model used to provide attributes to the view
+     * @param session the HTTP session associated with the current user
+     * @param model   the model used to provide attributes to the view
      * @return the name of the owner page view
      */
     @GetMapping("/ownerPage")
@@ -40,7 +40,7 @@ public class OwnerPageController {
 
         // Make the username available to the owner page template.
         model.addAttribute("user", user);
-        
+
         return "ownerPage";
     }
 }

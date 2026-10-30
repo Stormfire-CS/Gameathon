@@ -12,13 +12,12 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Handles web requests related to user login.
  * Displays the login page, validates submitted login information,
  * and redirects users to the home page when their credentials are valid.
- *
+ * <p>
  * The controller delegates user validation to {@link UserService} and uses
  * Spring validation to handle errors in submitted login forms.
  *
@@ -32,7 +31,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LoginController {
 
-    /** Service used to validate user credentials. */
+    /**
+     * Service used to validate user credentials.
+     */
     private final UserService userService;
 
     /**
@@ -66,8 +67,8 @@ public class LoginController {
      *
      * @param loginForm the submitted login form containing the username
      *                  and password
-     * @param result the result of validating the submitted form
-     * @param session attributes to include in the redirect URL
+     * @param result    the result of validating the submitted form
+     * @param session   the HTTP session containing the logged-in user
      * @return the login view when validation fails, or a redirect to the home page
      */
     @PostMapping("/login")

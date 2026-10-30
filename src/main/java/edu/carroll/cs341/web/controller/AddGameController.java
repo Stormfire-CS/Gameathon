@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * Handles web requests for adding new games to the game catalog.
  * This controller displays the page for entering game information and
  * processes submissions to add games through the game service.
- *
+ * <p>
  * The controller passes the username to the view and delegates game
  * creation and validation to {@link GamesService}.
  *
@@ -31,7 +31,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class AddGameController {
 
-    /** Service used to add games to the game catalog. */
+    /**
+     * Service used to add games to the game catalog.
+     */
     private final GamesService gamesService;
 
     /**
@@ -48,7 +50,7 @@ public class AddGameController {
      * Makes the username available to the view.
      *
      * @param session the username of the person adding the game
-     * @param model the model used to supply data to the view
+     * @param model   the model used to supply data to the view
      * @return the name of the Thymeleaf view for adding a game
      */
     @GetMapping("/addGamePage")
