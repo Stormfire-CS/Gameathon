@@ -61,7 +61,7 @@ public class UserServiceTest {
 
     /*
      * = = = = = = = = = = =
-     * Happy Path (Expected Input)
+     * Validate User Tests
      * = = = = = = = = = = =
      */
 
@@ -73,24 +73,8 @@ public class UserServiceTest {
     public void validateUserSuccessTest() {
         User result = userService.validateUser(username, password);
         assertNotNull("validateUserSuccessTest: should succeed using the same user/pass info", result);
+        assertEquals("validateUserSuccessTest: username of user who logged in should still be the same.",result.getUsername(),username);
     }
-
-    /**
-     * Verifies that new-user validation succeeds when the username is
-     * available and the two proposed passwords match.
-     */
-    @Test
-    public void validateNewUserValidUserMatchingPasswordsTest() {
-        String newUser = "DifferentTestUser";
-        User result = userService.newUser(newUser, password, password);
-        assertNotNull("validateNewUserValidUserMatchingPasswordsTest: should work using valid user, matching passwords", result);
-    }
-
-    /*
-     * = = = = = = = = = = =
-     * Crappy Path (Undesired inputs are given)
-     * = = = = = = = = = = =
-     */
 
     /**
      * Verifies that user validation fails when an existing username is
@@ -172,15 +156,34 @@ public class UserServiceTest {
         assertNull("validateUserNullUserNullPasswordTest: should fail using a null user, null pass", result);
     }
 
+    /*
+     * = = = = = = = = = = =
+     * New User Tests
+     * = = = = = = = = = = =
+     */
+
+    /**
+     * Verifies that new-user validation succeeds when the username is
+     * available and the two proposed passwords match.
+     */
+    @Test
+    public void NewUserMatchingPasswordsTest() {
+        String newUser = "DifferentTestUser";
+        User result = userService.newUser(newUser, password, password);
+        assertNotNull("NewUserMatchingPasswordsTest: should work using valid user, matching passwords", result);
+        assertEquals("NewUserMatchingPasswordsTest: the new user should have the same username as the username used to create it"
+                , result.getUsername(), newUser);
+    }
+
     /**
      * Verifies that new-user validation fails when the requested username
      * already exists, even when the two proposed passwords match.
      */
     @Test
-    public void validateNewUserExistingUserPasswordsMatchTest() {
+    public void newUserExistingUserPasswordsMatchTest() {
         String newPass = "NotTestPass";
         User result = userService.newUser(username, newPass, newPass);
-        assertNull("validateNewUserExistingUserPasswordsMatchTest: should fail using an existing user, matching passwords", result);
+        assertNull("newUserExistingUserPasswordsMatchTest: should fail using an existing user, matching passwords", result);
     }
 
     /**
@@ -188,10 +191,10 @@ public class UserServiceTest {
      * null, even when the two proposed passwords match.
      */
     @Test
-    public void validateNewUserNullUserPasswordsMatchTest() {
+    public void newUserNullUserPasswordsMatchTest() {
         String newPass = "NotTestPass";
         User result = userService.newUser(null, newPass, newPass);
-        assertNull("validateNewUserNullUserPasswordsMatchTest: should fail using an null user, matching passwords", result);
+        assertNull("newUserNullUserPasswordsMatchTest: should fail using an null user, matching passwords", result);
     }
 
     /**
@@ -199,9 +202,9 @@ public class UserServiceTest {
      * supplied with matching passwords equal to the stored user's password.
      */
     @Test
-    public void validateNewUserExistingUserExistingUserPasswordTest() {
+    public void newUserExistingUserExistingUserPasswordTest() {
         User result = userService.newUser(username, password, password);
-        assertNull("validateNewUserExistingUserExistingUserPasswordTest: should fail using an existing user, existing users matching passwords", result);
+        assertNull("newUserExistingUserExistingUserPasswordTest: should fail using an existing user, existing users matching passwords", result);
 
     }
 
@@ -210,9 +213,9 @@ public class UserServiceTest {
      * null and both proposed passwords match the stored user's password.
      */
     @Test
-    public void validateNewUserNullUserExistingUserPasswordsTest() {
+    public void newUserNullUserExistingUserPasswordsTest() {
         User result = userService.newUser(null, password, password);
-        assertNull("validateNewUserNullUserExistingUserPasswordsTest: should fail using a null user, existing users matching passwords", result);
+        assertNull("newUserNullUserExistingUserPasswordsTest: should fail using a null user, existing users matching passwords", result);
     }
 
     /**
@@ -220,10 +223,10 @@ public class UserServiceTest {
      * null and the other is valid, even when the username is available.
      */
     @Test
-    public void validateNewUserValidUserWithOneNullPasswordTest() {
+    public void newUserValidUserWithOneNullPasswordTest() {
         String newUser = "DifferentTestUser";
         User result = userService.newUser(newUser, null, password);
-        assertNull("validateNewUserValidUserWithOneNullPasswordTest: should fail using a valid user, null password, valid password", result);
+        assertNull("newUserValidUserWithOneNullPasswordTest: should fail using a valid user, null password, valid password", result);
 
     }
 
@@ -232,9 +235,9 @@ public class UserServiceTest {
      * supplied with one null password and one valid password.
      */
     @Test
-    public void validateNewUserExistingUserWithOneNullPasswordTest2() {
+    public void newUserExistingUserWithOneNullPasswordTest2() {
         User result = userService.newUser(username, null, password);
-        assertNull("validateNewUserExistingUserWithOneNullPasswordTest2: should fail using an existing user, null password, valid password", result);
+        assertNull("newUserExistingUserWithOneNullPasswordTest2: should fail using an existing user, null password, valid password", result);
     }
 
     /**
@@ -242,9 +245,9 @@ public class UserServiceTest {
      * proposed password are null while the other password is valid.
      */
     @Test
-    public void validateNewUserNullUserNullPasswordValidPasswordTest() {
+    public void newUserNullUserNullPasswordValidPasswordTest() {
         User result = userService.newUser(null, null, password);
-        assertNull("validateNewUserNullUserNullPasswordValidPasswordTest: should fail using a null user, null password, valid password", result);
+        assertNull("newUserNullUserNullPasswordValidPasswordTest: should fail using a null user, null password, valid password", result);
     }
 
     /**
@@ -252,10 +255,10 @@ public class UserServiceTest {
      * confirmation password are null while the first password is valid.
      */
     @Test
-    public void validateNewUserValidUserValidPasswordNullPasswordTest() {
+    public void newUserValidUserValidPasswordNullPasswordTest() {
         String newUser = "DifferentTestUser";
         User result = userService.newUser(newUser, password, null);
-        assertNull("validateNewUserValidUserValidPasswordNullPasswordTest: should fail using a valid user, valid password, null password", result);
+        assertNull("newUserValidUserValidPasswordNullPasswordTest: should fail using a valid user, valid password, null password", result);
     }
 
     /**
@@ -263,9 +266,9 @@ public class UserServiceTest {
      * supplied with a valid password and a null confirmation password.
      */
     @Test
-    public void validateNewUserExistingUserValidPasswordNullPasswordTest() {
+    public void newUserExistingUserValidPasswordNullPasswordTest() {
         User result = userService.newUser(username, password, null);
-        assertNull("validateNewUserExistingUserValidPasswordNullPasswordTest: should fail using an existing user, valid password, null password", result);
+        assertNull("newUserExistingUserValidPasswordNullPasswordTest: should fail using an existing user, valid password, null password", result);
     }
 
     /**
@@ -273,9 +276,9 @@ public class UserServiceTest {
      * the first password is valid, and the confirmation password is null.
      */
     @Test
-    public void validateNewUserNullUserValidPasswordNullPasswordTest() {
+    public void newUserNullUserValidPasswordNullPasswordTest() {
         User result = userService.newUser(null, password, null);
-        assertNull("validateNewUserNullUserValidPasswordNullPasswordTest: should fail using a null user, valid password, null password", result);
+        assertNull("newUserNullUserValidPasswordNullPasswordTest: should fail using a null user, valid password, null password", result);
     }
 
     /**
@@ -283,10 +286,10 @@ public class UserServiceTest {
      * but both proposed passwords are null.
      */
     @Test
-    public void validateNewUserValidUserNullPasswordsTest() {
+    public void newUserValidUserNullPasswordsTest() {
         String newUser = "DifferentTestUser";
         User result = userService.newUser(newUser, null, null);
-        assertNull("validateNewUserValidUserNullPasswordsTest: should fail using a valid user, null passwords", result);
+        assertNull("newUserValidUserNullPasswordsTest: should fail using a valid user, null passwords", result);
     }
 
     /**
@@ -294,9 +297,9 @@ public class UserServiceTest {
      * supplied and both proposed passwords are null.
      */
     @Test
-    public void validateNewUserExistingUserNullPasswordsTest() {
+    public void newUserExistingUserNullPasswordsTest() {
         User result = userService.newUser(username, null, null);
-        assertNull("validateNewUserExistingUserNullPasswordsTest: should fail using an existing user, null passwords", result);
+        assertNull("newUserExistingUserNullPasswordsTest: should fail using an existing user, null passwords", result);
     }
 
     /**
@@ -304,9 +307,9 @@ public class UserServiceTest {
      * proposed passwords are null.
      */
     @Test
-    public void validateNewUserNullUserNullPasswordsTest() {
+    public void newUserNullUserNullPasswordsTest() {
         User result = userService.newUser(null, null, null);
-        assertNull("validateNewUserNullUserNullPasswordsTest: should fail using a null user, null passwords", result);
+        assertNull("newUserNullUserNullPasswordsTest: should fail using a null user, null passwords", result);
     }
 
     /**
@@ -314,12 +317,12 @@ public class UserServiceTest {
      * but the two proposed passwords do not match.
      */
     @Test
-    public void validateNewUserValidUserNonMatchingPasswordsTest() {
+    public void newUserValidUserNonMatchingPasswordsTest() {
         String newUser = "DifferentTestUser";
         String nonMatching1 = "123";
         String nonMatching2 = "abc";
         User result = userService.newUser(newUser, nonMatching1, nonMatching2);
-        assertNull("validateNewUserValidUserNonMatchingPasswordsTest: should fail using a valid user, non matching passwords", result);
+        assertNull("newUserValidUserNonMatchingPasswordsTest: should fail using a valid user, non matching passwords", result);
 
     }
 
@@ -328,11 +331,11 @@ public class UserServiceTest {
      * exists and the two proposed passwords do not match.
      */
     @Test
-    public void validateNewUserExistingUserNonMatchingPasswordsTest() {
+    public void newUserExistingUserNonMatchingPasswordsTest() {
         String nonMatching1 = "123";
         String nonMatching2 = "abc";
         User result = userService.newUser(username, nonMatching1, nonMatching2);
-        assertNull("validateNewUserExistingUserNonMatchingPasswordsTest: should fail using an existing user, non matching passwords", result);
+        assertNull("newUserExistingUserNonMatchingPasswordsTest: should fail using an existing user, non matching passwords", result);
     }
 
     /**
@@ -340,11 +343,11 @@ public class UserServiceTest {
      * the two proposed passwords do not match.
      */
     @Test
-    public void validateNewUserNullUserNonMatchingPasswordsTest() {
+    public void newUserNullUserNonMatchingPasswordsTest() {
         String nonMatching1 = "123";
         String nonMatching2 = "abc";
         User result = userService.newUser(null, nonMatching1, nonMatching2);
-        assertNull("validateNewUserNullUserNonMatchingPasswordsTest: should fail using a null user, non matching passwords", result);
+        assertNull("newUserNullUserNonMatchingPasswordsTest: should fail using a null user, non matching passwords", result);
     }
 
 

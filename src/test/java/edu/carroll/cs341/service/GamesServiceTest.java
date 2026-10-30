@@ -4,6 +4,7 @@ import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
 import edu.carroll.cs341.jpa.repo.UserRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import static org.springframework.test.util.AssertionErrors.*;
  * @author Max Montowski
  */
 @SpringBootTest
+@Transactional
 public class GamesServiceTest {
 
     /** The username used for the test user. */
