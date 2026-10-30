@@ -332,11 +332,25 @@ public class FamilyServiceImpl implements FamilyService {
             return false;
         }
 
-        // Change the request status and persist the accepted membership.
+        // Accept the selected membership request.
         familyMembership.setStatus(ACCEPTED);
         membershipRepo.save(familyMembership);
 
-        log.debug("acceptRequest: user successfully {} accepted membership request from {}", user, familyMembership.getUser());
+        // Reject the user's other pending family requests.
+        User requestingUser = familyMembership.getUser();
+        List<FamilyMembership> pendingRequests =
+                membershipRepo.findByUserAndStatus(requestingUser, PENDING);
+
+        for (FamilyMembership request : pendingRequests) {
+            // Do not reject the request that was just accepted.
+            if (!request.equals(familyMembership)) {
+                request.setStatus(REJECTED);
+                membershipRepo.save(request);
+            }
+        }
+
+        log.debug("acceptRequest: user successfully {} accepted membership request from {}",
+                user, requestingUser);
 
         return true;
     }
