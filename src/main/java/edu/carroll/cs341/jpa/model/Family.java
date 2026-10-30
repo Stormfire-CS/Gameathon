@@ -29,7 +29,7 @@ import static org.aspectj.util.LangUtil.EOL;
  * </ul>
  */
 @Entity
-@Table(name = "Families")
+@Table(name = "Family")
 public class Family {
 
     /**

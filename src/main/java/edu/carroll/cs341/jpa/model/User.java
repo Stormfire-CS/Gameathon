@@ -22,7 +22,7 @@ import java.util.Objects;
  * ChatGPT assisted with documentation; reviewed by author. No code generated.
  */
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 public class User {
 
     /**
