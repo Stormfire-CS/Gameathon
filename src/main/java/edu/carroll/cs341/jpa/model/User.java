@@ -192,9 +192,8 @@ public class User {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Login @ ").append(super.toString()).append("[").append(EOL);
-        builder.append(TAB).append("username=").append(username).append(EOL);
-        builder.append("]").append(EOL);
+        builder.append("User: ").append(super.toString());
+        builder.append(TAB).append("username=");
         return builder.toString();
     }
 

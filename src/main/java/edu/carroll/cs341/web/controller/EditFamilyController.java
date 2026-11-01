@@ -2,6 +2,7 @@ package edu.carroll.cs341.web.controller;
 
 import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.User;
+import edu.carroll.cs341.service.FamilyMembershipService;
 import edu.carroll.cs341.service.FamilyService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -30,9 +31,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class EditFamilyController {
 
     /**
-     * Service used to retrieve and manage family membership requests.
+     * Service used to retrieve and manage family requests.
      */
     private final FamilyService familyService;
+
+    /**
+     * Service used to retrieve and manage family membership requests.
+     */
+    private final FamilyMembershipService familyMembershipService;
 
     /**
      * Constructs the controller with the service required to manage
@@ -40,8 +46,9 @@ public class EditFamilyController {
      *
      * @param familyService service for family and membership operations
      */
-    public EditFamilyController(FamilyService familyService) {
+    public EditFamilyController(FamilyService familyService, FamilyMembershipService familyMembershipService) {
         this.familyService = familyService;
+        this.familyMembershipService = familyMembershipService;
     }
 
     /**
@@ -66,11 +73,11 @@ public class EditFamilyController {
         // Make the username available to the view for subsequent actions.
         model.addAttribute("user", user);
 
-        model.addAttribute("members", familyService.getFamilyMembers(user));
-        model.addAttribute("family", familyService.getFamilyForUser(user));
+        model.addAttribute("members", familyMembershipService.getFamilyMembers(user));
+        model.addAttribute("family", familyMembershipService.getFamilyForUser(user));
 
         // Retrieve pending requests so the administrator can review them.
-        model.addAttribute("requests", familyService.getPendingRequests(user));
+        model.addAttribute("requests", familyMembershipService.getPendingRequests(user));
         return "editFamily";
     }
 
@@ -92,14 +99,14 @@ public class EditFamilyController {
             return "redirect:/login";
         }
 
-        FamilyMembership membership = familyService.getMembershipByID(membershipID);
+        FamilyMembership membership = familyMembershipService.getMembershipByID(membershipID);
 
         if (membership == null) {
             return "redirect:/addFamilyPage";
         }
 
         // Delegate request validation and acceptance to the service layer.
-        familyService.acceptRequest(user, membership);
+        familyMembershipService.acceptRequest(user, membership);
 
         // Return to the request list so it can be refreshed.
         return "redirect:/editFamilyPage";
@@ -123,14 +130,14 @@ public class EditFamilyController {
             return "redirect:/login";
         }
 
-        FamilyMembership membership = familyService.getMembershipByID(membershipID);
+        FamilyMembership membership = familyMembershipService.getMembershipByID(membershipID);
 
         if (membership == null) {
             return "redirect:/addFamilyPage";
         }
 
         // Delegate request validation and rejection to the service layer.
-        familyService.rejectRequest(user, membership);
+        familyMembershipService.rejectRequest(user, membership);
 
         // Return to the request list so it can be refreshed.
         return "redirect:/editFamilyPage";
@@ -173,7 +180,7 @@ public class EditFamilyController {
             return "redirect:/login";
         }
 
-        familyService.removeFamilyMember(user, membershipID);
+        familyMembershipService.removeFamilyMember(user, membershipID);
 
         return "redirect:/editFamilyPage";
     }

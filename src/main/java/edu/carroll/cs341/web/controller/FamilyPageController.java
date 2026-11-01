@@ -1,7 +1,9 @@
 package edu.carroll.cs341.web.controller;
 
 import edu.carroll.cs341.jpa.model.Family;
+import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.User;
+import edu.carroll.cs341.service.FamilyMembershipService;
 import edu.carroll.cs341.service.FamilyService;
 import edu.carroll.cs341.service.GamesOwnedService;
 import jakarta.servlet.http.HttpSession;
@@ -30,9 +32,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class FamilyPageController {
 
     /**
-     * Service used to retrieve family information and check administrator permissions.
+     * Service used to retrieve family inofmration and check administrator permissions.
      */
     private final FamilyService familyService;
+
+    /**
+     * Service used to check family membership status.
+     */
+    private final FamilyMembershipService familyMembershipService;
 
     private final GamesOwnedService gamesOwnedService;
 
@@ -43,9 +50,10 @@ public class FamilyPageController {
      * @param familyService     service for family-related operations
      * @param gamesOwnedService service for retrieving family-owned games
      */
-    public FamilyPageController(FamilyService familyService, GamesOwnedService gamesOwnedService) {
+    public FamilyPageController(FamilyService familyService, GamesOwnedService gamesOwnedService, FamilyMembershipService familyMembershipService) {
         this.familyService = familyService;
         this.gamesOwnedService = gamesOwnedService;
+        this.familyMembershipService = familyMembershipService;
     }
 
     /**
@@ -72,7 +80,7 @@ public class FamilyPageController {
         model.addAttribute("user", user);
 
         // Retrieve the family associated with the user's accepted membership.
-        Family family = familyService.getFamilyForUser(user);
+        Family family = familyMembershipService.getFamilyForUser(user);
         model.addAttribute("family", family);
 
         // A user is considered a family member when a family record is returned.
@@ -102,7 +110,7 @@ public class FamilyPageController {
             return "redirect:/login";
         }
 
-        familyService.leaveFamily(user);
+        familyMembershipService.leaveFamily(user);
 
         return "redirect:/familyPage";
     }

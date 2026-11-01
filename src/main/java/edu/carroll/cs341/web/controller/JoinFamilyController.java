@@ -1,6 +1,7 @@
 package edu.carroll.cs341.web.controller;
 
 import edu.carroll.cs341.jpa.model.User;
+import edu.carroll.cs341.service.FamilyMembershipService;
 import edu.carroll.cs341.service.FamilyService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -29,16 +30,16 @@ public class JoinFamilyController {
     /**
      * Service used to submit and manage family membership requests.
      */
-    private final FamilyService familyService;
+    private final FamilyMembershipService familyMembershipService;
 
     /**
      * Constructs the controller with the service required to manage
      * family membership operations.
      *
-     * @param familyService service for family-related operations
+     * @param familyMembershipService service for family membership related operations
      */
-    public JoinFamilyController(FamilyService familyService) {
-        this.familyService = familyService;
+    public JoinFamilyController(FamilyMembershipService familyMembershipService) {
+        this.familyMembershipService = familyMembershipService;
     }
 
     /**
@@ -82,7 +83,7 @@ public class JoinFamilyController {
         }
 
         // Delegate membership validation and request creation to the service layer.
-        familyService.requestToJoinFamily(user, familyID);
+        familyMembershipService.requestToJoinFamily(user, familyID);
 
         // Redirect so the user can view their family membership status.
         return "redirect:/familyPage";
