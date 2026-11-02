@@ -1,6 +1,9 @@
 package edu.carroll.cs341.web.form;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 /**
  * Represents the form data submitted when a user adds a new game
@@ -24,16 +27,23 @@ import jakarta.validation.constraints.*;
  */
 public class CreateGameForm {
 
-    /** Game name entered by the user; must not be blank or exceed 100 characters. */
+    /**
+     * Game name entered by the user; must not be blank or exceed 100 characters.
+     */
     @NotBlank(message = "Game name is required")
+    @Size(min = 2, message = "Game name must be longer than 2 characters")
     @Size(max = 100, message = "Game name must not exceed 100 characters")
     private String gameName;
 
-    /** Minimum number of players; must be at least one. */
+    /**
+     * Minimum number of players; must be at least one.
+     */
     @Min(value = 1, message = "Minimum number of players must be at least 1")
     private Integer minPlayers;
 
-    /** Maximum number of players; must at least one. */
+    /**
+     * Maximum number of players; must at least one.
+     */
     @Min(value = 1, message = "Maximum number of players must be at least 1")
     private Integer maxPlayers;
 
@@ -96,8 +106,8 @@ public class CreateGameForm {
      * the maximum number of players.
      *
      * @return true if both values are present and the minimum
-     *         player count is less than or equal to the maximum;
-     *         false otherwise
+     * player count is less than or equal to the maximum;
+     * false otherwise
      */
     @AssertTrue(message = "Minimum number of players cannot exceed maximum number of players")
     public boolean isPlayerCountValid() {

@@ -23,19 +23,25 @@ import jakarta.validation.constraints.Size;
  */
 public class CreateUserForm {
 
-    /** Username entered by the user; must contain at least two characters. */
+    /**
+     * Username entered by the user; must contain at least two characters.
+     */
     @Size(min = 2, message = "Username must be at least 2 characters long")
     @Size(max = 30, message = "Username cannot be longer than 30 characters")
     @Pattern(regexp = "^\\S+$", message = "Username cannot contain spaces")
     private String username;
 
-    /** First password entry; must contain at least eight characters. */
+    /**
+     * First password entry; must contain at least eight characters.
+     */
     @Size(min = 8, message = "Password must be at least 8 characters long")
     @Size(max = 30, message = "Password cannot be longer than 30 characters")
     @Pattern(regexp = "^\\S+$", message = "Password cannot contain spaces")
     private String password1;
 
-    /** Confirmation password entry; must contain at least eight characters. */
+    /**
+     * Confirmation password entry; must contain at least eight characters.
+     */
     @Size(min = 8, message = "Password must be at least 8 characters long")
     @Size(max = 30, message = "Password cannot be longer than 30 characters")
     @Pattern(regexp = "^\\S+$", message = "Password cannot contain spaces")

@@ -4,10 +4,14 @@ import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.GamesOwnedService;
 import edu.carroll.cs341.service.GamesService;
 import edu.carroll.cs341.service.UserService;
+import edu.carroll.cs341.web.form.AddGameToCollectionForm;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 /**
@@ -85,22 +89,30 @@ public class EditCollectionController {
 
         model.addAttribute("ownedGames", gamesOwnedService.getGamesOwnedByUsername(user));
 
+        // Supply an empty form object for adding a game to the colleciton.
+        model.addAttribute("addGameTocollectionForm", new AddGameToCollectionForm());
         return "editCollection";
     }
 
     /**
      * Processes a submission to add a game to the user's collection.
-     * Delegates the ownership operation to the service and redirects
-     * the user back to the collection page.
+     * Validates the production year before delegating the ownership operation
+     * to the service.
      *
-     * @param session      the HTTP session containing the logged-in user
-     * @param gameID       the ID of the game being added
-     * @param yearProduced the year the owned game was produced
-     * @return a redirect to the collection page, or the login page
-     * if no user is logged in
+     * @param session       the HTTP session containing the logged-in user
+     * @param gameID        the ID of the game being added
+     * @param form          the form containing the production year
+     * @param bindingResult the result of validating the submitted form
+     * @param model         the model used to supply data to the view
+     * @return a redirect to the collection page after success, the collection
+     * view if validation fails, or the login page if no user is logged in
      */
     @PostMapping("/addGameToCollection")
-    public String addGametoCollection(HttpSession session, Long gameID, Integer yearProduced) {
+    public String addGametoCollection(HttpSession session,
+                                      Long gameID,
+                                      @Valid @ModelAttribute("addGameToCollectionForm") AddGameToCollectionForm form,
+                                      BindingResult bindingResult,
+                                      Model model) {
 
         User user = (User) session.getAttribute("loggedInUser");
 
@@ -108,8 +120,17 @@ public class EditCollectionController {
             return "redirect:/login";
         }
 
+        // Redisplay the collection page if the production year is invalid.
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("user", user);
+            model.addAttribute("games", gamesService.getAvailableGames(user));
+            model.addAttribute("ownedGames", gamesOwnedService.getGamesOwnedByUsername(user));
+
+            return "editCollection";
+        }
+
         // Delegate creation and persistence of the ownership record to the service.
-        gamesOwnedService.addGameToCollection(user, gameID, yearProduced);
+        gamesOwnedService.addGameToCollection(user, gameID, form.getYearProduced());
 
         // Redirect to the collection view after processing the submission.
         return "redirect:/editCollectionPage";
