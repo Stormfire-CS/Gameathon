@@ -9,9 +9,9 @@
 <form action="#" th:action="@{/login}" th:object="${loginForm}" method="post">
     <span th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}">Global error</span><br/>
     <input type="text" th:field="*{username}" placeholder="Username"/>
-    <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Username error</span><br/>
+    <span th:if="${#fields.hasErrors('username')}" th:text="${#strings.listJoin(#fields.errors('username'), '; ')}">Username error</span><br/>
     <input type="password" th:field="*{password}" placeholder="Password"/>
-    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password error</span><br/>
+    <span th:if="${#fields.hasErrors('password')}"  th:text="${#strings.listJoin(#fields.errors('password'), '; ')}">Password error</span><br/>
     <p>Click <a href="/signUpPage">sign up</a> to sign up</p>
     <button type="submit">Login</button>
 </form>

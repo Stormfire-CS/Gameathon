@@ -1,6 +1,7 @@
 package edu.carroll.cs341.web.form;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -18,14 +19,18 @@ import jakarta.validation.constraints.Size;
  */
 public class LoginForm {
 
-    /** Username entered by the user; must not be null and must contain at least six characters. */
+    /** Username entered by the user; must not be null, contain no whitespace characters and must contain at least six characters. */
     @NotNull
     @Size(min = 2, message = "Username must be at least 2 characters long")
+    @Size(max = 30, message = "Username cannot be longer than 30 characters")
+    @Pattern(regexp = "^\\S+$", message = "Username cannot contain spaces")
     private String username;
 
     /** Password entered by the user; must not be null and must contain at least eight characters. */
     @NotNull
     @Size(min = 8, message = "Password must be at least 8 characters long")
+    @Size(max = 30, message = "Password cannot be longer than 30 characters")
+    @Pattern(regexp = "^\\S+$", message = "Password cannot contain spaces")
     private String password;
 
     /**

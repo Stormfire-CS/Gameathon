@@ -89,7 +89,7 @@ public class SignUpController {
         if (user == null) {
 
             // Add a form-level error when registration details are invalid.
-            result.addError(new ObjectError("globalError", "Username already exists or passwords do not match"));
+            result.addError(new ObjectError("globalError", "Username already exists"));
             return "signUpPage";
         }
 
