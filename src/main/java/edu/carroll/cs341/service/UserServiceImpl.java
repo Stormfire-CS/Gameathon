@@ -57,6 +57,16 @@ public class UserServiceImpl implements UserService {
     public User validateUser(String username, String password) {
         log.debug("validateUser: user '{}' attempted login", username);
 
+        if (username == null || username.isBlank()) {
+            log.debug("validateUser: username is blank");
+            return null;
+        }
+
+        if (password == null || password.isBlank()) {
+            log.error("validateUser: password is blank");
+            return null;
+        }
+
         // Perform the lookup without distinguishing between uppercase and lowercase usernames.
         List<User> users = userRepo.findByUsernameIgnoreCase(username);
 
@@ -93,22 +103,22 @@ public class UserServiceImpl implements UserService {
         log.debug("validateNewUser: attempting to register username '{}'", username);
 
         if (username == null) {
-            log.debug("validateNewUser: username is null");
+            log.error("validateNewUser: username is null");
             return null;
         }
 
         if (username.isEmpty()) {
-            log.debug("validateNewUser: username is blank");
+            log.error("validateNewUser: username is blank");
             return null;
         }
 
         if (password1 == null || password2 == null) {
-            log.debug("validateNewUser: One or both passwords is null");
+            log.error("validateNewUser: One or both passwords is null");
             return null;
         }
 
         if (password1.isEmpty() || password2.isEmpty()) {
-            log.debug("validateNewUser: One or both passwords is blank");
+            log.error("validateNewUser: One or both passwords is blank");
             return null;
         }
 
@@ -121,7 +131,19 @@ public class UserServiceImpl implements UserService {
 
         // Ensure the password confirmation matches before creating the account.
         if (!password1.equals(password2)) {
-            log.debug("validateNewUser: passwords do not match for '{}'", username);
+            log.error("validateNewUser: passwords do not match for '{}'", username);
+            return null;
+        }
+
+        // Reject usernames containing whitespace.
+        if (!username.matches("^\\S+$")) {
+            log.error("validateNewUser: username contains whitespace");
+            return null;
+        }
+
+        // Reject passwords containing whitespace.
+        if (!password1.matches("^\\S+$") || !password2.matches("^\\S+$")) {
+            log.error("validateNewUser: one or both passwords contain whitespace");
             return null;
         }
 
