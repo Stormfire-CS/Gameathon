@@ -14,9 +14,10 @@
     <button type="button">Back to Family</button>
 </a>
 
-<form th:action="@{/createFamily}" method="post">
+<form th:action="@{/createFamily}" th:object="${familyNameForm}" method="post">
     <label for="familyName">Family Name:</label>
     <input type="text" id="familyName" name="familyName" placeholder="Family Name"/>
+    <span th:if="${#fields.hasErrors('familyName')}"  th:text="${#strings.listJoin(#fields.errors('familyName'), '; ')}">Family Name Error</span><br/>
     <button type="submit">Create Family</button>
 </form>
 </body>

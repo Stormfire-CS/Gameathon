@@ -2,10 +2,15 @@ package edu.carroll.cs341.web.controller;
 
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyService;
+import edu.carroll.cs341.web.form.FamilyNameForm;
+import edu.carroll.cs341.web.form.LoginForm;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 /**
@@ -60,6 +65,8 @@ public class CreateFamilyController {
         // Make the username available to the view for use during submission.
         model.addAttribute("user", user);
 
+        model.addAttribute("familyNameForm", new FamilyNameForm());
+
         return "createFamily";
     }
 
@@ -69,11 +76,11 @@ public class CreateFamilyController {
      * to the family page.
      *
      * @param session    the username of the person creating the family
-     * @param familyName the name requested for the new family
+     *  the name requested for the new family
      * @return a redirect to the family page
      */
     @PostMapping("/createFamily")
-    public String createFamily(HttpSession session, String familyName) {
+    public String createFamily(@Valid @ModelAttribute FamilyNameForm familyNameForm, BindingResult result, HttpSession session, Model model) {
 
         User user = (User) session.getAttribute("loggedInUser");
 
@@ -81,8 +88,14 @@ public class CreateFamilyController {
             return "redirect:/login";
         }
 
+        // Return to the form if any field-level validation rules fail.
+        if (result.hasErrors()) {
+            model. addAttribute("user", user);
+            return "createFamily";
+        }
+
         // Delegate family creation and validation to the service layer.
-        familyService.createFamily(user, familyName);
+        familyService.createFamily(user, familyNameForm.getFamilyName());
 
         // Redirect to the family page after processing the submission.
         return "redirect:/familyPage";
