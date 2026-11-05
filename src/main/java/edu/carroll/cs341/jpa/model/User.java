@@ -193,7 +193,7 @@ public class User {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("User: ").append(super.toString());
-        builder.append(TAB).append("username=");
+        builder.append(TAB).append("username=").append(username);
         return builder.toString();
     }
 

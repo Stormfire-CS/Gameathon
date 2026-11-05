@@ -4,10 +4,14 @@ import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyMembershipService;
 import edu.carroll.cs341.service.FamilyService;
+import edu.carroll.cs341.web.form.FamilyNameForm;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 /**
@@ -78,6 +82,8 @@ public class EditFamilyController {
 
         // Retrieve pending requests so the administrator can review them.
         model.addAttribute("requests", familyMembershipService.getPendingRequests(user));
+
+        model.addAttribute("familyNameForm", new FamilyNameForm());
         return "editFamily";
     }
 
@@ -147,19 +153,30 @@ public class EditFamilyController {
      * Renames the family associated with the logged-in user.
      *
      * @param session    the HTTP session containing the logged-in user
-     * @param familyName the new name for the family
+     * the new name for the family
      * @return a redirect to the family management page, or the login page
      * if no user is logged in
      */
     @PostMapping("/renameFamily")
-    public String renameFamily(HttpSession session, String familyName) {
+    public String renameFamily(HttpSession session,
+                               @Valid @ModelAttribute("familyNameForm") FamilyNameForm familyNameForm,
+                               BindingResult bindingResult,
+                               Model model) {
         User user = (User) session.getAttribute("loggedInUser");
 
         if (user == null) {
             return "redirect:/login";
         }
 
-        familyService.renameFamily(user, familyName);
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("user", user);
+            model.addAttribute("members", familyMembershipService.getFamilyMembers(user));
+            model.addAttribute("family", familyMembershipService.getFamilyForUser(user));
+            model.addAttribute("requests", familyMembershipService.getPendingRequests(user));
+            return "editFamily";
+        }
+
+        familyService.renameFamily(user, familyNameForm.getFamilyName());
 
         return "redirect:/editFamilyPage";
     }
