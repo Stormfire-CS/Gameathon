@@ -117,6 +117,6 @@ public class ChangePasswordPageController {
 
         userService.changeUsersPassword(user, editPasswordForm.getPassword1());
 
-        return "redirect:/";
+        return "redirect:/editAccount";
     }
 }
