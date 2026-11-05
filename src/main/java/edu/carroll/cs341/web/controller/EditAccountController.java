@@ -65,7 +65,10 @@ public class EditAccountController {
 
         // Make the username available to the view for subsequent form submissions.
         model.addAttribute("user", user);
-        model.addAttribute("editNameForm", new EditNameForm());
+
+        EditNameForm editNameForm = new EditNameForm();
+        editNameForm.setName(user.getName());
+        model.addAttribute("editNameForm", editNameForm);
 
         return "editAccount";
     }
@@ -100,6 +103,6 @@ public class EditAccountController {
 
         userService.renameUser(user, editNameForm.getName());
 
-        return "/editAccount";
+        return "redirect:/editAccount";
     }
 }

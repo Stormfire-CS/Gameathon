@@ -5,13 +5,11 @@
 <header th:fragment="topBar"
         style="display: flex;  align-items: center; justify-content: flex-end; gap: 10px; width: 100%;">
 
-    <a th:href="@{/homePage}">
-        <button type="button">My Home</button>
-    </a>
 
-    <form th:if="${session.loggedInUser != null}"
-          th:action="@{/logout}"
-          method="post">
+    <a th:href="@{/homePage}"><button type="button">My Home</button></a>
+    <a th:href="@{/editAccount}"><button type="button">Edit Account</button></a>
+
+    <form th:if="${session.loggedInUser != null}" th:action="@{/logout}" method="post">
 
         <button type="submit">Logout</button>
     </form>

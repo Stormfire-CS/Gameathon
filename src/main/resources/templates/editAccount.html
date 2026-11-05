@@ -2,9 +2,20 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Title</title>
+        <title>Edit Account</title>
     </head>
     <body>
+        <h1>Edit Account</h1>
+        <p>
+            Editing your account <span th:text="${user.name}"></span>
+        </p>
+        <a th:href="@{/homePage}"><button type="button"> Back to Home Page</button></a>
 
+        <form th:action="@{/editAccount}" th:object="${editNameForm}" method="post">
+            <label for="name">New Name (This is how others will see you):</label><br>
+            <input type="text" id="name" th:field="*{name}"/>
+            <span th:if="${#fields.hasErrors('name')}" th:text="${#strings.listJoin(#fields.errors('name'), '; ')}">New Name Error</span><br>
+            <button type="submit">Change Name</button>
+        </form>
     </body>
 </html>
