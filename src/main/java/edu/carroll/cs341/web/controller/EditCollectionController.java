@@ -73,8 +73,7 @@ public class EditCollectionController {
      * if no user is logged in
      */
     @GetMapping("/editCollectionPage")
-    public String addGametoCollectionPage(HttpSession session, Model model) {
-
+    public String editCollectionPage(HttpSession session, Model model) {
         User user = (User) session.getAttribute("loggedInUser");
 
         if (user == null) {
