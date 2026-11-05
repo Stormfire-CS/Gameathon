@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
     <head>
         <meta charset="UTF-8">
         <title>Edit Account</title>
@@ -15,7 +15,9 @@
             <label for="name">New Name (This is how others will see you):</label><br>
             <input type="text" id="name" th:field="*{name}"/>
             <span th:if="${#fields.hasErrors('name')}" th:text="${#strings.listJoin(#fields.errors('name'), '; ')}">New Name Error</span><br>
-            <button type="submit">Change Name</button>
+            <button type="submit">Change Name</button><br><br>
         </form>
+        <a th:href="@{/enterPasswordPage}"><button type="button">Change Password</button></a>
+
     </body>
 </html>

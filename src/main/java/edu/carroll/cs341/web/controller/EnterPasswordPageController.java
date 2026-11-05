@@ -66,7 +66,10 @@ public class EnterPasswordPageController {
 
         // Make the username available to the view for subsequent form submissions.
         model.addAttribute("user", user);
-        model.addAttribute("loginForm", new LoginForm());
+        LoginForm loginForm = new LoginForm();
+        loginForm.setUsername(user.getUsername());
+
+        model.addAttribute("loginForm", loginForm);
 
         return "enterPasswordPage";
     }
@@ -98,6 +101,13 @@ public class EnterPasswordPageController {
 
         if (result.hasErrors()) {
             model.addAttribute("user", user);
+            return "enterPasswordPage";
+        }
+
+        User validatingUser = userService.validateUser(loginForm.getUsername(), loginForm.getPassword());
+        if(validatingUser == null) {
+            model.addAttribute("user", user);
+            model.addAttribute("passwordError", "Incorrect password.");
             return "enterPasswordPage";
         }
 
