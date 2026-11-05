@@ -150,6 +150,11 @@ public class User {
      */
     private static final String TAB = "\t";
 
+    /**
+     * Retrieves the user's name.
+     *
+     * @return the name associated with this user
+     */
     public String getName() {
         return name;
     }

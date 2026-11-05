@@ -1,6 +1,7 @@
 package edu.carroll.cs341.web.form;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -24,6 +25,7 @@ public class EditNameForm {
     @NotNull(message = "Name is required")
     @Size(min = 2, message = "Name must be longer than 1 character")
     @Size(max = 40, message = "Name cannot be longer than 40 characters")
+    @Pattern(regexp = "^\\S+$", message = "Name cannot contain spaces")
     private String name;
 
     /**

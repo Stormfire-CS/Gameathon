@@ -154,4 +154,98 @@ public class UserServiceImpl implements UserService {
         log.info("validateNewUser: successfully registered user '{}'", username);
         return user;
     }
+
+    /**
+     * Renames the currently selected user's account.
+     *
+     * @param user the user whose name is being changed
+     * @param newName the new name to assign to the user
+     * @return true if the user's name was successfully updated; false otherwise
+     */
+    @Transactional
+    @Override
+    public Boolean renameUser(User user, String newName) {
+        log.debug("renameUser: user {} attempting to change name to '{}'", user, newName);
+
+        if (user == null) {
+            log.error("renameUser: user is null");
+            return false;
+        }
+
+        if (newName == null) {
+            log.error("renameUser: newName is null");
+            return false;
+        }
+
+        if (newName.isEmpty()) {
+            log.error("renameUser: newName is empty");
+            return false;
+        }
+
+        if (newName.length() < 2 || newName.length() > 40) {
+            log.error("renameUser: new name must be between 2 and 40 characters");
+        }
+
+        // Reject passwords containing whitespace.
+        if (!newName.matches("^\\S+$")) {
+            log.error("renameUser: new name contains whitespace");
+            return false;
+        }
+
+        // Update and save the user's name.
+        user.setName(newName);
+        userRepo.save(user);
+
+        log.info("renameUser: successfully renamed user '{}'", user);
+        return true;
+    }
+
+    /**
+     * Changes the password associated with a user account.
+     *
+     * @param user the user whose password will be changed
+     * @param password the new password to assign to the user
+     * @return true if the password was successfully changed; false otherwise
+     */
+    @Transactional
+    @Override
+    public Boolean changeUsersPassword(User user, String password) {
+        log.debug("changeUsersPassword: user {} attempting to change password", user);
+
+        if (user == null) {
+            log.error("changeUsersPassword: user is null");
+            return false;
+        }
+
+        if (password == null) {
+            log.error("changeUsersPassword: password is null");
+            return false;
+        }
+
+        if (password.isEmpty()) {
+            log.error("changeUsersPassword: password is empty");
+            return false;
+        }
+
+        // Enforce the same password requirements as the form.
+        if (password.length() < 8 || password.length() > 30) {
+            log.error("changeUsersPassword: password must be between 8 and 30 characters");
+            return false;
+        }
+
+        // Reject passwords containing whitespace.
+        if (!password.matches("^\\S+$")) {
+            log.error("changeUsersPassword: password contains whitespace");
+            return false;
+        }
+
+        // Hash and store the new password.
+        user.setRawPassword(password);
+        userRepo.save(user);
+
+        log.info("changeUsersPassword: successfully changed password for '{}'", user);
+        return true;
+    }
+
+
 }

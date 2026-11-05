@@ -3,14 +3,16 @@ package edu.carroll.cs341.service;
 import edu.carroll.cs341.jpa.model.User;
 
 /**
- * Defines the service operations for managing user accounts.
- * This interface provides methods for validating login credentials,
- * validating and registering new users, and retrieving user IDs.
- *
- * Implementations are responsible for handling the business logic
- * associated with user authentication, registration, and account lookups.
- *
- * <p><b>Sources Used:</b></p>
+ * Implements the service operations for managing user accounts.
+ * This class validates login credentials, registers new users, updates
+ * user account information, and retrieves user IDs based on usernames.
+ * <p>
+ * The service uses the user repository to look up and save user account
+ * information. It also uses BCrypt to securely hash and verify passwords
+ * and logs relevant events to assist with debugging and monitoring
+ * authentication and registration operations.
+ * <p>
+ * <b>Sources Used:</b>
  * <ul>
  *   <li>ChatGPT – Assisted with generating Javadoc comments for this file
  *   in conjunction with Max Montowski.
@@ -38,5 +40,23 @@ public interface UserService {
      * @return {@code true} if registration succeeds; {@code false} otherwise
      */
      User newUser(String username, String password1, String password2);
+
+    /**
+     * Renames the currently selected user's account.
+     *
+     * @param user the user whose name is being changed
+     * @param newName the new name to assign to the user
+     * @return true if the user's name was successfully updated; false otherwise
+     */
+     Boolean renameUser(User user, String newName);
+
+    /**
+     * Changes the password associated with a user account.
+     *
+     * @param user the user whose password will be changed
+     * @param password the new password to assign to the user
+     * @return true if the password was successfully changed; false otherwise
+     */
+     Boolean changeUsersPassword(User user, String password);
 
 }
