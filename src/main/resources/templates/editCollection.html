@@ -8,38 +8,25 @@
         <div th:replace="~{fragments :: topBar}"></div>
         <h1>Gameathon</h1>
         <p>Please enter game information: <span th:text="${user.name}"></span></p>
-        <a th:href="@{/ownerPage}">
-            <button type="button">My Stuff</button>
-        </a>
-        <a th:href="@{/viewGamesPage}">
-            <button type="button">View My Games</button>
-        </a>
-        <a th:href="@{/addGamePage}">
-            <button type="button">Don't See desired Game?</button>
-        </a>
-        <form th:action="@{/addGameToCollection}"  th:object="${addGameToCollectionForm}" method="post">
+        <a th:href="@{/ownerPage}"><button type="button">My Stuff</button></a>
+        <a th:href="@{/viewGamesPage}"><button type="button">View My Games</button></a>
+        <a th:href="@{/addGamePage}"><button type="button">Don't See desired Game?</button></a>
+        <form th:action="@{/addGameToCollection}" th:object="${addGameToCollectionForm}" method="post">
             <label>Game Name:</label>
             <select name="gameID">
                 <option value="">Select a Game</option>
-
-                <option th:each="game : ${games}" th:value="${game.gameID}" th:text="${game.gameName}">
-                </option>
+                <option th:each="game : ${games}" th:value="${game.gameID}" th:text="${game.gameName}"></option>
             </select>
 
             <label>Year Produced:</label>
             <input type="number" th:field="*{yearProduced}" placeholder="Year Produced (optional)"/>
-
             <span th:if="${#fields.hasErrors('yearProduced')}" th:errors="*{yearProduced}">Production year error</span>
-
             <span th:if="${#fields.hasErrors('yearProducedValid')}" th:errors="*{yearProducedValid}">Future production year error</span>
-
             <button type="submit">Add Game to Collection</button>
-
         </form>
         <hr>
 
         <h2>Your Games</h2>
-
         <table>
             <tr>
                 <th>Game Name</th>
@@ -48,19 +35,14 @@
                 <th>Year Produced |</th>
                 <th>Action</th>
             </tr>
-
             <tr th:each="gameOwned : ${ownedGames}">
                 <td th:text="${gameOwned.game.gameName}"></td>
                 <td th:text="${gameOwned.game.minPlayers}"></td>
                 <td th:text="${gameOwned.game.maxPlayers}"></td>
                 <td th:text="${gameOwned.yearProduced}"></td>
-
                 <td>
                     <form th:action="@{/deleteGameFromCollection}" method="post">
-                        <input type="hidden"
-                               name="gameOwnedID"
-                               th:value="${gameOwned.gameOwnedID}"/>
-
+                        <input type="hidden" name="gameOwnedID" th:value="${gameOwned.gameOwnedID}"/>
                         <button type="submit">Delete</button>
                     </form>
                 </td>

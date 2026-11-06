@@ -6,9 +6,7 @@
     </head>
     <body>
         <h1>Edit Account</h1>
-        <p>
-            Editing your account <span th:text="${user.name}"></span>
-        </p>
+        <p>Editing your account <span th:text="${user.name}"></span></p>
         <a th:href="@{/homePage}"><button type="button"> Back to Home Page</button></a>
 
         <form th:action="@{/editAccount}" th:object="${editNameForm}" method="post">

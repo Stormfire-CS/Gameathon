@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>View Games</title>
-</head>
-<body>
-<div th:replace="~{fragments :: topBar}"></div>
-<h1>Gameathon</h1>
-<p>Welcome to viewing your games: <span th:text="${user.name}"></span></p>
-<a th:href="@{/ownerPage}">
-    <button type="button">Back to My Stuff</button>
-</a>
-<a th:href="@{/editCollectionPage}">
-    <button type="button">Edit Collection</button>
-</a>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>View Games</title>
+    </head>
+    <body>
+        <div th:replace="~{fragments :: topBar}"></div>
+        <h1>Gameathon</h1>
+        <p>Welcome to viewing your games: <span th:text="${user.name}"></span></p>
+        <a th:href="@{/ownerPage}"><button type="button">Back to My Stuff</button></a>
+        <a th:href="@{/editCollectionPage}"><button type="button">Edit Collection</button></a>
 
-<h2>Games</h2>
-<table>
-    <tr>
-        <th>Game Name</th>
-        <th>Minimum Players |</th>
-        <th>Maximum Players |</th>
-        <th>Year Produced</th>
-    </tr>
-    <tr th:each="gameOwned : ${games}">
-        <td th:text="${gameOwned.game.gameName}"></td>
-        <td th:text="${gameOwned.game.minPlayers}"></td>
-        <td th:text="${gameOwned.game.maxPlayers}"></td>
-        <td th:text="${gameOwned.yearProduced}"></td>
-    </tr>
-</table>
-</body>
+        <h2>Games</h2>
+        <table>
+            <tr>
+                <th>Game Name</th>
+                <th>Minimum Players |</th>
+                <th>Maximum Players |</th>
+                <th>Year Produced</th>
+            </tr>
+            <tr th:each="gameOwned : ${games}">
+                <td th:text="${gameOwned.game.gameName}"></td>
+                <td th:text="${gameOwned.game.minPlayers}"></td>
+                <td th:text="${gameOwned.game.maxPlayers}"></td>
+                <td th:text="${gameOwned.yearProduced}"></td>
+            </tr>
+        </table>
+    </body>
 </html>

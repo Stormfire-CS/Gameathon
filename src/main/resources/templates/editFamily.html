@@ -1,98 +1,92 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Family Requests</title>
-</head>
-<body>
-<div th:replace="~{fragments :: topBar}"></div>
-<h1>EDITING FAMILY</h1>
-<p>
-    Welcome Administer: <span th:text="${user.name}"></span>
-</p>
+    <head>
+        <meta charset="UTF-8">
+        <title>Family Requests</title>
+    </head>
+    <body>
+        <div th:replace="~{fragments :: topBar}"></div>
+        <h1>EDITING FAMILY</h1>
+        <p>Welcome Administer: <span th:text="${user.name}"></span></p>
 
-<a th:href="@{/familyPage}"><button type="button">Back to Family</button></a>
-    <form th:action="@{/deleteFamily}" method="post"
-          style="display: inline-block;"
-          onsubmit="return confirm('Are you sure you want to delete your family? This action cannot be undone.');">
-        <button type="submit">Delete Family</button>
-    </form>
-<h2>Change Family Name</h2>
-<form th:action="@{/renameFamily}" th:object="${familyNameForm}" method="post">
-    <label for="familyName">New Family Name:</label>
-    <input type="text" id="familyName" name="familyName">
-    <span th:if="${#fields.hasErrors('familyName')}" th:text="${#strings.listJoin(#fields.errors('familyName'), '; ')}">Family Name Error</span><br/>
-    <button type="submit">Rename Family</button>
-</form>
-<h2>Current Family Members</h2>
+        <a th:href="@{/familyPage}"><button type="button">Back to Family</button></a>
+        <form th:action="@{/deleteFamily}" method="post"
+              style="display: inline-block;"
+              onsubmit="return confirm('Are you sure you want to delete your family? This action cannot be undone.');">
+            <button type="submit">Delete Family</button>
+        </form>
+        <h2>Change Family Name</h2>
+        <form th:action="@{/renameFamily}" th:object="${familyNameForm}" method="post">
+            <label for="familyName">New Family Name:</label>
+            <input type="text" id="familyName" name="familyName">
+            <span th:if="${#fields.hasErrors('familyName')}"
+                  th:text="${#strings.listJoin(#fields.errors('familyName'), '; ')}">Family Name Error</span><br/>
+            <button type="submit">Rename Family</button>
+        </form>
+        <h2>Current Family Members</h2>
 
-<table th:if="${!#lists.isEmpty(members)}">
-    <thead>
-    <tr>
-        <th>Name |</th>
-        <th>Username |</th>
-        <th>Action</th>
-        <th>Change Admin</th>
-    </tr>
-    </thead>
+        <table th:if="${!#lists.isEmpty(members)}">
+            <thead>
+                <tr>
+                    <th>Name |</th>
+                    <th>Username |</th>
+                    <th>Action</th>
+                    <th>Change Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="member : ${members}">
+                    <td th:text="${member.user.name}"></td>
+                    <td th:text="${member.user.username}"></td>
+                    <td>
+                        <span th:if="${member.user == user}">Administrator</span>
+                        <form th:unless="${member.user == user}" th:action="@{/removeFamilyMember}" method="post">
+                            <input type="hidden" name="membershipID" th:value="${member.membershipID}"/>
+                            <button type="submit">Remove Member</button>
+                        </form>
+                    </td>
+                    <td>
+                        <span th:if="${member.user == user}">Administrator</span>
+                        <form th:unless="${member.user == user}" th:action="@{/makeFamilyMemberAdmin}" method="post">
+                            <input type="hidden" name="membershipID" th:value="${member.membershipID}"/>
+                            <button type="submit">Make Admin</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-    <tbody>
-    <tr th:each="member : ${members}">
-        <td th:text="${member.user.name}"></td>
-        <td th:text="${member.user.username}"></td>
-        <td>
-            <span th:if="${member.user == user}">Administrator</span>
-            <form th:unless="${member.user == user}" th:action="@{/removeFamilyMember}" method="post">
-                <input type="hidden" name="membershipID" th:value="${member.membershipID}"/>
-                <button type="submit">Remove Member</button>
-            </form>
-        </td>
-        <td>
-            <span th:if="${member.user == user}">Administrator</span>
-            <form th:unless="${member.user == user}" th:action="@{/makeFamilyMemberAdmin}" method="post">
-                <input type="hidden" name="membershipID" th:value="${member.membershipID}"/>
-                <button type="submit">Make Admin</button>
-            </form>
-        </td>
-    </tr>
-    </tbody>
-</table>
+        <p th:if="${#lists.isEmpty(members)}">There are no current family members.</p>
+        <h1>Pending Family Requests</h1>
+        <div th:if="${#lists.isEmpty(requests)}">
+            <p>There are no pending family requests.</p>
+        </div>
 
-<p th:if="${#lists.isEmpty(members)}">
-    There are no current family members.
-</p>
+        <table th:if="${!#lists.isEmpty(requests)}">
+            <thead>
+                <tr>
+                    <th>Users Name |</th>
+                    <th>Username</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-<h1>Pending Family Requests</h1>
-
-<div th:if="${#lists.isEmpty(requests)}">
-    <p>There are no pending family requests.</p>
-</div>
-
-<table th:if="${!#lists.isEmpty(requests)}">
-    <thead>
-    <tr>
-        <th>Users Name  | </th>
-        <th>Username</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    <tr th:each="request : ${requests}">
-        <td th:text="${request.user.name}"></td>
-        <td th:text="${request.user.username}"></td>
-        <td>
-            <form th:action="@{/acceptFamilyMember}" method="post" style="display:inline">
-                <input type="hidden" name="membershipID" th:value="${request.membershipID}"/>
-                <button type="submit">Accept</button>
-            </form>
-            <form th:action="@{/rejectFamilyMember}" method="post" style="display:inline">
-                <input type="hidden" name="membershipID" th:value="${request.membershipID}"/>
-                <button type="submit">Reject</button>
-            </form>
-        </td>
-    </tr>
-    </tbody>
-</table>
-</body>
+            <tbody>
+                <tr th:each="request : ${requests}">
+                    <td th:text="${request.user.name}"></td>
+                    <td th:text="${request.user.username}"></td>
+                    <td>
+                        <form th:action="@{/acceptFamilyMember}" method="post" style="display:inline">
+                            <input type="hidden" name="membershipID" th:value="${request.membershipID}"/>
+                            <button type="submit">Accept</button>
+                        </form>
+                        <form th:action="@{/rejectFamilyMember}" method="post" style="display:inline">
+                            <input type="hidden" name="membershipID" th:value="${request.membershipID}"/>
+                            <button type="submit">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
 </html>

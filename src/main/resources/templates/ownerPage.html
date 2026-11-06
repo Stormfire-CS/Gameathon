@@ -1,24 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Owner Home</title>
-</head>
-<body>
-<div th:replace="~{fragments :: topBar}"></div>
-<h1>Gameathon</h1>
-<p>Welcome to your stuff: <span th:text="${user.name}"></span></p>
-<a th:href="@{/homePage}">
-    <button type="button">My Home</button>
-</a>
-<a th:href="@{/familyPage}">
-    <button type="button">My Family</button>
-</a>
-<a th:href="@{/viewGamesPage}">
-    <button type="button">View My Games</button>
-</a>
-<a th:href="@{/editCollectionPage}">
-    <button type="button">Edit my Collection</button>
-</a>
-</body>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Owner Home</title>
+    </head>
+    <body>
+        <div th:replace="~{fragments :: topBar}"></div>
+        <h1>Gameathon</h1>
+        <p>Welcome to your stuff: <span th:text="${user.name}"></span></p>
+        <a th:href="@{/homePage}"><button type="button">My Home</button></a>
+        <a th:href="@{/familyPage}"><button type="button">My Family</button></a>
+        <a th:href="@{/viewGamesPage}"><button type="button">View My Games</button></a>
+        <a th:href="@{/editCollectionPage}"><button type="button">Edit my Collection</button></a>
+    </body>
 </html>
