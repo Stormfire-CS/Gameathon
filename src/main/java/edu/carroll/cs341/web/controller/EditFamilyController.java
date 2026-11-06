@@ -201,4 +201,18 @@ public class EditFamilyController {
 
         return "redirect:/editFamilyPage";
     }
+
+    @PostMapping("/makeFamilyMemberAdmin")
+    public String makeFamilyMemberAdmin(HttpSession session, Long membershipID) {
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+
+        familyService.changeAdmin(user, familyMembershipService.getUserByMembershipID(membershipID));
+        return "redirect:/familyPage";
+
+    }
 }

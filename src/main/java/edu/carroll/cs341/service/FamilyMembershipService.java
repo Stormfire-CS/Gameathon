@@ -94,4 +94,6 @@ import java.util.List;
      *         {@code false} otherwise
      */
     boolean leaveFamily(User user);
+
+    User getUserByMembershipID(Long membershipID);
 }

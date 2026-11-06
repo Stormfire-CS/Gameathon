@@ -30,6 +30,7 @@
         <th>Name |</th>
         <th>Username |</th>
         <th>Action</th>
+        <th>Change Admin</th>
     </tr>
     </thead>
 
@@ -38,17 +39,17 @@
         <td th:text="${member.user.name}"></td>
         <td th:text="${member.user.username}"></td>
         <td>
-            <span th:if="${member.user == user}">
-                Administrator
-            </span>
-
-            <form th:unless="${member.user == user}"
-                  th:action="@{/removeFamilyMember}"
-                  method="post">
-                <input type="hidden"
-                       name="membershipID"
-                       th:value="${member.membershipID}"/>
+            <span th:if="${member.user == user}">Administrator</span>
+            <form th:unless="${member.user == user}" th:action="@{/removeFamilyMember}" method="post">
+                <input type="hidden" name="membershipID" th:value="${member.membershipID}"/>
                 <button type="submit">Remove Member</button>
+            </form>
+        </td>
+        <td>
+            <span th:if="${member.user == user}">Administrator</span>
+            <form th:unless="${member.user == user}" th:action="@{/makeFamilyMemberAdmin}" method="post">
+                <input type="hidden" name="membershipID" th:value="${member.membershipID}"/>
+                <button type="submit">Make Admin</button>
             </form>
         </td>
     </tr>

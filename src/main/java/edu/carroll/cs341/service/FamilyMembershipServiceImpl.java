@@ -72,7 +72,7 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
         // Only accepted memberships determine which family belongs to the user.
         List<FamilyMembership> memberships = membershipRepo.findByUserAndStatus(user, ACCEPTED);
         if (memberships.size() != 1) {
-            log.warn("getFamilyForUser: user {} has {} accepted membership('s)", user, memberships.size());
+            log.debug("getFamilyForUser: user {} has {} accepted membership('s)", user, memberships.size());
             return null;
         }
 
@@ -355,6 +355,23 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
 
         return membershipRepo.findById(membershipID).orElse(null);
     }
+
+    @Override
+    public User getUserByMembershipID(Long membershipID) {
+        if (membershipID == null) {
+            log.warn("getUserByMembershipID: membershipID is null");
+            return null;
+        }
+
+        FamilyMembership familyMembership = membershipRepo.findById(membershipID).orElse(null);
+
+        if(familyMembership == null) {
+            return null;
+        }
+
+        return familyMembership.getUser();
+    }
+
 
     /**
      * Removes an accepted member from a family administered by the specified user.

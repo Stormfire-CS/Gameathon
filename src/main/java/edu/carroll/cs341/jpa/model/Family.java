@@ -9,6 +9,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.aspectj.util.LangUtil.EOL;
 
@@ -51,6 +52,12 @@ public class Family {
     @OneToOne
     @JoinColumn(name = "family_admin", nullable = false, unique = true)
     private User familyAdmin;
+
+    /**
+     * A unique identifier used to distinguish this family from other families.
+     */
+    @Column(nullable = false, unique = true, updatable = false)
+    private String familyIdentifier = UUID.randomUUID().toString();
 
     /**
      * Creates an empty Family object.
@@ -158,7 +165,7 @@ public class Family {
             return false;
 
         Family family = (Family) o;
-        return (familyName.equals(family.familyName) && familyAdmin.equals(family.familyAdmin));
+        return (familyName.equals(family.familyName) && familyIdentifier.equals(family.familyIdentifier));
     }
 
     /**
@@ -168,6 +175,6 @@ public class Family {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(familyName, familyAdmin);
+        return Objects.hash(familyName, familyIdentifier);
     }
 }

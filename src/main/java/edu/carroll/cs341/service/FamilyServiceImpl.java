@@ -212,5 +212,52 @@ public class FamilyServiceImpl implements FamilyService{
 
         return true;
     }
+
+    /**
+     * Changes the administrator of the family administered by the specified user.
+     *
+     * <p>The operation fails if either user is {@code null}, the current user
+     * does not administer a family, or the proposed administrator is not an
+     * accepted member of that family.</p>
+     *
+     * @param currentAdmin the user currently administering the family
+     * @param newAdmin the user who will become the new administrator
+     * @return {@code true} if the administrator was changed successfully;
+     *         {@code false} otherwise
+     */
+    @Override
+    public boolean changeAdmin(User currentAdmin, User newAdmin) {
+        log.info("changeAdmin: user '{}' is attempting to change the family administrator to '{}'",currentAdmin, newAdmin);
+
+        // Both users are required.
+        if (currentAdmin == null || newAdmin == null) {
+            log.error("changeAdmin: current admin or new admin is null");
+            return false;
+        }
+
+        // Find the family administered by the current user.
+        Family family = familiesRepo.findByFamilyAdmin(currentAdmin);
+
+        if (family == null || !family.getFamilyAdmin().equals(currentAdmin)) {
+            log.debug("changeAdmin: user '{}' is not the family admin", currentAdmin);
+            return false;
+        }
+
+        // The new administrator must already belong to the same family.
+        if (!family.equals(newAdmin.getFamily())) {
+            log.debug("changeAdmin: user '{}' does not belong to family '{}'",
+                    newAdmin, family);
+            return false;
+        }
+
+        // Update the family administrator.
+        family.setFamilyAdmin(newAdmin);
+        familiesRepo.save(family);
+
+        log.debug("changeAdmin: user '{}' changed the administrator of family '{}' to '{}'",
+                currentAdmin, family, newAdmin);
+
+        return true;
+    }
 }
 

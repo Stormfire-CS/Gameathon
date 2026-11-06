@@ -53,4 +53,7 @@ public interface FamilyService {
      *         {@code false} otherwise
      */
     boolean renameFamily(User user, String familyName);
+
+    boolean changeAdmin(User currentAdmin, User newAdmin);
+
 }
