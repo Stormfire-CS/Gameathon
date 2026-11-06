@@ -56,4 +56,16 @@ public interface FamilyService {
 
     boolean changeAdmin(User currentAdmin, User newAdmin);
 
+    /**
+     * Deletes the family administered by the specified user.
+     *
+     * <p>All family memberships are removed and the associated users'
+     * family references are cleared before the family is deleted.</p>
+     *
+     * @param user the user requesting the family deletion
+     * @return {@code true} if the family was deleted successfully;
+     *         {@code false} otherwise
+     */
+    boolean deleteFamily(User user);
+
 }

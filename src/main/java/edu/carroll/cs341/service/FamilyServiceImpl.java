@@ -259,5 +259,59 @@ public class FamilyServiceImpl implements FamilyService{
 
         return true;
     }
+
+    /**
+     * Deletes the family administered by the specified user.
+     *
+     * <p>All family memberships are removed and the associated users'
+     * family references are cleared before the family is deleted.</p>
+     *
+     * @param user the user requesting the family deletion
+     * @return {@code true} if the family was deleted successfully;
+     *         {@code false} otherwise
+     */
+    @Transactional
+    @Override
+    public boolean deleteFamily(User user) {
+        log.info("deleteFamily: user '{}' is attempting to delete their family", user);
+
+        // A valid user is required.
+        if (user == null) {
+            log.error("deleteFamily: user is null");
+            return false;
+        }
+
+        // Find the family administered by this user.
+        Family family = familiesRepo.findByFamilyAdmin(user);
+
+        if (family == null || !family.getFamilyAdmin().equals(user)) {
+            log.debug("deleteFamily: user '{}' is not the family admin", user);
+            return false;
+        }
+
+        // Retrieve all memberships associated with the family.
+        List<FamilyMembership> memberships = membershipRepo.findByFamily(family);
+
+        // Clear the family reference for each associated user.
+        for (FamilyMembership membership : memberships) {
+            User member = membership.getUser();
+
+            if (family.equals(member.getFamily())) {
+                member.setFamily(null);
+                userRepo.save(member);
+            }
+        }
+
+        // Delete all memberships before deleting the family.
+        membershipRepo.deleteAll(memberships);
+        membershipRepo.flush();
+
+        // Delete the family.
+        familiesRepo.delete(family);
+
+        log.debug("deleteFamily: user '{}' successfully deleted family '{}'", user, family);
+
+        return true;
+    }
 }
 

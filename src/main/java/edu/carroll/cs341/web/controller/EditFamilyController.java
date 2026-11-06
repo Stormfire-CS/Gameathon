@@ -215,4 +215,16 @@ public class EditFamilyController {
         return "redirect:/familyPage";
 
     }
+
+    @PostMapping("/deleteFamily")
+    public String deleteFamily(HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        familyService.deleteFamily(user);
+        return "redirect:/familyPage";
+    }
 }

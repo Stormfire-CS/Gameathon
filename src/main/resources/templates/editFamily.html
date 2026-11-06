@@ -11,9 +11,12 @@
     Welcome Administer: <span th:text="${user.name}"></span>
 </p>
 
-<a th:href="@{/familyPage}">
-    <button type="button">Back to Family</button>
-</a>
+<a th:href="@{/familyPage}"><button type="button">Back to Family</button></a>
+    <form th:action="@{/deleteFamily}" method="post"
+          style="display: inline-block;"
+          onsubmit="return confirm('Are you sure you want to delete your family? This action cannot be undone.');">
+        <button type="submit">Delete Family</button>
+    </form>
 <h2>Change Family Name</h2>
 <form th:action="@{/renameFamily}" th:object="${familyNameForm}" method="post">
     <label for="familyName">New Family Name:</label>
@@ -21,7 +24,6 @@
     <span th:if="${#fields.hasErrors('familyName')}" th:text="${#strings.listJoin(#fields.errors('familyName'), '; ')}">Family Name Error</span><br/>
     <button type="submit">Rename Family</button>
 </form>
-
 <h2>Current Family Members</h2>
 
 <table th:if="${!#lists.isEmpty(members)}">

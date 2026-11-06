@@ -54,4 +54,13 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
      * @return the matching membership, or {@code null} if no match is found
      */
     FamilyMembership findByFamilyAndUser(Family family, User user);
+
+    /**
+     * Finds all memberships associated with a specified family.
+     *
+     * @param family the family
+     * @return a list of all memberships associated with the family;
+     *         an empty list if no matches are found
+     */
+    List<FamilyMembership> findByFamily(Family family);
 }
