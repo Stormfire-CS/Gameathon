@@ -89,7 +89,7 @@ public class EditCollectionController {
         model.addAttribute("ownedGames", gamesOwnedService.getGamesOwnedByUsername(user));
 
         // Supply an empty form object for adding a game to the colleciton.
-        model.addAttribute("addGameTocollectionForm", new AddGameToCollectionForm());
+        model.addAttribute("addGameToCollectionForm", new AddGameToCollectionForm());
         return "editCollection";
     }
 
