@@ -9,7 +9,7 @@
         <h1>Add a New Game</h1>
         <p>Please enter the name of the game: <span th:text="${user.name}"></span></p>
         <a th:href="@{/editCollectionPage}"><button type="button">Back to Adding Game to Collection</button></a>
-        <form th:action="@{/addGame}" th:object="${createGameForm}" method="post">
+        <form th:action="@{/addGame}" th:object="${addGameForm}" method="post">
             <label>Game Name:</label>
             <input type="text" th:field="*{gameName}" placeholder="Game Name"/>
             <span th:if="${#fields.hasErrors('gameName')}"
@@ -29,7 +29,92 @@
 
             <button type="submit">Add Game to Database</button>
         </form>
-    </body>
-</html>
 
+        <h2>Edit an Existing Game</h2>
+
+        <form id="editGameForm"
+              th:action="@{/editGame}"
+              th:object="${editGameForm}"
+              method="post">
+            <label>Select a Game:</label>
+            <select th:field="*{gameID}" required>
+                <option value="">-- Select a Game --</option>
+                <option th:each="game : ${availableGames}"
+                        th:value="${game.gameID}"
+                        th:text="${game.gameName}">
+                </option>
+            </select><br/>
+
+            <label>New Game Name:</label>
+            <input type="text" th:field="*{gameName}" placeholder="Game Name"/><br/>
+            <span th:if="${#fields.hasErrors('gameName')}"
+                  th:text="${#strings.listJoin(#fields.errors('gameName'), '; ')}"></span><br/>
+            <label>Minimum Number of Players:</label>
+            <input type="number" th:field="*{minPlayers}" placeholder="Minimum # of Players"/><br/>
+            <span th:if="${#fields.hasErrors('minPlayers')}" th:errors="*{minPlayers}"></span><br/>
+            <label>Maximum Number of Players:</label>
+            <input type="number" th:field="*{maxPlayers}" placeholder="Maximum # of Players"/><br/>
+            <span th:if="${#fields.hasErrors('maxPlayers')}" th:errors="*{maxPlayers}"></span><br/>
+
+            <span th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></span>
+            <p>If you edit a game or the information assocaited with it, it will be changed for all of your games that refrence it</p>
+            <button type="submit">Save Changes</button>
+        </form>
+
+        <h2>Remove Game</h2>
+
+        <p>
+            Removing a game will remove it from your list of available games.
+            You cannot remove a game while it is associated with any of your
+            collection entries. Remove those entries first if you want to
+            remove the game.
+        </p>
+
+        <form th:action="@{/removeGame}" method="post">
+            <label>Select a Game:</label>
+            <select name="gameID" id="removeGameID" required>
+                <option value="">-- Select a Game --</option>
+                <option th:each="game : ${availableGames}" th:value="${game.gameID}" th:text="${game.gameName}"></option>
+            </select>
+            <span th:if="${removeGameError != null}" th:text="${removeGameError}"><br></span>
+            <span th:if="${removeGameSuccess != null}" th:text="${removeGameSuccess}"><br></span>
+            <button type="submit">Remove Game</button>
+        </form>
+    </body>
+    <script>
+        const editForm = document.getElementById("editGameForm");
+
+        editForm.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const gameID = document.getElementById("gameID").value;
+
+            if (!gameID) {
+                editForm.submit();
+                return;
+            }
+
+            const response = await fetch(
+                `/gameReferenceCount?gameID=${encodeURIComponent(gameID)}`
+            );
+
+            if (!response.ok) {
+                alert("Unable to retrieve the number of affected collection entries.");
+                return;
+            }
+
+            const referenceCount = await response.text();
+
+            const confirmed = confirm(
+                "You are changing this game. This will affect " +
+                referenceCount +
+                " of your collection entries. Do you want to continue?"
+            );
+
+            if (confirmed) {
+                editForm.submit();
+            }
+        });
+    </script>
+</html>
 

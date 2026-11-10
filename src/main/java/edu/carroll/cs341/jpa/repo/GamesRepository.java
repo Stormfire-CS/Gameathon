@@ -37,14 +37,6 @@ public interface GamesRepository extends JpaRepository<Game, Long> {
     boolean existsByGameName(String gameName);
 
     /**
-     * Finds a game by its name, ignoring differences in letter case.
-     *
-     * @param gameName the name of the game to search for
-     * @return the matching game, or {@code null} if no match is found
-     */
-    Game findByGameNameIgnoreCase(String gameName);
-
-    /**
      * Finds a game by its database identifier.
      *
      * @param gameID the ID of the game to search for
@@ -66,4 +58,8 @@ public interface GamesRepository extends JpaRepository<Game, Long> {
      * if no matching games are found
      */
     List<Game> findByUserWhoAddedIsNullOrUserWhoAddedOrderByGameNameAsc(User userWhoAdded);
+
+    Game findByGameNameIgnoreCaseAndUserWhoAdded(String gameName, User userWhoAdded);
+
+    Game findByGameNameIgnoreCaseAndUserWhoAddedIsNull(String gameName);
 }

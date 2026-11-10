@@ -223,4 +223,32 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         return gamesOwnedRepo.findByUserIn(users);
     }
 
+    @Override
+    public long getNumberOfReferences(Long gameID, User user) {
+        if (gameID == null || user == null) {
+            log.warn("getNumberOfReferences: gameID or user was null");
+            return 0;
+        }
+
+        return gamesOwnedRepo.countByGame_GameIDAndUser(gameID, user);
+    }
+
+    @Transactional
+    @Override
+    public void updateGameReferences(Long gameID, User user, Game newGame) {
+
+        if (gameID == null || user == null || newGame == null) {
+            log.warn("updateGameReferences: gameID, user, or newGame was null");
+            return;
+        }
+
+        List<GameOwned> ownedGames = gamesOwnedRepo.findByGame_GameIDAndUser(gameID, user);
+
+        for (GameOwned ownedGame : ownedGames) {
+            ownedGame.setGame(newGame);
+        }
+        log.debug("updateGameReferences: {} updated {} owned games game refrences.", user, ownedGames.size());
+
+        gamesOwnedRepo.saveAll(ownedGames);
+    }
 }

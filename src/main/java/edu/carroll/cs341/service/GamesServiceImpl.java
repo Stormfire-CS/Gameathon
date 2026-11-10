@@ -1,6 +1,7 @@
 package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.Game;
+import edu.carroll.cs341.jpa.model.GameOwned;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
 import edu.carroll.cs341.jpa.repo.UserRepository;
@@ -9,7 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implements the service operations for managing games in the game catalog.
@@ -37,7 +42,9 @@ public class GamesServiceImpl implements GamesService {
     private final GamesRepository gamesRepo;
 
     /** Repository for looking up user accounts. */
-    final UserRepository userRepo;
+    private final UserRepository userRepo;
+
+    private final GamesOwnedService gamesOwnedService;
 
     /**
      * Constructs the service with the repositories needed to manage games
@@ -46,9 +53,10 @@ public class GamesServiceImpl implements GamesService {
      * @param gamesRepo repository for game catalog operations
      * @param userRepo repository for user account lookups
      */
-    public GamesServiceImpl(GamesRepository gamesRepo, UserRepository userRepo) {
+    public GamesServiceImpl(GamesRepository gamesRepo, UserRepository userRepo, GamesOwnedService gamesOwnedService) {
         this.gamesRepo = gamesRepo;
         this.userRepo = userRepo;
+        this.gamesOwnedService = gamesOwnedService;
     }
 
     /**
@@ -67,14 +75,46 @@ public class GamesServiceImpl implements GamesService {
         // Ensure user is not null
         if (user == null) {
             log.error("getAvailableGames: user was null");
+            return new LinkedList<>();
         }
 
         // Retrieve globally available games along with those added by this owner.
         List<Game> games = gamesRepo.findByUserWhoAddedIsNullOrUserWhoAddedOrderByGameNameAsc(user);
 
+//        /**
+//         * Need to cite
+//         answered Jan 9, 2012 at 22:23
+//         Robin's user avatar
+//         Robin
+//         36.7k55 gold badges5151 silver badges
+//         https://stackoverflow.com/questions/8795945/merging-two-maps
+//         */
+
+        Map<String, Game> defaultGames = new HashMap<>();
+        Map<String, Game> userGames = new HashMap<>();
+
+        for (Game game: games) {
+            String gameName = game.getGameName();
+
+            if (game.getUserWhoAdded() == null) {
+                defaultGames.put(gameName, game);
+            } else {
+                userGames.put(gameName, game);
+            }
+        }
+
+        for (Map.Entry<String, Game> game: defaultGames.entrySet()) {
+            userGames.computeIfAbsent(game.getKey(), k -> game.getValue());
+        }
+
+        userGames.entrySet().removeIf(game -> !game.getValue().getCanSee());
+
+        List<Game> availableGames = new LinkedList<>(userGames.values());
+
+        availableGames.sort(Comparator.comparing(Game::getGameName, String.CASE_INSENSITIVE_ORDER));
         log.debug("getAvailableGames: found {} available games", games.size());
 
-        return games;
+        return availableGames;
     }
 
     /**
@@ -104,23 +144,51 @@ public class GamesServiceImpl implements GamesService {
             return false;
         }
 
-        // Prevent adding another catalog entry with an existing game name.
-        Game game = gamesRepo.findByGameNameIgnoreCase(gameName);
-        if (game != null) {
-            if (game.getUserWhoAdded() == null || game.getUserWhoAdded().equals(user)) {
-                log.debug("addGame: game {} already exists and is available to user {}", gameName, user.getUsername());
-                return false;
-            }
+        gameName = gameName.trim();
+
+        if (gameName.isEmpty()) {
+            log.warn("game name is empty");
+            return false;
         }
+
         if (maxPlayers != null && minPlayers != null) {
             if (maxPlayers < minPlayers) {
-                log.debug("addGame: max players {} was less than min players {}", maxPlayers, minPlayers);
+                log.error("addGame: max players {} was less than min players {}", maxPlayers, minPlayers);
                 return false;
             }
         }
 
         if ((maxPlayers != null && maxPlayers < 0) || (minPlayers != null && minPlayers < 0)) {
-            log.debug("addGame: max player {} or min player {} was less than zero", maxPlayers, minPlayers);
+            log.error("addGame: max player {} or min player {} was less than zero", maxPlayers, minPlayers);
+            return false;
+        }
+
+        // Check whether the user already owns a game with this name.
+        Game existingGame = gamesRepo.findByGameNameIgnoreCaseAndUserWhoAdded(gameName, user);
+
+        if (existingGame != null) {
+            // Do not allow adding a game that is already visible.
+            if (existingGame.getCanSee()) {
+                log.debug("addGame: user {} already has a visible game named {}", user.getUsername(), gameName);
+                return false;
+            }
+
+            // Update the existing hidden game and make it visible.
+            existingGame.setMaxPlayers(maxPlayers);
+            existingGame.setMinPlayers(minPlayers);
+            existingGame.setCanSee(true);
+
+            gamesRepo.save(existingGame);
+
+            log.info("addGame: user {} restored game {}", user.getUsername(), gameName);
+            return true;
+        }
+
+        // Check whether a default game with this name already exists.
+        Game defaultGame = gamesRepo.findByGameNameIgnoreCaseAndUserWhoAddedIsNull(gameName);
+
+        if (defaultGame != null) {
+            log.debug("addGame: default game {} already exists", gameName);
             return false;
         }
 
@@ -131,6 +199,7 @@ public class GamesServiceImpl implements GamesService {
         newGame.setMaxPlayers(maxPlayers);
         newGame.setMinPlayers(minPlayers);
         newGame.setUserWhoAdded(user);
+        newGame.setCanSee(true);
 
         // Save the new game to the catalog.
         gamesRepo.save(newGame);
@@ -138,4 +207,133 @@ public class GamesServiceImpl implements GamesService {
         log.info("addGame: user: {} added game: {}", user.getUsername(), newGame.getGameName());
         return true;
     }
+
+    @Transactional
+    @Override
+    public boolean editGame(User user, Long gameID, String gameName,
+                            Integer minPlayers, Integer maxPlayers) {
+
+        Game game = getGameByGameID(gameID);
+
+        if (user == null) {
+            log.warn("editGame: null user");
+            return false;
+        }
+        if (game == null) {
+            log.error("editGame: null Game");
+            return false;
+        }
+        if (gameName == null) {
+            log.error("editGame: null gameName");
+            return false;
+        }
+        if (gameName.trim().isEmpty()) {
+            log.error("editGame: gameName was empty");
+            return false;
+        }
+
+        String originalName = game.getGameName();
+        String newName = gameName.trim();
+
+        Game userCopy = gamesRepo.findByGameNameIgnoreCaseAndUserWhoAdded(
+                originalName, user);
+
+        // The user is keeping the same game name.
+        if (originalName.equalsIgnoreCase(newName)) {
+            if (userCopy == null) {
+                // Create a user-owned copy of the default game.
+                userCopy = new Game();
+                userCopy.setUserWhoAdded(user);
+            }
+
+            userCopy.setGameName(newName);
+            userCopy.setMinPlayers(minPlayers);
+            userCopy.setMaxPlayers(maxPlayers);
+            userCopy.setCanSee(true);
+
+            gamesRepo.save(userCopy);
+            gamesOwnedService.updateGameReferences(gameID, user, userCopy);
+
+            return true;
+        }
+
+        // The user is changing the game's name.
+        // Check that they do not already have a game with the new name.
+        Game existingNewGame = gamesRepo.findByGameNameIgnoreCaseAndUserWhoAdded(
+                newName, user);
+
+        if (existingNewGame != null) {
+            log.warn("editGame: user already has a game named '{}'", newName);
+            return false;
+        }
+
+        if (userCopy == null) {
+            // Create a hidden copy of the original game to suppress its default.
+            userCopy = new Game();
+            userCopy.setGameName(originalName);
+            userCopy.setMinPlayers(game.getMinPlayers());
+            userCopy.setMaxPlayers(game.getMaxPlayers());
+            userCopy.setUserWhoAdded(user);
+        }
+
+        userCopy.setCanSee(false);
+        gamesRepo.save(userCopy);
+
+        // Create a new visible game with the updated name and information.
+        Game newGame = new Game();
+        newGame.setGameName(newName);
+        newGame.setMinPlayers(minPlayers);
+        newGame.setMaxPlayers(maxPlayers);
+        newGame.setUserWhoAdded(user);
+        newGame.setCanSee(true);
+
+        gamesRepo.save(newGame);
+        gamesOwnedService.updateGameReferences(gameID, user, newGame);
+
+        return true;
+    }
+
+    @Transactional
+    @Override
+    public boolean removeGame(User user, Long gameID) {
+        Game game = getGameByGameID(gameID);
+
+        if (user == null) {
+            log.error("removeGame: null user");
+            return false;
+        }
+        if (game == null) {
+            log.error("removeGame: null Game");
+            return false;
+        }
+        Long games = gamesOwnedService.getNumberOfReferences(gameID, user);
+        if (games != 0) {
+            log.debug("removeGame: game is still refrenced by users owned game.");
+            return false;
+        }
+
+        if(game.getUserWhoAdded() == null) {
+            Game removedGame = new Game();
+            removedGame.setGameName(game.getGameName());
+            removedGame.setMinPlayers(game.getMinPlayers());
+            removedGame.setMaxPlayers(game.getMaxPlayers());
+            removedGame.setUserWhoAdded(user);
+            removedGame.setCanSee(false);
+            gamesRepo.save(removedGame);
+            return true;
+        }
+        game.setCanSee(false);
+        gamesRepo.save(game);
+        return true;
+
+    }
+
+    public Game getGameByGameID(Long gameID) {
+        if (gameID == null) {
+            log.error("getGameByUserID: gameID is null");
+            return null;
+        }
+        return gamesRepo.findByGameID(gameID);
+    }
+
 }

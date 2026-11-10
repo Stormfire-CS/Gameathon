@@ -41,4 +41,10 @@ public interface GamesService {
      * @param maxPlayers the maximum number of players supported by the game
      */
     boolean addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers);
+
+    boolean editGame(User user, Long gameID, String gameName, Integer minPlayers, Integer maxPlayers);
+
+    boolean removeGame(User user, Long gameID);
+
+    Game getGameByGameID(Long gameID);
 }

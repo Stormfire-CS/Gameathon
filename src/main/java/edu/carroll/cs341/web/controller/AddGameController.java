@@ -1,8 +1,10 @@
 package edu.carroll.cs341.web.controller;
 
 import edu.carroll.cs341.jpa.model.User;
+import edu.carroll.cs341.service.GamesOwnedService;
 import edu.carroll.cs341.service.GamesService;
 import edu.carroll.cs341.web.form.CreateGameForm;
+import edu.carroll.cs341.web.form.EditGameForm;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,9 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Handles web requests for adding new games to the game catalog.
@@ -36,13 +41,16 @@ public class AddGameController {
      */
     private final GamesService gamesService;
 
+    private final GamesOwnedService gamesOwnedService;
+
     /**
      * Constructs the controller with the service required to manage games.
      *
      * @param gamesService service for retrieving and adding games
      */
-    public AddGameController(GamesService gamesService) {
+    public AddGameController(GamesService gamesService, GamesOwnedService gamesOwnedService) {
         this.gamesService = gamesService;
+        this.gamesOwnedService = gamesOwnedService;
     }
 
     /**
@@ -65,7 +73,9 @@ public class AddGameController {
         // Make the username available to the view for use during submission.
         model.addAttribute("user", user);
 
-        model.addAttribute("createGameForm", new CreateGameForm());
+        model.addAttribute("addGameForm", new CreateGameForm());
+        model.addAttribute("editGameForm", new EditGameForm());
+        model.addAttribute("availableGames", gamesService.getAvailableGames(user));
         return "addGame";
     }
 
@@ -79,7 +89,7 @@ public class AddGameController {
      */
     @PostMapping("/addGame")
     public String addGame(
-            @Valid @ModelAttribute CreateGameForm createGameForm,
+            @Valid @ModelAttribute("addGameForm") CreateGameForm addGameForm,
             BindingResult result,
             HttpSession session,
             Model model
@@ -93,14 +103,16 @@ public class AddGameController {
 
         if (result.hasErrors()) {
             model.addAttribute("user", user);
+            model.addAttribute("availableGames", gamesService.getAvailableGames(user));
+            model.addAttribute("editGameForm", new EditGameForm());
             return "addGame";
         }
 
         boolean added = gamesService.addGame(
                 user,
-                createGameForm.getGameName(),
-                createGameForm.getMinPlayers(),
-                createGameForm.getMaxPlayers()
+                addGameForm.getGameName(),
+                addGameForm.getMinPlayers(),
+                addGameForm.getMaxPlayers()
         );
 
         if (!added) {
@@ -109,6 +121,8 @@ public class AddGameController {
                     "The game could not be added. Check that the game doesn't already exist."
             ));
             model.addAttribute("user", user);
+            model.addAttribute("availableGames", gamesService.getAvailableGames(user));
+            model.addAttribute("editGameForm", new EditGameForm());
             return "addGame";
         }
 
@@ -116,5 +130,106 @@ public class AddGameController {
         return "redirect:/editCollectionPage";
     }
 
+    @PostMapping("/editGame")
+    public String editGame(
+            @Valid @ModelAttribute("editGameForm") EditGameForm editGameForm,
+            BindingResult result,
+            HttpSession session,
+            Model model
+    ) {
 
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if (editGameForm.getGameID() == null) {
+            result.addError(new ObjectError("globalError", "Please select a game to edit."
+            ));
+        }
+
+        if (result.hasErrors()) {
+            model.addAttribute("user", user);
+            model.addAttribute("availableGames", gamesService.getAvailableGames(user));
+            model.addAttribute("addGameForm", new CreateGameForm());
+            return "addGame";
+        }
+
+        boolean edited = gamesService.editGame(
+                user,
+                editGameForm.getGameID(),
+                editGameForm.getGameName(),
+                editGameForm.getMinPlayers(),
+                editGameForm.getMaxPlayers()
+        );
+
+        if (!edited) {
+            result.addError(new ObjectError(
+                    "globalError",
+                    "The game could not be edited. Check that the new game name is not already in use."
+            ));
+
+            model.addAttribute("user", user);
+            model.addAttribute("availableGames", gamesService.getAvailableGames(user));
+            model.addAttribute("addGameForm", new CreateGameForm());
+            return "addGame";
+        }
+
+        return "redirect:/editCollectionPage";
+    }
+
+    @PostMapping("/removeGame")
+    public String removeGame(HttpSession session, Long gameID, Model model) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        // Check whether the game is still associated with owned games.
+        long referenceCount = gamesOwnedService.getNumberOfReferences(gameID, user);
+
+        if (referenceCount > 0) {
+            model.addAttribute("removeGameError",
+                    "This game cannot be removed because it is still associated with " +
+                            referenceCount + " of your collection entries.");
+
+            // Reload the attributes needed by the page.
+            model.addAttribute("user", user);
+            model.addAttribute("addGameForm", new CreateGameForm());
+            model.addAttribute("editGameForm", new EditGameForm());
+            model.addAttribute("availableGames", gamesService.getAvailableGames(user));
+
+            return "addGame";
+        }
+
+        String gameName = gamesService.getGameByGameID(gameID).getGameName();
+
+        gamesService.removeGame(user, gameID);
+
+        model.addAttribute("removeGameSuccess", "Successfully removed " + gameName + ".");
+        model.addAttribute("user", user);
+        model.addAttribute("addGameForm", new CreateGameForm());
+        model.addAttribute("editGameForm", new EditGameForm());
+        model.addAttribute("availableGames", gamesService.getAvailableGames(user));
+
+        return "addGame";
+    }
+
+    @GetMapping("/gameReferenceCount")
+    @ResponseBody
+    public long getGameReferenceCount(
+            @RequestParam Long gameID,
+            HttpSession session) {
+
+        User user = (User) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return 0;
+        }
+
+        return gamesOwnedService.getNumberOfReferences(gameID, user);
+    }
 }

@@ -1,6 +1,7 @@
 package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.Family;
+import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.GameOwned;
 import edu.carroll.cs341.jpa.model.User;
 
@@ -62,4 +63,8 @@ public interface GamesOwnedService {
      * @return a list of games owned by members of the specified family
      */
     List<GameOwned> getGamesOwnedByFamily(Family family);
+
+    long getNumberOfReferences(Long gameID, User user);
+
+    void updateGameReferences(Long gameID, User user, Game newGame);
 }
