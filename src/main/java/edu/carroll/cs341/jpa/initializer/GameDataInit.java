@@ -123,6 +123,7 @@ public class GameDataInit implements CommandLineRunner {
 
                     game.setMinPlayers(minPlayers);
                     game.setMaxPlayers(maxPlayers);
+                    game.setCanSee(true);
 
                     // Save the new game record to the database.
                     gamesRepo.save(game);
