@@ -65,6 +65,12 @@ public class Game {
     private User userWhoAdded;
 
     /**
+     *  Whether the user can see the game.
+     */
+    @Column(name = "user_can_see")
+    private Boolean canSee;
+
+    /**
      * Creates an empty Game object.
      *
      * <p>This constructor is required by JPA when retrieving game records
@@ -170,6 +176,14 @@ public class Game {
      */
     public void setUserWhoAdded(User userWhoAdded) {
         this.userWhoAdded = userWhoAdded;
+    }
+
+    public Boolean getCanSee() {
+        return canSee;
+    }
+
+    public void setCanSee(Boolean canSee) {
+        this.canSee = canSee;
     }
 
     /**
