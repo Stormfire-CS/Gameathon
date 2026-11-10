@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.Year;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -109,6 +110,11 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         Game game = gamesRepo.findByGameID(gameID);
         if (game == null) {
             log.debug("addGameToCollection: game {} was not found", gameID);
+            return false;
+        }
+
+        if (yearProduced != null && (yearProduced > (Year.now().getValue() + 2) || yearProduced < -2000)) {
+            log.error("addGameToCollection: {} tried adding a game with an invalid year {}", user, yearProduced);
             return false;
         }
 
@@ -235,11 +241,11 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
 
     @Transactional
     @Override
-    public void updateGameReferences(Long gameID, User user, Game newGame) {
+    public boolean updateGameReferences(Long gameID, User user, Game newGame) {
 
         if (gameID == null || user == null || newGame == null) {
             log.warn("updateGameReferences: gameID, user, or newGame was null");
-            return;
+            return false;
         }
 
         List<GameOwned> ownedGames = gamesOwnedRepo.findByGame_GameIDAndUser(gameID, user);
@@ -250,5 +256,54 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         log.debug("updateGameReferences: {} updated {} owned games game refrences.", user, ownedGames.size());
 
         gamesOwnedRepo.saveAll(ownedGames);
+        return true;
     }
+    @Override
+    public GameOwned getGameOwnedByID(User user, Long gameOwnedID) {
+        if (gameOwnedID == null || user == null) {
+            log.warn("getGameOwnedByID: gameOwnedID or user was null");
+            return null;
+        }
+        GameOwned gameOwned = gamesOwnedRepo.findByGameOwnedID(gameOwnedID);
+
+        if (gameOwned == null) {
+            log.warn("getGameOwnedByID: gameOwned {} was not found", gameOwnedID);
+            return null;
+        }
+
+        if(!gameOwned.getUser().equals(user)) {
+            log.error("getGameOwnedByID: {} tried to retrieve a game owned by {}", user, gameOwned.getUser());
+            return null;
+        }
+
+        return gameOwned;
+    }
+
+    @Override
+    public boolean editGameInCollection(User user, Long gameOwnedID, Game game, Integer yearProduced) {
+        if (gameOwnedID == null || user == null || game == null) {
+            log.warn("editGameInCollection: user, gameOwnedID, or game was null");
+            return false;
+        }
+
+        GameOwned gameOwned = getGameOwnedByID(user, gameOwnedID);
+
+        if(gameOwned == null) {
+            log.warn("editGameInCollection: the user did not own the passed gameID");
+            return false;
+        }
+
+        if (yearProduced != null && (yearProduced > (Year.now().getValue() + 2) || yearProduced < -2000)) {
+            log.error("editGameInCollection: {} tried adding a game with an invalid year {}", user, yearProduced);
+            return false;
+        }
+
+        gameOwned.setGame(game);
+        gameOwned.setYearProduced(yearProduced);
+        gamesOwnedRepo.save(gameOwned);
+
+        return true;
+    }
+
+
 }

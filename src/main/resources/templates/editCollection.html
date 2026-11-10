@@ -15,7 +15,16 @@
             <label>Game Name:</label>
             <select name="gameID">
                 <option value="">Select a Game</option>
-                <option th:each="game : ${games}" th:value="${game.gameID}" th:text="${game.gameName}"></option>
+                <option th:each="game : ${games}"
+                        th:value="${game.gameID}"
+                        th:text="${game.minPlayers == null && game.maxPlayers == null
+            ? game.gameName
+            : game.minPlayers == null
+                ? game.gameName + ' (up to ' + game.maxPlayers + ' players)'
+                : game.maxPlayers == null
+                    ? game.gameName + ' (' + game.minPlayers + '+ players)'
+                    : game.gameName + ' (' + game.minPlayers + '-' + game.maxPlayers + ' players)'}">
+                </option>
             </select>
 
             <label>Year Produced:</label>
@@ -40,6 +49,12 @@
                 <td th:text="${gameOwned.game.minPlayers}"></td>
                 <td th:text="${gameOwned.game.maxPlayers}"></td>
                 <td th:text="${gameOwned.yearProduced}"></td>
+                <td>
+                    <form th:action="@{/editGameOwnedPage}" method="get">
+                        <input type="hidden" name="gameOwnedID" th:value="${gameOwned.gameOwnedID}"/>
+                        <button type="submit">Edit</button>
+                    </form>
+                    </td>
                 <td>
                     <form th:action="@{/deleteGameFromCollection}" method="post">
                         <input type="hidden" name="gameOwnedID" th:value="${gameOwned.gameOwnedID}"/>

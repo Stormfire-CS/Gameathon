@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Edit Game</title>
+    </head>
+    <body>
+        <div th:replace="~{fragments :: topBar}"></div>
+
+        <h1>Edit Game</h1>
+        <p>Editing:<span th:text="${gameOwned.game.gameName}"></span></p>
+        <form th:action="@{/editGameInCollection}" th:object="${addGameToCollectionForm}" method="post">
+            <label>Game Name:</label>
+            <select name="gameID" required>
+                <option value="">Select a Game</option>
+                <option th:each="game : ${games}"
+                        th:value="${game.gameID}"
+                        th:text="${game.minPlayers == null && game.maxPlayers == null
+            ? game.gameName
+            : game.minPlayers == null
+                ? game.gameName + ' (up to ' + game.maxPlayers + ' players)'
+                : game.maxPlayers == null
+                    ? game.gameName + ' (' + game.minPlayers + '+ players)'
+                    : game.gameName + ' (' + game.minPlayers + '-' + game.maxPlayers + ' players)'}">
+                </option>            </select>
+            <input type="hidden" name="gameOwnedID" th:value="${gameOwned.gameOwnedID}"/>
+            <label>Year Produced:</label>
+            <input type="number" th:field="*{yearProduced}" placeholder="Year Produced"/>
+            <span th:if="${#fields.hasErrors('yearProduced')}" th:errors="*{yearProduced}"></span>
+            <span th:if="${#fields.hasErrors('yearProducedValid')}" th:errors="*{yearProducedValid}">Future production year error</span>
+            <button type="submit">Save Changes</button>
+        </form>
+        <a th:href="@{/editCollectionPage}"><button type="button">Cancel</button></a>
+        <a th:href="@{/addGamePage}"> <button type="button">Edit game refrence</button></a>
+    </body>
+</html>

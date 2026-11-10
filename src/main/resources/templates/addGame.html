@@ -41,7 +41,13 @@
                 <option value="">-- Select a Game --</option>
                 <option th:each="game : ${availableGames}"
                         th:value="${game.gameID}"
-                        th:text="${game.gameName}">
+                        th:text="${game.minPlayers == null && game.maxPlayers == null
+            ? game.gameName
+            : game.minPlayers == null
+                ? game.gameName + ' (up to ' + game.maxPlayers + ' players)'
+                : game.maxPlayers == null
+                    ? game.gameName + ' (' + game.minPlayers + '+ players)'
+                    : game.gameName + ' (' + game.minPlayers + '-' + game.maxPlayers + ' players)'}">
                 </option>
             </select><br/>
 
@@ -74,7 +80,16 @@
             <label>Select a Game:</label>
             <select name="gameID" id="removeGameID" required>
                 <option value="">-- Select a Game --</option>
-                <option th:each="game : ${availableGames}" th:value="${game.gameID}" th:text="${game.gameName}"></option>
+                <option th:each="game : ${availableGames}"
+                        th:value="${game.gameID}"
+                        th:text="${game.minPlayers == null && game.maxPlayers == null
+            ? game.gameName
+            : game.minPlayers == null
+                ? game.gameName + ' (up to ' + game.maxPlayers + ' players)'
+                : game.maxPlayers == null
+                    ? game.gameName + ' (' + game.minPlayers + '+ players)'
+                    : game.gameName + ' (' + game.minPlayers + '-' + game.maxPlayers + ' players)'}">
+                </option>
             </select>
             <span th:if="${removeGameError != null}" th:text="${removeGameError}"><br></span>
             <span th:if="${removeGameSuccess != null}" th:text="${removeGameSuccess}"><br></span>

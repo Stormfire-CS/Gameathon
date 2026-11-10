@@ -66,5 +66,10 @@ public interface GamesOwnedService {
 
     long getNumberOfReferences(Long gameID, User user);
 
-    void updateGameReferences(Long gameID, User user, Game newGame);
+    boolean updateGameReferences(Long gameID, User user, Game newGame);
+
+    boolean editGameInCollection(User user, Long gameOwnedID, Game game, Integer yearProduced);
+
+    GameOwned getGameOwnedByID(User user, Long gameOwnedID);
+
 }
