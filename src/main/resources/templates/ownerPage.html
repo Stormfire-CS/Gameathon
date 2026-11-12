@@ -8,9 +8,11 @@
         <div th:replace="~{fragments :: topBar}"></div>
         <h1>Gameathon</h1>
         <p>Welcome to your stuff: <span th:text="${user.name}"></span></p>
+        If you wish to perform a family acction click on My family, if you wish to view your collection click on View My Games, <br>
+        if you wish to edit your collection click on Edit My Collection.<br><br>
         <a th:href="@{/homePage}"><button type="button">My Home</button></a>
         <a th:href="@{/familyPage}"><button type="button">My Family</button></a>
         <a th:href="@{/viewGamesPage}"><button type="button">View My Games</button></a>
-        <a th:href="@{/editCollectionPage}"><button type="button">Edit my Collection</button></a>
+        <a th:href="@{/editCollectionPage}"><button type="button">Edit My Collection</button></a>
     </body>
 </html>
