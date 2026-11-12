@@ -7,10 +7,10 @@
     <body>
         <div th:replace="~{fragments :: topBar}"></div>
         <h1>Gameathon</h1>
-        <p>Welcome to viewing your games: <span th:text="${user.name}"></span></p>
+        <h4>Welcome to viewing your games: <span th:text="${user.name}"></span></h4>
         <a th:href="@{/ownerPage}"><button type="button">Back to My Stuff</button></a>
         <a th:href="@{/editCollectionPage}"><button type="button">Edit Collection</button></a>
-
+        <hr>
         <h2>Games</h2>
         <table>
             <tr>
