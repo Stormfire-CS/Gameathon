@@ -7,7 +7,7 @@
     <body>
         <div th:replace="~{fragments :: topBar}"></div>
         <h1>Gameathon</h1>
-        <p>Please enter game information: <span th:text="${user.name}"></span></p>
+        <h4>Please enter game information: <span th:text="${user.name}"></span></h4>
         <a th:href="@{/ownerPage}"><button type="button">My Stuff</button></a>
         <a th:href="@{/viewGamesPage}"><button type="button">View My Games</button></a>
         <a th:href="@{/addGamePage}"><button type="button">Add, Remove, or Edit Game Title</button></a>
@@ -31,8 +31,8 @@
 
             <label>Year Produced:</label>
             <input type="number" th:field="*{yearProduced}" placeholder="Year Produced (optional)"/>
-            <span th:if="${#fields.hasErrors('yearProduced')}" th:errors="*{yearProduced}">Production year error</span>
-            <span th:if="${#fields.hasErrors('yearProducedValid')}" th:errors="*{yearProducedValid}">Future production year error</span>
+            <span th:if="${#fields.hasErrors('yearProduced')}" style="color: red;" th:errors="*{yearProduced}">Production year error</span>
+            <span th:if="${#fields.hasErrors('yearProducedValid')}" style="color: red;" th:errors="*{yearProducedValid}">Future production year error</span>
             <button type="submit">Add Game to Collection</button>
         </form>
         <hr>

@@ -8,7 +8,7 @@
         <div th:replace="~{fragments :: topBar}"></div>
 
         <h1>Edit Game</h1>
-        <p>Editing:<span th:text="${gameOwned.game.gameName}"></span></p>
+        <h4>Editing:<span th:text="${gameOwned.game.gameName}"></span></h4>
         <form th:action="@{/editGameInCollection}" th:object="${addGameToCollectionForm}" method="post">
             <label>Game Name:</label>
             <select name="gameID" required>
@@ -26,8 +26,8 @@
             <input type="hidden" name="gameOwnedID" th:value="${gameOwned.gameOwnedID}"/>
             <label>Year Produced:</label>
             <input type="number" th:field="*{yearProduced}" placeholder="Year Produced"/>
-            <span th:if="${#fields.hasErrors('yearProduced')}" th:errors="*{yearProduced}"></span>
-            <span th:if="${#fields.hasErrors('yearProducedValid')}" th:errors="*{yearProducedValid}">Future production year error</span>
+            <span style="color: red;" th:if="${#fields.hasErrors('yearProduced')}" th:errors="*{yearProduced}"></span>
+            <span style="color: red;" th:if="${#fields.hasErrors('yearProducedValid')}" th:errors="*{yearProducedValid}">Future production year error</span>
             <button type="submit">Save Changes</button>
         </form>
         <a th:href="@{/editCollectionPage}"><button type="button">Cancel</button></a>
