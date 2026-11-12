@@ -6,18 +6,20 @@
     </head>
     <body>
         <h1>Sign Up</h1>
+        <p>Please enter a username longer than 2 characters containing no spaces:</p><br>
         <form action="#" th:action="@{/signUpPage}" th:object="${createUserForm}" method="post">
             <span th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}">Global error</span><br/>
             <input type="text" th:field="*{username}" placeholder="Username"/>
             <span th:if="${#fields.hasErrors('username')}"
                   th:text="${#strings.listJoin(#fields.errors('username'), '; ')}">Username errors</span><br/>
+            <span th:if="${#fields.hasErrors('passwordMatching')}">
+            <span th:errors="*{passwordMatching}">Password matching error</span><br/></span>
             <input type="password" th:field="*{password1}" placeholder="Password"/>
             <span th:if="${#fields.hasErrors('password1')}"
                   th:text="${#strings.listJoin(#fields.errors('password1'), '; ')}">Password1 errors</span><br/>
             <input type="password" th:field="*{password2}" placeholder="Reenter Password"/>
             <span th:if="${#fields.hasErrors('password2')}"
                   th:text="${#strings.listJoin(#fields.errors('password2'), '; ')}">Password2 errors</span><br/>
-            <span th:if="${#fields.hasErrors('passwordMatching')}" th:errors="*{passwordMatching}">Password matching error</span><br/>
             <p>Click <a href="/login">login</a> to Login</p>
             <button type="submit">Sign Up</button>
         </form>
