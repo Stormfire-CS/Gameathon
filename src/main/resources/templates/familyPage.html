@@ -7,11 +7,11 @@
     <body>
         <div th:replace="~{fragments :: topBar}"></div>
         <h1>Gameathon Family</h1>
-        <p> Welcome to your family page: <span th:text="${user.name}"></span></p>
+        <h4> Welcome to your family page: <span th:text="${user.name}"></span></h4>
         <a th:href="@{/homePage}"><button type="button">My Home</button></a>
         <a th:href="@{/ownerPage}"><button type="button">My Stuff</button></a>
-
         <div th:if="${!isFamilyMember}">
+            <hr>
             <h2>You are not currently part of a family.</h2>
             <p>You can join an existing family or create your own.</p>
             <a th:href="@{/joinFamilyPage}"><button type="button">Join a Family</button></a>
@@ -19,9 +19,9 @@
         </div>
 
         <div th:if="${isFamilyMember}">
-            <h2>Your Family</h2>
+            <hr>
+            <h2>The <span th:text="${family.familyName}"></span>family</h2>
             <p>
-                Family Name: <span th:text="${family.familyName}"></span>
                 Family ID: <span th:text="${family.familyID}"></span>
                 Family Administrator: <span th:text="${family.familyAdmin.name}"></span>
             <div th:if="${!isFamilyAdmin}">
@@ -33,6 +33,7 @@
                 <a th:href="@{/editFamilyPage}"><button type="button">Edit Family and View Membership Requests</button></a>
             </div>
             </p>
+            <hr>
             <h2>Games Owned by Your Family</h2>
 
             <div th:if="${#lists.isEmpty(games)}">
