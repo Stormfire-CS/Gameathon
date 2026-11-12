@@ -6,8 +6,8 @@
     </head>
     <body>
         <div th:replace="~{fragments :: topBar}"></div>
-        <h1>EDITING FAMILY</h1>
-        <p>Welcome Administer: <span th:text="${user.name}"></span></p>
+        <h1>Editing <span th:text="${family.familyName}"></span> Family</h1>
+        <h4>Welcome Administer: <span th:text="${user.name}"></span></h4>
 
         <a th:href="@{/familyPage}"><button type="button">Back to Family</button></a>
         <form th:action="@{/deleteFamily}" method="post"
@@ -15,14 +15,16 @@
               onsubmit="return confirm('Are you sure you want to delete your family? This action cannot be undone.');">
             <button type="submit">Delete Family</button>
         </form>
+        <hr>
         <h2>Change Family Name</h2>
         <form th:action="@{/renameFamily}" th:object="${familyNameForm}" method="post">
             <label for="familyName">New Family Name:</label>
-            <input type="text" id="familyName" name="familyName">
+            <input type="text" id="familyName" name="familyName"><br>
             <span th:if="${#fields.hasErrors('familyName')}"
-                  th:text="${#strings.listJoin(#fields.errors('familyName'), '; ')}">Family Name Error</span><br/>
+                  style="color: red;" th:text="${#strings.listJoin(#fields.errors('familyName'), '; ')}">Family Name Error</span><br/>
             <button type="submit">Rename Family</button>
         </form>
+        <hr>
         <h2>Current Family Members</h2>
 
         <table th:if="${!#lists.isEmpty(members)}">
@@ -57,7 +59,8 @@
         </table>
 
         <p th:if="${#lists.isEmpty(members)}">There are no current family members.</p>
-        <h1>Pending Family Requests</h1>
+        <hr>
+        <h2>Pending Family Requests</h2>
         <div th:if="${#lists.isEmpty(requests)}">
             <p>There are no pending family requests.</p>
         </div>
@@ -66,7 +69,7 @@
             <thead>
                 <tr>
                     <th>Users Name |</th>
-                    <th>Username</th>
+                    <th>Username |</th>
                     <th>Action</th>
                 </tr>
             </thead>
