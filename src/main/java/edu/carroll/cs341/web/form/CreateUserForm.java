@@ -62,7 +62,7 @@ public class CreateUserForm {
      * @param username the username to store
      */
     public void setUsername(String username) {
-        this.username = username;
+        this.username = username == null ? null : username.trim();
     }
 
     /**

@@ -43,6 +43,6 @@ public class EditNameForm {
      * @param name the name to set
      */
     public void setName(String name) {
-        this.name = name;
+        this.name = name == null ? null : name.trim();
     }
 }

@@ -43,6 +43,6 @@ public class FamilyNameForm {
      * @param familyName the family name to set
      */
     public void setFamilyName(String familyName) {
-        this.familyName = familyName;
+        this.familyName = familyName == null ? null : familyName.trim();
     }
 }
