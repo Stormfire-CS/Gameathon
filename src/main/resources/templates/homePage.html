@@ -7,7 +7,10 @@
     <body>
         <div th:replace="~{fragments :: topBar}"></div>
         <h1>Gameathon Home</h1>
-        <p>Welcome Home: <span th:text="${user.name}"></span></p>
+        <h2>Welcome Home: <span th:text="${user.name}"></span></h2>
+
+        Click View My Family to Join, Create, or View your family.<br>
+        Click View My Stuff to view your collection or edit it.<br><br>
         <a th:href="@{/familyPage}"><button type="button">View My Family</button></a>
         <a th:href="@{/ownerPage}"> <button type="button">View My Stuff</button></a>
     </body>
