@@ -7,12 +7,13 @@
     <body>
         <div th:replace="~{fragments :: topBar}"></div>
         <h1>Create a Family</h1>
-        <p>Creating a family <span th:text="${user.name}"></span></p>
-        <a th:href="@{/familyPage}"><button type="button">Back to Family</button></a>
+        <h4>Creating a family <span th:text="${user.name}"></span></h4>
+        <a th:href="@{/familyPage}"><button type="button">Back to Family</button></a><br><br>
+        Enter the name you wish to name your family. It must not contain spaces and must be longer than two characters
         <form th:action="@{/createFamily}" th:object="${familyNameForm}" method="post">
             <label for="familyName">Family Name:</label>
-            <input type="text" id="familyName" name="familyName" placeholder="Family Name"/>
-            <span th:if="${#fields.hasErrors('familyName')}"
+            <input type="text" id="familyName" name="familyName" placeholder="Family Name"/><br>
+            <span style="color: red;" th:if="${#fields.hasErrors('familyName')}"
                   th:text="${#strings.listJoin(#fields.errors('familyName'), '; ')}">Family Name Error</span><br/>
             <button type="submit">Create Family</button>
         </form>

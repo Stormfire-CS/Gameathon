@@ -7,7 +7,7 @@
     <body>
         <div th:replace="~{fragments :: topBar}"></div>
         <h1>Join a Family</h1>
-        <p> Request to join family: <span th:text="${user.name}"></span></p>
+        <h4> Request to join family: <span th:text="${user.name}"></span></h4>
         <a th:href="@{/familyPage}"><button type="button">Back to Family</button></a>
         <p>
             Enter the family ID that you were given by the family administrator.
