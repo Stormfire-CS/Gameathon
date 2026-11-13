@@ -8,13 +8,17 @@
         <h1>Edit Account</h1>
         <h4>Editing your account <span th:text="${user.name}"></span></h4>
         <a th:href="@{/homePage}"><button type="button"> Back to Home Page</button></a>
+        <hr>
 
+        <h2>Edit Name</h2>
         <form th:action="@{/editAccount}" th:object="${editNameForm}" method="post">
             <label for="name">New Name (This is how others will see you):</label><br>
             <input type="text" id="name" th:field="*{name}"/>
             <span th:if="${#fields.hasErrors('name')}" style="color: red;" th:text="${#strings.listJoin(#fields.errors('name'), '; ')}">New Name Error</span><br>
             <button type="submit">Change Name</button><br><br>
         </form>
+        <hr>
+        <h2>Edit Password</h2>
         <a th:href="@{/enterPasswordPage}"><button type="button">Change Password</button></a>
 
     </body>

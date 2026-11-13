@@ -62,7 +62,8 @@ public class CreateGameForm {
      * @param gameName the game name to store
      */
     public void setGameName(String gameName) {
-        this.gameName = gameName;
+        this.gameName = gameName == null ? null : gameName.trim();
+
     }
 
     /**

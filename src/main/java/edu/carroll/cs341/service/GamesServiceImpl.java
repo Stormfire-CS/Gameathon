@@ -235,8 +235,7 @@ public class GamesServiceImpl implements GamesService {
         String originalName = game.getGameName();
         String newName = gameName.trim();
 
-        Game userCopy = gamesRepo.findByGameNameIgnoreCaseAndUserWhoAdded(
-                originalName, user);
+        Game userCopy = gamesRepo.findByGameNameIgnoreCaseAndUserWhoAdded(originalName, user);
 
         // The user is keeping the same game name.
         if (originalName.equalsIgnoreCase(newName)) {
@@ -261,23 +260,32 @@ public class GamesServiceImpl implements GamesService {
         // Check that they do not already have a game with the new name.
         Game existingNewGame = gamesRepo.findByGameNameIgnoreCaseAndUserWhoAdded(
                 newName, user);
+        Game existingDefaultGame = gamesRepo.findByGameNameIgnoreCaseAndUserWhoAddedIsNull(newName);
 
-        if (existingNewGame != null) {
+        System.out.print(existingDefaultGame);
+
+        if (existingNewGame != null && existingNewGame.getCanSee()) {
             log.warn("editGame: user already has a game named '{}'", newName);
             return false;
         }
 
-        if (userCopy == null) {
-            // Create a hidden copy of the original game to suppress its default.
-            userCopy = new Game();
-            userCopy.setGameName(originalName);
-            userCopy.setMinPlayers(game.getMinPlayers());
-            userCopy.setMaxPlayers(game.getMaxPlayers());
-            userCopy.setUserWhoAdded(user);
+        if (existingDefaultGame != null && existingNewGame == null) {
+            log.warn("editGame: user already has a game named '{}'", newName);
+            return false;
         }
 
-        userCopy.setCanSee(false);
-        gamesRepo.save(userCopy);
+            if (userCopy == null) {
+                // Create a hidden copy of the original game to suppress its default.
+                userCopy = new Game();
+                userCopy.setGameName(originalName);
+                userCopy.setMinPlayers(game.getMinPlayers());
+                userCopy.setMaxPlayers(game.getMaxPlayers());
+                userCopy.setUserWhoAdded(user);
+            }
+
+            userCopy.setCanSee(false);
+            gamesRepo.save(userCopy);
+
 
         // Create a new visible game with the updated name and information.
         Game newGame = new Game();
