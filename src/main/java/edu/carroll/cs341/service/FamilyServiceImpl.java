@@ -179,7 +179,7 @@ public class FamilyServiceImpl implements FamilyService{
     @Transactional
     @Override
     public boolean renameFamily(User user, String familyName) {
-        log.info("renameFamily: user '{}' is attempting to rename their family to '{}'", user, familyName.trim());
+        log.info("renameFamily: user '{}' is attempting to rename their family to '{}'", user, familyName);
 
         if (user == null) {
             log.error("renameFamily: user is null");

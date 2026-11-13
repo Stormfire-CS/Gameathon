@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     public User validateUser(String username, String password) {
         log.debug("validateUser: user '{}' attempted login", username);
 
-        if (username == null || username.isBlank()) {
+        if (username == null || username.trim().isEmpty()) {
             log.debug("validateUser: username is blank");
             return null;
         }
@@ -67,6 +67,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
+        username = username.trim();
         // Perform the lookup without distinguishing between uppercase and lowercase usernames.
         List<User> users = userRepo.findByUsernameIgnoreCase(username);
 
@@ -107,6 +108,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
+        username = username.trim();
         if (username.isEmpty()) {
             log.error("validateNewUser: username is blank");
             return null;
@@ -177,6 +179,7 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
+        newName = newName.trim();
         if (newName.isEmpty()) {
             log.error("renameUser: newName is empty");
             return false;
@@ -184,6 +187,7 @@ public class UserServiceImpl implements UserService {
 
         if (newName.length() < 2 || newName.length() > 40) {
             log.error("renameUser: new name must be between 2 and 40 characters");
+            return false;
         }
 
         // Reject passwords containing whitespace.

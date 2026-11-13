@@ -39,12 +39,36 @@ public interface GamesService {
      * @param gameName the name of the game to add
      * @param minPlayers the minimum number of players supported by the game
      * @param maxPlayers the maximum number of players supported by the game
+     * @return true if the game was successfully added, false otherwise
      */
     boolean addGame(User user, String gameName, Integer minPlayers, Integer maxPlayers);
 
+    /**
+     * Edits an existing game in the game catalog.
+     *
+     * @param user the user attempting to edit the game
+     * @param gameID the ID of the game to edit
+     * @param gameName the updated name of the game
+     * @param minPlayers the updated minimum number of players
+     * @param maxPlayers the updated maximum number of players
+     * @return true if the game was successfully edited, false otherwise
+     */
     boolean editGame(User user, Long gameID, String gameName, Integer minPlayers, Integer maxPlayers);
 
+    /**
+     * Removes a game from the game catalog.
+     *
+     * @param user the user attempting to remove the game
+     * @param gameID the ID of the game to remove
+     * @return true if the game was successfully removed, false otherwise
+     */
     boolean removeGame(User user, Long gameID);
 
+    /**
+     * Retrieves a game using its unique game ID.
+     *
+     * @param gameID the ID of the game being requested
+     * @return the game associated with the specified ID, or null if no game is found
+     */
     Game getGameByGameID(Long gameID);
 }

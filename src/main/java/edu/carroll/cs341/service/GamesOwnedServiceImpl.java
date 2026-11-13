@@ -239,6 +239,15 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         return gamesOwnedRepo.countByGame_GameIDAndUser(gameID, user);
     }
 
+    /**
+     * Updates the game references for the specified user's owned games.
+     *
+     * @param gameID the ID of the game whose references are being updated
+     * @param user   the user whose game references are being updated
+     * @param newGame the new game to associate with the ownership records
+     * @return {@code true} if the game references were updated successfully;
+     *         {@code false} otherwise
+     */
     @Transactional
     @Override
     public boolean updateGameReferences(Long gameID, User user, Game newGame) {
@@ -258,6 +267,14 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         gamesOwnedRepo.saveAll(ownedGames);
         return true;
     }
+
+    /**
+     * Retrieves the game ownership record with the specified ID from the user's collection.
+     *
+     * @param user        the user whose collection is being searched
+     * @param gameOwnedID the ID of the game ownership record to retrieve
+     * @return the game ownership record with the specified ID, or {@code null} if not found
+     */
     @Override
     public GameOwned getGameOwnedByID(User user, Long gameOwnedID) {
         if (gameOwnedID == null || user == null) {
@@ -279,6 +296,15 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         return gameOwned;
     }
 
+    /**
+     * Edits the game ownership record in the user's collection.
+     *
+     * @param user         the user whose collection contains the game
+     * @param gameOwnedID  the ID of the game ownership record to edit
+     * @param game         the updated game information
+     * @param yearProduced the updated year the game was produced
+     * @return
+     */
     @Override
     public boolean editGameInCollection(User user, Long gameOwnedID, Game game, Integer yearProduced) {
         if (gameOwnedID == null || user == null || game == null) {

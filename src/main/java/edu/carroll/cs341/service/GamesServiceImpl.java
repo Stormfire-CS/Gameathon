@@ -208,6 +208,17 @@ public class GamesServiceImpl implements GamesService {
         return true;
     }
 
+    /**
+     * Edits the specified game with the provided details.
+     *
+     * @param user the user attempting to edit the game
+     * @param gameID the ID of the game to edit
+     * @param gameName the updated name of the game
+     * @param minPlayers the updated minimum number of players
+     * @param maxPlayers the updated maximum number of players
+     * @return {@code true} if the game was successfully edited;
+     *         {@code false} otherwise
+     */
     @Transactional
     @Override
     public boolean editGame(User user, Long gameID, String gameName,
@@ -229,6 +240,18 @@ public class GamesServiceImpl implements GamesService {
         }
         if (gameName.trim().isEmpty()) {
             log.error("editGame: gameName was empty");
+            return false;
+        }
+
+        if (maxPlayers != null && minPlayers != null) {
+            if (maxPlayers < minPlayers) {
+                log.error("editGame: max players {} was less than min players {}", maxPlayers, minPlayers);
+                return false;
+            }
+        }
+
+        if ((maxPlayers != null && maxPlayers < 0) || (minPlayers != null && minPlayers < 0)) {
+            log.error("editGame: max player {} or min player {} was less than zero", maxPlayers, minPlayers);
             return false;
         }
 
@@ -301,6 +324,14 @@ public class GamesServiceImpl implements GamesService {
         return true;
     }
 
+    /**
+     * Removes the specified game from the user's collection.
+     *
+     * @param user the user attempting to remove the game
+     * @param gameID the ID of the game to remove
+     * @return {@code true} if the game was successfully removed;
+     *         {@code false} otherwise
+     */
     @Transactional
     @Override
     public boolean removeGame(User user, Long gameID) {

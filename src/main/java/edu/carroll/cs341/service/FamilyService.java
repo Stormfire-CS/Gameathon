@@ -54,6 +54,14 @@ public interface FamilyService {
      */
     boolean renameFamily(User user, String familyName);
 
+    /**
+     * Changes the administrator of the family associated with the specified user.
+     *
+     * @param currentAdmin the current administrator of the family
+     * @param newAdmin the new administrator of the family
+     * @return {@code true} if the administrator was changed successfully;
+     *         {@code false} otherwise
+     */
     boolean changeAdmin(User currentAdmin, User newAdmin);
 
     /**
