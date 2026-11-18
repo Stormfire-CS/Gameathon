@@ -247,50 +247,60 @@ public class UserServiceTest {
         final String username2 = "testUser2";
         final String password2 = "testPassword2";
         final String invalidUsername = "missingUser";
+        final String invalidPassword = "missingPassword";
 
         // No users in the database
+        //username, password.substring(0, password.length() - 1)
         User result = userService.validateUser(invalidUsername, password);
         assertNull("validateUserInvalidUserValidPasswordTest: should fail with no users", result);
+        result = userService.validateUser(invalidUsername, invalidPassword);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail with invalid password and user with no user in the database", result);
+        result = userService.validateUser(username.substring(1), password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first letter missing and valid password and no user in the database", result);
+        result = userService.validateUser(username.substring(0, username.length() - 1), password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the last letter missing and valid password and no user in the database", result);
+        result = userService.validateUser(username.substring(1, username.length() - 1), password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first and last letter missing and valid password and no user in the database", result);
 
         // One user in the database
-        insertTestingUser(username, password);
+        User checkUser1 = insertTestingUser(username, password);
         result = userService.validateUser(invalidUsername, password);
         assertNull("validateUserInvalidUserValidPasswordTest: should fail with one user", result);
+        result = userService.validateUser(invalidUsername, invalidPassword);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail with invalid password and user with one user in the database", result);
+        result = userService.validateUser(username.substring(1), password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first letter missing and valid password and one user in the database", result);
+        result = userService.validateUser(username.substring(0, username.length() - 1), password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the last letter missing and valid password and one user in the database", result);
+        result = userService.validateUser(username.substring(1, username.length() - 1), password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first and last letter missing and valid password and one user in the database", result);
+        result = userService.validateUser(username.substring(1), invalidPassword);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first letter missing and invalid password and one user in the database", result);
+        result = userService.validateUser(username.substring(0, username.length() - 1), invalidPassword);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the last letter missing and invalid password and one user in the database", result);
+        result = userService.validateUser(username.substring(1, username.length() - 1), invalidPassword);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first and last letter missing and invalid password and one user in the database", result);
 
         // Two users in the database
-        insertTestingUser(username2, password2);
+        User checkUser2 = insertTestingUser(username2, password2);
         result = userService.validateUser(invalidUsername, password);
         assertNull("validateUserInvalidUserValidPasswordTest: should fail with two users", result);
+        result = userService.validateUser(username.substring(1), password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first letter missing and valid password and two users in the database", result);
+        result = userService.validateUser(username.substring(0, username.length() - 1), password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the last letter missing and valid password and two users in the database", result);
+        result = userService.validateUser(username.substring(1, username.length() - 1), password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first and last letter missing and valid password and two users in the database", result);
+        result = userService.validateUser(username2.substring(1), password2);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first letter missing and valid password and two users in the database", result);
+        result = userService.validateUser(username2.substring(0, username2.length() - 1), password2);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the last letter missing and valid password and two users in the database", result);
+        result = userService.validateUser(username2.substring(1, username2.length() - 1), password2);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail using a valid username with the first and last letter missing and valid password and two users in the database", result);
         result = userService.validateUser(invalidUsername, password2);
         assertNull("validateUserInvalidUserValidPasswordTest: should reject the second user's password too", result);
-    }
-
-    /**
-     * Verifies that an invalid username and password fail when the database
-     * has zero, one, or two users.
-     */
-    @Test
-    public void validateUserInvalidUserInvalidPasswordTest() {
-        final String username = "testUser";
-        final String password = "testPassword";
-        final String username2 = "testUser2";
-        final String password2 = "testPassword2";
-        final String invalidUsername = "missingUser";
-        final String invalidPassword = "incorrectPassword";
-
-        // No users in the database
-        User result = userService.validateUser(invalidUsername, invalidPassword);
-        assertNull("validateUserInvalidUserInvalidPasswordTest: should fail with no users", result);
-
-        // One user in the database
-        insertTestingUser(username, password);
         result = userService.validateUser(invalidUsername, invalidPassword);
-        assertNull("validateUserInvalidUserInvalidPasswordTest: should fail with one user", result);
-
-        // Two users in the database
-        insertTestingUser(username2, password2);
-        result = userService.validateUser(invalidUsername, invalidPassword);
-        assertNull("validateUserInvalidUserInvalidPasswordTest: should fail with two users", result);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail with invalid password and user when two users in database", result);
     }
 
     /**
