@@ -37,14 +37,9 @@ import static org.springframework.test.util.AssertionErrors.*;
 @SpringBootTest
 @Transactional
 public class UserServiceTest {
-    private static final String username = "testuser";
-    private static final String password = "testpass";
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private UserRepository userRepo;
 
     /*
      * = = = = = = = = = = =
@@ -54,126 +49,384 @@ public class UserServiceTest {
 
     /**
      * Verifies that a user can be validated when the username and password
-     * match the credentials stored in the database.
+     * match the credentials stored in the database, when the database is empty, has one user, or has two users.
      */
     @Test
     public void validateUserSuccessTest() {
-        insertTestingUser();
-        User result = userService.validateUser(username, password);
-        assertNotNull("validateUserSuccessTest: should succeed using the same user/pass info", result);
-        assertEquals("validateUserSuccessTest: username of user who logged in should still be the same.",result.getUsername(),username);
+        // No users in the database
+        final String username = "testUser";
+        final String password = "testpass";
+        final String username2 = "testUser2";
+        final String password2 = "testpass2";
+        User nullUser = userService.validateUser(username, password);
+        assertNull("validateUserSuccessTest: user should be null when there is no user in the database", nullUser);
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        User sucsefulUser1 = userService.validateUser(username, password);
+        assertNotNull("validateUserSuccessTest: should succeed using the same user/pass info", sucsefulUser1);
+        assertEquals("validateUserSuccessTest: user who logged in should still be the same user that was created.", sucsefulUser1, checkUser);
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        User sucsesfulUser2 = userService.validateUser(username2, password2);
+        assertNotNull("validateUserSuccessTest: should succeed using the same user/pass info", sucsesfulUser2);
+        assertEquals("validateUserSuccessTest: user who logged in should still be the same user that was created.", sucsesfulUser2, checkUser2);
+        User sucsesfulUser3 = userService.validateUser(username, password);
+        assertNotNull("validateUserSuccessTest: should succeed using the same user/pass info", sucsesfulUser3);
+        assertEquals("validateUserSuccessTest: user of user who logged in should still be the same after another user was added.", sucsesfulUser3, checkUser);
+        assertNotEquals("validateUserSuccessTest: users should not be the same.", sucsesfulUser2, sucsesfulUser3);
     }
 
     /**
      * Verifies that a user can be validated when the username and password
-     * match the credentials stored in the database and the username has a space at the end of it.
+     * match the credentials stored in the database and the username has a space at the end, beginning, or both.
+     * Checks these conditions for an empty database, a database with one user, and a database with two users.
      */
     @Test
-    public void validateUserSuccessTestWithSpaceAtEnd() {
-        insertTestingUser();
-        User result = userService.validateUser(username + " ", password);
-        assertNotNull("validateUserSuccessTest: should succeed using the same user/pass info", result);
-        assertEquals("validateUserSuccessTest: username of user who logged in should still be the same.",result.getUsername(),username);
+    public void validateUserSuccessTestWithSpaces() {
+        // No user in the database
+        final String username = "testUser";
+        final String password = "testpass";
+        final String username2 = "testUser2";
+        final String password2 = "testpass2";
+        User nullUser1 = userService.validateUser(username + " ", password);
+        User nullUser2 = userService.validateUser(" " + username, password);
+        User nullUser3 = userService.validateUser(" " + username + " ", password);
+        assertNull("validateUserSuccessTest: should fail using a valid user with a space because no user is in the database", nullUser1);
+        assertNull("validateUserSuccessTest: should fail using a valid user with a space because no user is in the database", nullUser2);
+        assertNull("validateUserSuccessTest: should fail using a valid user with a space because no user is in the database", nullUser3);
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        User sucsesfulUser1 = userService.validateUser(username + " ", password);
+        User sucsesfulUser2 = userService.validateUser(" " + username, password);
+        User sucsesfulUser3 = userService.validateUser(" " + username + " ", password);
+        assertNotNull("validateUserSuccessTest: should succeed when using a valid user with a space at the end", sucsesfulUser1);
+        assertNotNull("validateUserSuccessTest: should succeed when using a valid user with a space at the beginning", sucsesfulUser2);
+        assertNotNull("validateUserSuccessTest: should succeed when using a valid user with a space at the beginning and end", sucsesfulUser3);
+        assertEquals("validateUserSuccessTest: user who logged in should still be the same after a space was added to the end of the login.", sucsesfulUser1, checkUser);
+        assertEquals("validateUserSuccessTest: user who logged in should still be the same after a space was added to the beginning of the login.", sucsesfulUser2, checkUser);
+        assertEquals("validateUserSuccessTest: user who logged in should still be the same after a space was added to the beginning and end of the login.", sucsesfulUser3, checkUser);
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        sucsesfulUser1 = userService.validateUser(username + " ", password);
+        sucsesfulUser2 = userService.validateUser(" " + username, password);
+        sucsesfulUser3 = userService.validateUser(" " + username + " ", password);
+        User sucsesfulUser4 = userService.validateUser(username2 + " ", password2);
+        User sucsesfulUser5 = userService.validateUser(" " + username2, password2);
+        User sucsesfulUser6 = userService.validateUser(" " + username2 + " ", password2);
+        assertNotNull("validateUserSuccessTest: should succeed using an existing valid user with a space at the end", sucsesfulUser1);
+        assertNotNull("validateUserSuccessTest: should succeed using an existing valid user with a space at the beginning", sucsesfulUser2);
+        assertNotNull("validateUserSuccessTest: should succeed using an existing valid user with a space at the beginning and end", sucsesfulUser3);
+        assertNotNull("validateUserSuccessTest: should succeed using the new valid user with a space at the end", sucsesfulUser4);
+        assertNotNull("validateUserSuccessTest: should succeed using the new valid user with a space at the beginning", sucsesfulUser5);
+        assertNotNull("validateUserSuccessTest: should succeed using the new valid user with a space at the beginning and end", sucsesfulUser6);
+        assertEquals("validateUserSuccessTest: user who logged in should still be the same after a space was added to the end of the login, and a second user was added", sucsesfulUser1, checkUser);
+        assertEquals("validateUserSuccessTest: user who logged in should still be the same after a space was added to the beginning of the login, and a second user was added", sucsesfulUser2, checkUser);
+        assertEquals("validateUserSuccessTest: user who logged in should still be the same after a space was added to the beginning and end of the login, and a second user was added", sucsesfulUser3, checkUser);
+        assertEquals("validateUserSuccessTest: second user who logged in should still be the same after a space was added to the end of the login", sucsesfulUser4, checkUser2);
+        assertEquals("validateUserSuccessTest: second user who logged in should still be the same after a space was added to the beginning of the login", sucsesfulUser5, checkUser2);
+        assertEquals("validateUserSuccessTest: second user who logged in should still be the same after a space was added to the beginning and end of the login", sucsesfulUser6, checkUser2);
     }
 
     /**
-     * Verifies that a user can be validated when the username and password
-     * match the credentials stored in the database and the username has a space at the beginning of it.
+     * Verifies that user validation succeeds when two users have the same password.
      */
     @Test
-    public void validateUserSuccessTestWithSpaceAtStart() {
-        insertTestingUser();
-        User result = userService.validateUser(" " + username, password);
-        assertNotNull("validateUserSuccessTest: should succeed using the same user/pass info", result);
-        assertEquals("validateUserSuccessTest: username of user who logged in should still be the same.",result.getUsername(),username);
+    public void validateUserTwoUsersWithSamePassword() {
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+
+        User checkUser = insertTestingUser(username, password);
+        User checkUser2 = insertTestingUser(username2, password);
+        User sucsefulUser1 = userService.validateUser(username, password);
+        User sucsefulUser2 = userService.validateUser(username2, password);
+
+        assertNotNull("validateUserTwoUsersWithSamePassword: should succeed using a valid user, valid pass", sucsefulUser1);
+        assertNotNull("validateUserTwoUsersWithSamePassword: should succeed using a valid user, same valid pass as first user", sucsefulUser2);
+        assertEquals("validateUserTwoUsersWithSamePassword: user should be still be the same after logging in and a second user is added", checkUser, sucsefulUser1);
+        assertEquals("validateUserTwoUsersWithSamePassword: user should still be the same after logging in ", checkUser2, sucsefulUser2);
+        assertNotEquals("validateUserTwoUsersWithSamePassword: users should not be equal after logging in", sucsefulUser1, sucsefulUser2);
     }
 
     /**
-     * Verifies that user validation fails when an existing username is
-     * supplied with an incorrect password.
+     * Verifies that incorrect passwords fail with one or two stored users.
+     * Checks missing and extra characters at the beginning, end, or both.
      */
     @Test
     public void validateUserExistingUserInvalidPasswordTest() {
-        insertTestingUser();
-        User result = userService.validateUser(username, password + "extra");
-        assertNull("validateUserExistingUserInvalidPasswordTest: should fail using a valid user, invalid pass", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+
+        // Incorect password
+        User failedLogin1 = userService.validateUser(username, "incorrectPassword");
+        assertNull("validateUserExistingUserInvalidPasswordTest: should reject an incorrect password", failedLogin1);
+
+        // Missing character'(s) in password
+        User failedLogin2 = userService.validateUser(username, password.substring(1));
+        assertNull("validateUserExistingUserInvalidPasswordTest: should reject a missing first character", failedLogin2);
+        User failedLogin3 = userService.validateUser(username, password.substring(0, password.length() - 1));
+        assertNull("validateUserExistingUserInvalidPasswordTest: should reject a missing last character", failedLogin3);
+        User failedLogin4 = userService.validateUser(username, password.substring(1, password.length() - 1));
+        assertNull("validateUserExistingUserInvalidPasswordTest: should reject missing first and last characters", failedLogin4);
+
+        // Extra character'(s) in password
+        User failedLogin5 = userService.validateUser(username, "x" + password);
+        assertNull("validateUserExistingUserInvalidPasswordTest: should reject an extra first character", failedLogin5);
+        User failedLogin6 = userService.validateUser(username, password + "x");
+        assertNull("validateUserExistingUserInvalidPasswordTest: should reject an extra last character", failedLogin6);
+        User failedLogin7 = userService.validateUser(username, "x" + password + "x");
+        assertNull("validateUserExistingUserInvalidPasswordTest: should reject extra first and last characters", failedLogin7);
+
+        // Users have not been changed by failing to login.
+        User stillSame = userService.validateUser(username, password);
+        assertNotNull("validateUserExistingUserInvalidPasswordTest: should still return a valid user", stillSame);
+        assertEquals("validateUserExistingUserInvalidPasswordTest: should still return the same user as originally created", stillSame, checkUser);
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        User failedLogin8 = userService.validateUser(username, "incorrectPassword");
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject an incorrect password", failedLogin8);
+
+        // Missing character'(s) in password for both users
+        User failedLogin9 = userService.validateUser(username, password.substring(1));
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject a missing first character", failedLogin9);
+        User failedLogin10 = userService.validateUser(username, password.substring(0, password.length() - 1));
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject a missing last character", failedLogin10);
+        User failedLogin11 = userService.validateUser(username, password.substring(1, password.length() - 1));
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject missing first and last characters", failedLogin11);
+        User failedLogin12 = userService.validateUser(username2, password2.substring(1));
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject a missing first character", failedLogin12);
+        User failedLogin13 = userService.validateUser(username2, password2.substring(0, password2.length() - 1));
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject a missing last character", failedLogin13);
+        User failedLogin14 = userService.validateUser(username2, password2.substring(1, password2.length() - 1));
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject a missing first and last character", failedLogin14);
+
+        // Extra character'(s) in password for both users
+        User failedLogin15 = userService.validateUser(username, "x" + password);
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject an extra first character", failedLogin15);
+        User failedLogin16 = userService.validateUser(username, password + "x");
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject an extra last character", failedLogin16);
+        User failedLogin17 = userService.validateUser(username, "x" + password + "x");
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject extra first and last characters", failedLogin17);
+        User failedLogin18 = userService.validateUser(username2, "x" + password);
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject an extra first character", failedLogin18);
+        User failedLogin19 = userService.validateUser(username2, password + "x");
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject an extra last character", failedLogin19);
+        User failedLogin20 = userService.validateUser(username2, "x" + password + "x");
+        assertNull("validateUserExistingUserInvalidPasswordTest: should still reject extra first and last characters", failedLogin20);
+
+        // Checking a valid password for one account does not give access to another account.
+        User failedLogin21 = userService.validateUser(username, password2);
+        assertNull("validateUserExistingUserInvalidPasswordTest: should reject the second user's password for the first user", failedLogin21);
+        User failedLogin22 = userService.validateUser(username2, password);
+        assertNull("validateUserExistingUserInvalidPasswordTest: should reject the first user's password for the second user", failedLogin22);
+
+        stillSame = userService.validateUser(username, password);
+        assertNotNull("validateUserExistingUserInvalidPasswordTest: first user should still be able to log in", stillSame);
+        assertEquals("validateUserExistingUserInvalidPasswordTest: first user should still be the same after failed login attempts", checkUser, stillSame);
+        User stillSame2 = userService.validateUser(username2, password2);
+        assertNotNull("validateUserExistingUserInvalidPasswordTest: second user should still be able to log in", stillSame2);
+        assertEquals("validateUserExistingUserInvalidPasswordTest: second user should still be the same after failed login attempts", checkUser2, stillSame2);
     }
 
     /**
-     * Verifies that user validation fails when a nonexistent username is
-     * supplied with an otherwise valid password.
+     * Verifies that a nonexistent username fails with an otherwise valid
+     * password when the database has zero, one, or two users.
      */
     @Test
     public void validateUserInvalidUserValidPasswordTest() {
-        insertTestingUser();
-        User result = userService.validateUser(username + "not", password);
-        assertNull("validateUserInvalidUserValidPasswordTest: should fail using an invalid user, valid pass", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String invalidUsername = "missingUser";
+
+        // No users in the database
+        User result = userService.validateUser(invalidUsername, password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail with no users", result);
+
+        // One user in the database
+        insertTestingUser(username, password);
+        result = userService.validateUser(invalidUsername, password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail with one user", result);
+
+        // Two users in the database
+        insertTestingUser(username2, password2);
+        result = userService.validateUser(invalidUsername, password);
+        assertNull("validateUserInvalidUserValidPasswordTest: should fail with two users", result);
+        result = userService.validateUser(invalidUsername, password2);
+        assertNull("validateUserInvalidUserValidPasswordTest: should reject the second user's password too", result);
     }
 
     /**
-     * Verifies that user validation fails when both the username and password
-     * are invalid.
+     * Verifies that an invalid username and password fail when the database
+     * has zero, one, or two users.
      */
     @Test
     public void validateUserInvalidUserInvalidPasswordTest() {
-        insertTestingUser();
-        User result = userService.validateUser(username + "not", password + "extra");
-        assertNull("validateUserInvalidUserInvalidPasswordTest: should fail using an invalid user, valid pass", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String invalidUsername = "missingUser";
+        final String invalidPassword = "incorrectPassword";
+
+        // No users in the database
+        User result = userService.validateUser(invalidUsername, invalidPassword);
+        assertNull("validateUserInvalidUserInvalidPasswordTest: should fail with no users", result);
+
+        // One user in the database
+        insertTestingUser(username, password);
+        result = userService.validateUser(invalidUsername, invalidPassword);
+        assertNull("validateUserInvalidUserInvalidPasswordTest: should fail with one user", result);
+
+        // Two users in the database
+        insertTestingUser(username2, password2);
+        result = userService.validateUser(invalidUsername, invalidPassword);
+        assertNull("validateUserInvalidUserInvalidPasswordTest: should fail with two users", result);
     }
 
     /**
-     * Verifies that user validation fails when the username is null and the
-     * password is valid.
+     * Verifies that a null username fails with an otherwise valid password
+     * when the database has zero, one, or two users.
      */
     @Test
     public void validateUserNullUserValidPasswordTest() {
-        insertTestingUser();
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+
+        // No users in the database
         User result = userService.validateUser(null, password);
-        assertNull("validateUserNullUserInvalidPasswordTest: should fail using a null user, valid pass", result);
+        assertNull("validateUserNullUserValidPasswordTest: should fail with no users", result);
+
+        // One user in the database
+        insertTestingUser(username, password);
+        result = userService.validateUser(null, password);
+        assertNull("validateUserNullUserValidPasswordTest: should fail with one user", result);
+
+        // Two users in the database
+        insertTestingUser(username2, password2);
+        result = userService.validateUser(null, password);
+        assertNull("validateUserNullUserValidPasswordTest: should fail with two users", result);
+        result = userService.validateUser(null, password2);
+        assertNull("validateUserNullUserValidPasswordTest: should reject the second user's password too", result);
     }
 
     /**
-     * Verifies that user validation fails when the username is valid but the
-     * password is null.
+     * Verifies that a null password fails when the database has zero, one,
+     * or two users.
      */
     @Test
     public void validateUserValidUserNullPasswordTest() {
-        insertTestingUser();
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+
+        // No users in the database
         User result = userService.validateUser(username, null);
-        assertNull("validateUserValidUserNullPasswordTest: should fail using a valid user, null pass", result);
+        assertNull("validateUserValidUserNullPasswordTest: should fail with no users", result);
+
+        // One user in the database
+        insertTestingUser(username, password);
+        result = userService.validateUser(username, null);
+        assertNull("validateUserValidUserNullPasswordTest: should fail with one user", result);
+
+        // Two users in the database
+        insertTestingUser(username2, password2);
+        result = userService.validateUser(username, null);
+        assertNull("validateUserValidUserNullPasswordTest: should fail for the first user", result);
+        result = userService.validateUser(username2, null);
+        assertNull("validateUserValidUserNullPasswordTest: should fail for the second user", result);
     }
 
     /**
-     * Verifies that user validation fails when the username is null and the
-     * password is incorrect.
+     * Verifies that a null username and invalid password fail when the
+     * database has zero, one, or two users.
      */
     @Test
     public void validateUserNullUserInvalidPasswordTest() {
-        insertTestingUser();
-        User result = userService.validateUser(null, password + "extra");
-        assertNull("validateUserNullUserInvalidPasswordTest: should fail using a null user, invalid pass", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String invalidPassword = "incorrectPassword";
+
+        // No users in the database
+        User result = userService.validateUser(null, invalidPassword);
+        assertNull("validateUserNullUserInvalidPasswordTest: should fail with no users", result);
+
+        // One user in the database
+        insertTestingUser(username, password);
+        result = userService.validateUser(null, invalidPassword);
+        assertNull("validateUserNullUserInvalidPasswordTest: should fail with one user", result);
+
+        // Two users in the database
+        insertTestingUser(username2, password2);
+        result = userService.validateUser(null, invalidPassword);
+        assertNull("validateUserNullUserInvalidPasswordTest: should fail with two users", result);
     }
 
     /**
-     * Verifies that user validation fails when the username does not exist
-     * and the password is null.
+     * Verifies that a nonexistent username and null password fail when the
+     * database has zero, one, or two users.
      */
     @Test
     public void validateUserInvalidUserNullPasswordTest() {
-        insertTestingUser();
-        User result = userService.validateUser(username + "not", null);
-        assertNull("validateUserInvalidUserNullPasswordTest: should fail using a invalid user, null pass", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String invalidUsername = "missingUser";
+
+        // No users in the database
+        User result = userService.validateUser(invalidUsername, null);
+        assertNull("validateUserInvalidUserNullPasswordTest: should fail with no users", result);
+
+        // One user in the database
+        insertTestingUser(username, password);
+        result = userService.validateUser(invalidUsername, null);
+        assertNull("validateUserInvalidUserNullPasswordTest: should fail with one user", result);
+
+        // Two users in the database
+        insertTestingUser(username2, password2);
+        result = userService.validateUser(invalidUsername, null);
+        assertNull("validateUserInvalidUserNullPasswordTest: should fail with two users", result);
     }
 
     /**
-     * Verifies that user validation fails when both the username and password
-     * are null.
+     * Verifies that null credentials fail when the database has zero, one,
+     * or two users.
      */
     @Test
     public void validateUserNullUserNullPasswordTest() {
-        insertTestingUser();
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+
+        // No users in the database
         User result = userService.validateUser(null, null);
-        assertNull("validateUserNullUserNullPasswordTest: should fail using a null user, null pass", result);
+        assertNull("validateUserNullUserNullPasswordTest: should fail with no users", result);
+
+        // One user in the database
+        insertTestingUser(username, password);
+        result = userService.validateUser(null, null);
+        assertNull("validateUserNullUserNullPasswordTest: should fail with one user", result);
+
+        // Two users in the database
+        insertTestingUser(username2, password2);
+        result = userService.validateUser(null, null);
+        assertNull("validateUserNullUserNullPasswordTest: should fail with two users", result);
     }
 
     /*
@@ -183,206 +436,204 @@ public class UserServiceTest {
      */
 
     /**
-     * Verifies that new-user validation succeeds when the username is
-     * available and the two proposed passwords match.
+     * Verifies that available usernames can be registered without changing
+     * users who already exist.
      */
     @Test
-    public void NewUserMatchingPasswordsTest() {
-        insertTestingUser();
-        String newUser = "DifferentTestUser";
-        User result = userService.newUser(newUser, password, password);
-        assertNotNull("NewUserMatchingPasswordsTest: should work using valid user, matching passwords", result);
-        assertEquals("NewUserMatchingPasswordsTest: the new user should have the same username as the username used to create it"
-                , result.getUsername(), newUser);
-        List<User> insertedUsers = userRepo.findByUsernameIgnoreCase(username);
-        assertTrue("NewUserMatchingPasswordsTest: should work, but not overwrite existing users", !insertedUsers.isEmpty());
-        User existingUser = insertedUsers.getFirst();
-        assertNotEquals("NewUserMatchingPasswordsTest: making a new user should not change an existing user", existingUser, result);
+    public void newUserSuccessTest() {
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String username3 = "testUser3";
+        final String password3 = "testPassword3";
 
+        // No users in the database
+        User result = userService.newUser(username, password);
+        assertNotNull("newUserSuccessTest: should create the first user", result);
+        assertEquals("newUserSuccessTest: first username should match",
+                username, result.getUsername());
+        assertEquals("newUserSuccessTest: first user should be able to log in",
+                result, userService.validateUser(username, password));
+
+        // One user in the database
+        User result2 = userService.newUser(username2, password2);
+        assertNotNull("newUserSuccessTest: should create the second user", result2);
+        assertEquals("newUserSuccessTest: second username should match",
+                username2, result2.getUsername());
+        assertEquals("newUserSuccessTest: second user should be able to log in",
+                result2, userService.validateUser(username2, password2));
+        assertEquals("newUserSuccessTest: first user should remain unchanged",
+                result, userService.validateUser(username, password));
+        assertNotEquals("newUserSuccessTest: users should be different", result, result2);
+
+        // Two users in the database
+        User result3 = userService.newUser(username3, password3);
+        assertNotNull("newUserSuccessTest: should create the third user", result3);
+        assertEquals("newUserSuccessTest: third username should match",
+                username3, result3.getUsername());
+        assertEquals("newUserSuccessTest: third user should be able to log in",
+                result3, userService.validateUser(username3, password3));
+        assertEquals("newUserSuccessTest: first user should still be unchanged",
+                result, userService.validateUser(username, password));
+        assertEquals("newUserSuccessTest: second user should remain unchanged",
+                result2, userService.validateUser(username2, password2));
+        assertNotEquals("newUserSuccessTest: first and third users should differ", result, result3);
+        assertNotEquals("newUserSuccessTest: second and third users should differ", result2, result3);
     }
 
     /**
-     * Verifies that new-user validation fails when the requested username
-     * already exists, even when the two proposed passwords match.
+     * Verifies that an existing username cannot be registered with a
+     * different password.
      */
     @Test
-    public void newUserExistingUserPasswordsMatchTest() {
-        insertTestingUser();
-        String newPass = "NotTestPass";
-        User result = userService.newUser(username, newPass, newPass);
-        assertNull("newUserExistingUserPasswordsMatchTest: should fail using an existing user, matching passwords", result);
+    public void newUserExistingUserTest() {
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newPassword = "differentPassword";
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        User result = userService.newUser(username, newPassword);
+        assertNull("newUserExistingUserTest: should reject an existing username", result);
+        assertEquals("newUserExistingUserTest: original credentials should still work",
+                checkUser, userService.validateUser(username, password));
+        assertNull("newUserExistingUserTest: rejected password should not work",
+                userService.validateUser(username, newPassword));
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        result = userService.newUser(username, newPassword);
+        assertNull("newUserExistingUserTest: should still reject the first username", result);
+        result = userService.newUser(username2, newPassword);
+        assertNull("newUserExistingUserTest: should reject the second username", result);
+        assertEquals("newUserExistingUserTest: first user's credentials should remain unchanged",
+                checkUser, userService.validateUser(username, password));
+        assertEquals("newUserExistingUserTest: second user's credentials should remain unchanged",
+                checkUser2, userService.validateUser(username2, password2));
+        assertNull("newUserExistingUserTest: first user should reject the new password",
+                userService.validateUser(username, newPassword));
+        assertNull("newUserExistingUserTest: second user should reject the new password",
+                userService.validateUser(username2, newPassword));
     }
 
     /**
-     * Verifies that new-user validation fails when the requested username is
-     * null, even when the two proposed passwords match.
-     */
-    @Test
-    public void newUserNullUserPasswordsMatchTest() {
-        insertTestingUser();
-        String newPass = "NotTestPass";
-        User result = userService.newUser(null, newPass, newPass);
-        assertNull("newUserNullUserPasswordsMatchTest: should fail using an null user, matching passwords", result);
-    }
-
-    /**
-     * Verifies that new-user validation fails when an existing username is
-     * supplied with matching passwords equal to the stored user's password.
+     * Verifies that an existing username cannot be registered again with
+     * the same password.
      */
     @Test
     public void newUserExistingUserExistingUserPasswordTest() {
-        insertTestingUser();
-        User result = userService.newUser(username, password, password);
-        assertNull("newUserExistingUserExistingUserPasswordTest: should fail using an existing user, existing users matching passwords", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
 
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        User result = userService.newUser(username, password);
+        assertNull("newUserExistingUserExistingUserPasswordTest: should reject duplicate credentials", result);
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        result = userService.newUser(username, password);
+        assertNull("newUserExistingUserExistingUserPasswordTest: should still reject the first user", result);
+        result = userService.newUser(username2, password2);
+        assertNull("newUserExistingUserExistingUserPasswordTest: should reject the second user", result);
+        assertEquals("newUserExistingUserExistingUserPasswordTest: first user should remain unchanged",
+                checkUser, userService.validateUser(username, password));
+        assertEquals("newUserExistingUserExistingUserPasswordTest: second user should remain unchanged",
+                checkUser2, userService.validateUser(username2, password2));
     }
 
     /**
-     * Verifies that new-user validation fails when the requested username is
-     * null and both proposed passwords match the stored user's password.
+     * Verifies that a null username cannot be registered when the database
+     * has zero, one, or two users.
      */
     @Test
-    public void newUserNullUserExistingUserPasswordsTest() {
-        insertTestingUser();
-        User result = userService.newUser(null, password, password);
-        assertNull("newUserNullUserExistingUserPasswordsTest: should fail using a null user, existing users matching passwords", result);
+    public void newUserNullUserTest() {
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+
+        // No users in the database
+        User result = userService.newUser(null, password);
+        assertNull("newUserNullUserTest: should fail with no users", result);
+
+        // One user in the database
+        insertTestingUser(username, password);
+        result = userService.newUser(null, password);
+        assertNull("newUserNullUserTest: should fail with one user", result);
+
+        // Two users in the database
+        insertTestingUser(username2, password2);
+        result = userService.newUser(null, password2);
+        assertNull("newUserNullUserTest: should fail with two users", result);
     }
 
     /**
-     * Verifies that new-user validation fails when one proposed password is
-     * null and the other is valid, even when the username is available.
+     * Verifies that a null password cannot be used for an available or
+     * existing username.
      */
     @Test
-    public void newUserValidUserWithOneNullPasswordTest() {
-        insertTestingUser();
-        String newUser = "DifferentTestUser";
-        User result = userService.newUser(newUser, null, password);
-        assertNull("newUserValidUserWithOneNullPasswordTest: should fail using a valid user, null password, valid password", result);
+    public void newUserNullPasswordTest() {
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newUsername = "differentTestUser";
 
+        // No users in the database
+        User result = userService.newUser(newUsername, null);
+        assertNull("newUserNullPasswordTest: should fail with no users", result);
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        result = userService.newUser(newUsername, null);
+        assertNull("newUserNullPasswordTest: should reject an available username with a null password", result);
+        result = userService.newUser(username, null);
+        assertNull("newUserNullPasswordTest: should reject an existing username with a null password", result);
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        result = userService.newUser(newUsername, null);
+        assertNull("newUserNullPasswordTest: should still reject an available username with a null password", result);
+        result = userService.newUser(username, null);
+        assertNull("newUserNullPasswordTest: should still reject the first username", result);
+        result = userService.newUser(username2, null);
+        assertNull("newUserNullPasswordTest: should reject the second username", result);
+        assertEquals("newUserNullPasswordTest: first user should remain unchanged",
+                checkUser, userService.validateUser(username, password));
+        assertEquals("newUserNullPasswordTest: second user should remain unchanged",
+                checkUser2, userService.validateUser(username2, password2));
     }
 
     /**
-     * Verifies that new-user validation fails when an existing username is
-     * supplied with one null password and one valid password.
+     * Verifies that null registration credentials fail when the database
+     * has zero, one, or two users.
      */
     @Test
-    public void newUserExistingUserWithOneNullPasswordTest2() {
-        insertTestingUser();
-        User result = userService.newUser(username, null, password);
-        assertNull("newUserExistingUserWithOneNullPasswordTest2: should fail using an existing user, null password, valid password", result);
-    }
+    public void newUserNullUserNullPasswordTest() {
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
 
-    /**
-     * Verifies that new-user validation fails when the username and one
-     * proposed password are null while the other password is valid.
-     */
-    @Test
-    public void newUserNullUserNullPasswordValidPasswordTest() {
-        User result = userService.newUser(null, null, password);
-        assertNull("newUserNullUserNullPasswordValidPasswordTest: should fail using a null user, null password, valid password", result);
-    }
+        // No users in the database
+        User result = userService.newUser(null, null);
+        assertNull("newUserNullUserNullPasswordTest: should fail with no users", result);
 
-    /**
-     * Verifies that new-user validation fails when the username and the
-     * confirmation password are null while the first password is valid.
-     */
-    @Test
-    public void newUserValidUserValidPasswordNullPasswordTest() {
-        String newUser = "DifferentTestUser";
-        User result = userService.newUser(newUser, password, null);
-        assertNull("newUserValidUserValidPasswordNullPasswordTest: should fail using a valid user, valid password, null password", result);
-    }
+        // One user in the database
+        insertTestingUser(username, password);
+        result = userService.newUser(null, null);
+        assertNull("newUserNullUserNullPasswordTest: should fail with one user", result);
 
-    /**
-     * Verifies that new-user validation fails when an existing username is
-     * supplied with a valid password and a null confirmation password.
-     */
-    @Test
-    public void newUserExistingUserValidPasswordNullPasswordTest() {
-        insertTestingUser();
-        User result = userService.newUser(username, password, null);
-        assertNull("newUserExistingUserValidPasswordNullPasswordTest: should fail using an existing user, valid password, null password", result);
-    }
-
-    /**
-     * Verifies that new-user validation fails when the username is null,
-     * the first password is valid, and the confirmation password is null.
-     */
-    @Test
-    public void newUserNullUserValidPasswordNullPasswordTest() {
-        User result = userService.newUser(null, password, null);
-        assertNull("newUserNullUserValidPasswordNullPasswordTest: should fail using a null user, valid password, null password", result);
-    }
-
-    /**
-     * Verifies that new-user validation fails when the username is available
-     * but both proposed passwords are null.
-     */
-    @Test
-    public void newUserValidUserNullPasswordsTest() {
-        String newUser = "DifferentTestUser";
-        User result = userService.newUser(newUser, null, null);
-        assertNull("newUserValidUserNullPasswordsTest: should fail using a valid user, null passwords", result);
-    }
-
-    /**
-     * Verifies that new-user validation fails when an existing username is
-     * supplied and both proposed passwords are null.
-     */
-    @Test
-    public void newUserExistingUserNullPasswordsTest() {
-        insertTestingUser();
-        User result = userService.newUser(username, null, null);
-        assertNull("newUserExistingUserNullPasswordsTest: should fail using an existing user, null passwords", result);
-    }
-
-    /**
-     * Verifies that new-user validation fails when the username and both
-     * proposed passwords are null.
-     */
-    @Test
-    public void newUserNullUserNullPasswordsTest() {
-        User result = userService.newUser(null, null, null);
-        assertNull("newUserNullUserNullPasswordsTest: should fail using a null user, null passwords", result);
-    }
-
-    /**
-     * Verifies that new-user validation fails when the username is available
-     * but the two proposed passwords do not match.
-     */
-    @Test
-    public void newUserValidUserNonMatchingPasswordsTest() {
-        String newUser = "DifferentTestUser";
-        String nonMatching1 = "123";
-        String nonMatching2 = "abc";
-        User result = userService.newUser(newUser, nonMatching1, nonMatching2);
-        assertNull("newUserValidUserNonMatchingPasswordsTest: should fail using a valid user, non matching passwords", result);
-
-    }
-
-    /**
-     * Verifies that new-user validation fails when the username already
-     * exists and the two proposed passwords do not match.
-     */
-    @Test
-    public void newUserExistingUserNonMatchingPasswordsTest() {
-        insertTestingUser();
-        String nonMatching1 = "123";
-        String nonMatching2 = "abc";
-        User result = userService.newUser(username, nonMatching1, nonMatching2);
-        assertNull("newUserExistingUserNonMatchingPasswordsTest: should fail using an existing user, non matching passwords", result);
-    }
-
-    /**
-     * Verifies that new-user validation fails when the username is null and
-     * the two proposed passwords do not match.
-     */
-    @Test
-    public void newUserNullUserNonMatchingPasswordsTest() {
-        String nonMatching1 = "123";
-        String nonMatching2 = "abc";
-        User result = userService.newUser(null, nonMatching1, nonMatching2);
-        assertNull("newUserNullUserNonMatchingPasswordsTest: should fail using a null user, non matching passwords", result);
+        // Two users in the database
+        insertTestingUser(username2, password2);
+        result = userService.newUser(null, null);
+        assertNull("newUserNullUserNullPasswordTest: should fail with two users", result);
     }
 
     /*
@@ -392,60 +643,175 @@ public class UserServiceTest {
      */
 
     /**
-     * Verifies that a user's name can be successfully changed.
+     * Verifies that renaming a user updates only the selected user's name.
      */
     @Test
     public void renameUserSuccessTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        String newName = "NewTestName";
-        boolean result = userService.renameUser(user, newName);
-        assertTrue("renameUserSuccessTest: should successfully rename a valid user", result);
-        assertEquals("renameUserSuccessTest: user's name should be updated",
-                newName, user.getName());
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newName = "NewTestName";
+        final String newName2 = "OtherTestName";
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        boolean result = userService.renameUser(checkUser, newName);
+        assertTrue("renameUserSuccessTest: should rename the first user", result);
+        assertEquals("renameUserSuccessTest: first user's name should be updated",
+                newName, checkUser.getName());
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        String originalName2 = checkUser2.getName();
+
+        result = userService.renameUser(checkUser, newName2);
+        assertTrue("renameUserSuccessTest: should rename the first user again", result);
+        assertEquals("renameUserSuccessTest: first user's name should change again",
+                newName2, checkUser.getName());
+        assertEquals("renameUserSuccessTest: second user's name should remain unchanged",
+                originalName2, checkUser2.getName());
+
+        result = userService.renameUser(checkUser2, newName);
+        assertTrue("renameUserSuccessTest: should rename the second user", result);
+        assertEquals("renameUserSuccessTest: second user's name should be updated",
+                newName, checkUser2.getName());
+        assertEquals("renameUserSuccessTest: first user's name should remain unchanged",
+                newName2, checkUser.getName());
+
+        assertEquals("renameUserSuccessTest: first user's login should still work",
+                checkUser, userService.validateUser(username, password));
+        assertEquals("renameUserSuccessTest: second user's login should still work",
+                checkUser2, userService.validateUser(username2, password2));
     }
 
     /**
-     * Verifies that renaming a user fails when the user is null.
+     * Verifies that renaming a null user fails with zero, one, or two users.
      */
     @Test
     public void renameUserNullUserTest() {
-        boolean result = userService.renameUser(null, "NewTestName");
-        assertFalse("renameUserNullUserTest: should fail using a null user", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newName = "NewTestName";
+
+        // No users in the database
+        boolean result = userService.renameUser(null, newName);
+        assertFalse("renameUserNullUserTest: should fail with no users", result);
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        String originalName = checkUser.getName();
+        result = userService.renameUser(null, newName);
+        assertFalse("renameUserNullUserTest: should fail with one user", result);
+        assertEquals("renameUserNullUserTest: first user's name should remain unchanged",
+                originalName, checkUser.getName());
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        String originalName2 = checkUser2.getName();
+        result = userService.renameUser(null, newName);
+        assertFalse("renameUserNullUserTest: should fail with two users", result);
+        assertEquals("renameUserNullUserTest: first user's name should still be unchanged",
+                originalName, checkUser.getName());
+        assertEquals("renameUserNullUserTest: second user's name should remain unchanged",
+                originalName2, checkUser2.getName());
     }
 
     /**
-     * Verifies that renaming a user fails when the new name is null.
+     * Verifies that a null name is rejected without changing either user.
      */
     @Test
     public void renameUserNullNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = userService.renameUser(user, null);
-        assertFalse("renameUserNullNameTest: should fail using a null name", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        String originalName = checkUser.getName();
+        boolean result = userService.renameUser(checkUser, null);
+        assertFalse("renameUserNullNameTest: should reject a null name", result);
+        assertEquals("renameUserNullNameTest: first user's name should remain unchanged",
+                originalName, checkUser.getName());
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        String originalName2 = checkUser2.getName();
+        result = userService.renameUser(checkUser, null);
+        assertFalse("renameUserNullNameTest: should still reject a null name for the first user", result);
+        result = userService.renameUser(checkUser2, null);
+        assertFalse("renameUserNullNameTest: should reject a null name for the second user", result);
+        assertEquals("renameUserNullNameTest: first user's name should still be unchanged",
+                originalName, checkUser.getName());
+        assertEquals("renameUserNullNameTest: second user's name should remain unchanged",
+                originalName2, checkUser2.getName());
     }
 
     /**
-     * Verifies that renaming a user fails when the new name is too short.
+     * Verifies that a name shorter than two characters is rejected.
      */
     @Test
     public void renameUserShortNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = userService.renameUser(user, "A");
-        assertFalse("renameUserShortNameTest: should fail using a name shorter than 2 characters", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newName = "A";
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        String originalName = checkUser.getName();
+        boolean result = userService.renameUser(checkUser, newName);
+        assertFalse("renameUserShortNameTest: should reject a short name", result);
+        assertEquals("renameUserShortNameTest: first user's name should remain unchanged",
+                originalName, checkUser.getName());
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        String originalName2 = checkUser2.getName();
+        result = userService.renameUser(checkUser, newName);
+        assertFalse("renameUserShortNameTest: should still reject a short name for the first user", result);
+        result = userService.renameUser(checkUser2, newName);
+        assertFalse("renameUserShortNameTest: should reject a short name for the second user", result);
+        assertEquals("renameUserShortNameTest: first user's name should still be unchanged",
+                originalName, checkUser.getName());
+        assertEquals("renameUserShortNameTest: second user's name should remain unchanged",
+                originalName2, checkUser2.getName());
     }
 
     /**
-     * Verifies that renaming a user fails when the new name is too long.
+     * Verifies that a name longer than forty characters is rejected.
      */
     @Test
     public void renameUserLongNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newName = "ThisNameIsMuchLongerThanTheAllowedFortyCharacters";
 
-        boolean result = userService.renameUser(user, "ThisNameIsMuchLongerThanTheAllowedFortyCharacters");
-        assertFalse("renameUserLongNameTest: should fail using a name longer than 40 characters", result);
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        String originalName = checkUser.getName();
+        boolean result = userService.renameUser(checkUser, newName);
+        assertFalse("renameUserLongNameTest: should reject a long name", result);
+        assertEquals("renameUserLongNameTest: first user's name should remain unchanged",
+                originalName, checkUser.getName());
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        String originalName2 = checkUser2.getName();
+        result = userService.renameUser(checkUser, newName);
+        assertFalse("renameUserLongNameTest: should still reject a long name for the first user", result);
+        result = userService.renameUser(checkUser2, newName);
+        assertFalse("renameUserLongNameTest: should reject a long name for the second user", result);
+        assertEquals("renameUserLongNameTest: first user's name should still be unchanged",
+                originalName, checkUser.getName());
+        assertEquals("renameUserLongNameTest: second user's name should remain unchanged",
+                originalName2, checkUser2.getName());
     }
 
     /*
@@ -455,94 +821,232 @@ public class UserServiceTest {
      */
 
     /**
-     * Verifies that a user's password can be successfully changed.
+     * Verifies that changing a password updates only the selected user.
      */
     @Test
     public void changeUsersPasswordSuccessTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        String newPassword = "NewTestPassword";
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newPassword = "NewTestPassword";
+        final String newPassword2 = "OtherTestPassword";
 
-        boolean result = userService.changeUsersPassword(user, newPassword);
-
-        assertTrue("changeUsersPasswordSuccessTest: should successfully change a valid user's password", result);
-        assertNotNull("changeUsersPasswordSuccessTest: user should be able to log in with the new password",
-                userService.validateUser(username, newPassword));
-        assertNull("changeUsersPasswordSuccessTest: user should no longer be able to log in with the old password",
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        boolean result = userService.changeUsersPassword(checkUser, newPassword);
+        assertTrue("changeUsersPasswordSuccessTest: should change the first user's password", result);
+        assertEquals("changeUsersPasswordSuccessTest: new password should log in the first user",
+                checkUser, userService.validateUser(username, newPassword));
+        assertNull("changeUsersPasswordSuccessTest: original password should no longer work",
                 userService.validateUser(username, password));
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        result = userService.changeUsersPassword(checkUser, newPassword2);
+        assertTrue("changeUsersPasswordSuccessTest: should change the first user's password again", result);
+        assertEquals("changeUsersPasswordSuccessTest: newest password should work",
+                checkUser, userService.validateUser(username, newPassword2));
+        assertNull("changeUsersPasswordSuccessTest: previous password should no longer work",
+                userService.validateUser(username, newPassword));
+        assertEquals("changeUsersPasswordSuccessTest: second user's password should remain unchanged",
+                checkUser2, userService.validateUser(username2, password2));
+
+        result = userService.changeUsersPassword(checkUser2, newPassword);
+        assertTrue("changeUsersPasswordSuccessTest: should change the second user's password", result);
+        assertEquals("changeUsersPasswordSuccessTest: second user's new password should work",
+                checkUser2, userService.validateUser(username2, newPassword));
+        assertNull("changeUsersPasswordSuccessTest: second user's original password should no longer work",
+                userService.validateUser(username2, password2));
+        assertEquals("changeUsersPasswordSuccessTest: first user's password should remain unchanged",
+                checkUser, userService.validateUser(username, newPassword2));
     }
 
     /**
-     * Verifies that changing a password fails when the user is null.
+     * Verifies that changing a null user's password fails with zero, one,
+     * or two users.
      */
     @Test
     public void changeUsersPasswordNullUserTest() {
-        boolean result = userService.changeUsersPassword(null, "NewTestPassword");
-        assertFalse("changeUsersPasswordNullUserTest: should fail using a null user", result);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newPassword = "NewTestPassword";
+
+        // No users in the database
+        boolean result = userService.changeUsersPassword(null, newPassword);
+        assertFalse("changeUsersPasswordNullUserTest: should fail with no users", result);
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        result = userService.changeUsersPassword(null, newPassword);
+        assertFalse("changeUsersPasswordNullUserTest: should fail with one user", result);
+        assertEquals("changeUsersPasswordNullUserTest: first user's password should remain unchanged",
+                checkUser, userService.validateUser(username, password));
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        result = userService.changeUsersPassword(null, newPassword);
+        assertFalse("changeUsersPasswordNullUserTest: should fail with two users", result);
+        assertEquals("changeUsersPasswordNullUserTest: first user's password should still be unchanged",
+                checkUser, userService.validateUser(username, password));
+        assertEquals("changeUsersPasswordNullUserTest: second user's password should remain unchanged",
+                checkUser2, userService.validateUser(username2, password2));
     }
 
     /**
-     * Verifies that changing a password fails when the new password is null.
+     * Verifies that a null password is rejected without changing either user.
      */
     @Test
     public void changeUsersPasswordNullPasswordTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
 
-        boolean result = userService.changeUsersPassword(user, null);
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        boolean result = userService.changeUsersPassword(checkUser, null);
+        assertFalse("changeUsersPasswordNullPasswordTest: should reject a null password", result);
+        assertEquals("changeUsersPasswordNullPasswordTest: original password should still work",
+                checkUser, userService.validateUser(username, password));
 
-        assertFalse("changeUsersPasswordNullPasswordTest: should fail using a null password", result);
-        User checkUser = userService.validateUser(username, password);
-        assertEquals("changeUsersPasswordNullPasswordTest: the users should still be able to log in with the old password", user, checkUser);
-
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        result = userService.changeUsersPassword(checkUser, null);
+        assertFalse("changeUsersPasswordNullPasswordTest: should still reject a null password for the first user", result);
+        result = userService.changeUsersPassword(checkUser2, null);
+        assertFalse("changeUsersPasswordNullPasswordTest: should reject a null password for the second user", result);
+        assertEquals("changeUsersPasswordNullPasswordTest: first user's original password should still work",
+                checkUser, userService.validateUser(username, password));
+        assertEquals("changeUsersPasswordNullPasswordTest: second user's original password should still work",
+                checkUser2, userService.validateUser(username2, password2));
     }
 
     /**
-     * Verifies that changing a password fails when the new password is too short.
+     * Verifies that a password shorter than eight characters is rejected.
      */
     @Test
     public void changeUsersPasswordShortPasswordTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newPassword = "Short";
 
-        boolean result = userService.changeUsersPassword(user, "Short");
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        boolean result = userService.changeUsersPassword(checkUser, newPassword);
+        assertFalse("changeUsersPasswordShortPasswordTest: should reject a short password", result);
+        assertEquals("changeUsersPasswordShortPasswordTest: original password should still work",
+                checkUser, userService.validateUser(username, password));
+        assertNull("changeUsersPasswordShortPasswordTest: rejected password should not work",
+                userService.validateUser(username, newPassword));
 
-        assertFalse("changeUsersPasswordShortPasswordTest: should fail using a password shorter than 8 characters", result);
-        User checkUser = userService.validateUser(username, password);
-        assertEquals("changeUsersPasswordShortPasswordTest: the users should still be able to log in with the old password", user, checkUser);
-
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        result = userService.changeUsersPassword(checkUser, newPassword);
+        assertFalse("changeUsersPasswordShortPasswordTest: should still reject a short password for the first user", result);
+        result = userService.changeUsersPassword(checkUser2, newPassword);
+        assertFalse("changeUsersPasswordShortPasswordTest: should reject a short password for the second user", result);
+        assertEquals("changeUsersPasswordShortPasswordTest: first user's original password should still work",
+                checkUser, userService.validateUser(username, password));
+        assertEquals("changeUsersPasswordShortPasswordTest: second user's original password should still work",
+                checkUser2, userService.validateUser(username2, password2));
+        assertNull("changeUsersPasswordShortPasswordTest: first user should reject the short password",
+                userService.validateUser(username, newPassword));
+        assertNull("changeUsersPasswordShortPasswordTest: second user should reject the short password",
+                userService.validateUser(username2, newPassword));
     }
 
     /**
-     * Verifies that changing a password fails when the new password is too long.
+     * Verifies that a password longer than thirty characters is rejected.
      */
     @Test
     public void changeUsersPasswordLongPasswordTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newPassword = "ThisPasswordIsMuchLongerThanTheAllowedThirtyCharacters";
 
-        boolean result = userService.changeUsersPassword(user,
-                "ThisPasswordIsMuchLongerThanTheAllowedThirtyCharacters");
-        assertFalse("changeUsersPasswordLongPasswordTest: should fail using a password longer than 30 characters", result);
-        User checkUser = userService.validateUser(username, password);
-        assertEquals("changeUsersPasswordLongPasswordTest: the users should still be able to log in with the old password", user, checkUser);
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        boolean result = userService.changeUsersPassword(checkUser, newPassword);
+        assertFalse("changeUsersPasswordLongPasswordTest: should reject a long password", result);
+        assertEquals("changeUsersPasswordLongPasswordTest: original password should still work",
+                checkUser, userService.validateUser(username, password));
+        assertNull("changeUsersPasswordLongPasswordTest: rejected password should not work",
+                userService.validateUser(username, newPassword));
 
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        result = userService.changeUsersPassword(checkUser, newPassword);
+        assertFalse("changeUsersPasswordLongPasswordTest: should still reject a long password for the first user", result);
+        result = userService.changeUsersPassword(checkUser2, newPassword);
+        assertFalse("changeUsersPasswordLongPasswordTest: should reject a long password for the second user", result);
+        assertEquals("changeUsersPasswordLongPasswordTest: first user's original password should still work",
+                checkUser, userService.validateUser(username, password));
+        assertEquals("changeUsersPasswordLongPasswordTest: second user's original password should still work",
+                checkUser2, userService.validateUser(username2, password2));
+        assertNull("changeUsersPasswordLongPasswordTest: first user should reject the long password",
+                userService.validateUser(username, newPassword));
+        assertNull("changeUsersPasswordLongPasswordTest: second user should reject the long password",
+                userService.validateUser(username2, newPassword));
     }
 
     /**
-     * Verifies that changing a password fails when the new password contains whitespace.
+     * Verifies that a password containing whitespace is rejected.
      */
     @Test
     public void changeUsersPasswordWhitespaceTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = userService.changeUsersPassword(user, "New Test Password");
-        assertFalse("changeUsersPasswordWhitespaceTest: should fail using a password containing whitespace", result);
-        User checkUser = userService.validateUser(username, password);
-        assertEquals("changeUsersPasswordWhitespaceTest: the users should still be able to log in with the old password", user, checkUser);
+        final String username = "testUser";
+        final String password = "testPassword";
+        final String username2 = "testUser2";
+        final String password2 = "testPassword2";
+        final String newPassword = "New Test Password";
+
+        // One user in the database
+        User checkUser = insertTestingUser(username, password);
+        boolean result = userService.changeUsersPassword(checkUser, newPassword);
+        assertFalse("changeUsersPasswordWhitespaceTest: should reject whitespace in a password", result);
+        assertEquals("changeUsersPasswordWhitespaceTest: original password should still work",
+                checkUser, userService.validateUser(username, password));
+        assertNull("changeUsersPasswordWhitespaceTest: rejected password should not work",
+                userService.validateUser(username, newPassword));
+
+        // Two users in the database
+        User checkUser2 = insertTestingUser(username2, password2);
+        result = userService.changeUsersPassword(checkUser, newPassword);
+        assertFalse("changeUsersPasswordWhitespaceTest: should still reject whitespace for the first user", result);
+        result = userService.changeUsersPassword(checkUser2, newPassword);
+        assertFalse("changeUsersPasswordWhitespaceTest: should reject whitespace for the second user", result);
+        assertEquals("changeUsersPasswordWhitespaceTest: first user's original password should still work",
+                checkUser, userService.validateUser(username, password));
+        assertEquals("changeUsersPasswordWhitespaceTest: second user's original password should still work",
+                checkUser2, userService.validateUser(username2, password2));
+        assertNull("changeUsersPasswordWhitespaceTest: first user should reject the password containing whitespace",
+                userService.validateUser(username, newPassword));
+        assertNull("changeUsersPasswordWhitespaceTest: second user should reject the password containing whitespace",
+                userService.validateUser(username2, newPassword));
     }
 
-    private void insertTestingUser() {
-        userService.newUser(username, password, password);
+    /**
+     * Creates a test user and verifies that the saved credentials work.
+     */
+    private User insertTestingUser(String username, String password) {
+        User user = userService.validateUser(username, password);
+        assertNull("insertTestingUser: user should not exist yet", user);
+
+        user = userService.newUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after creation", user);
+        assertEquals("insertTestingUser: user should have the correct username", username, user.getUsername());
+
+        User userCheck = userService.validateUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after validation", userCheck);
+        assertEquals("insertTestingUser: validated user should match the created user", user, userCheck);
+        assertEquals("inserTestingUser: validate user should have the same username still", userCheck.getUsername(), username);
+        return user;
     }
 }
