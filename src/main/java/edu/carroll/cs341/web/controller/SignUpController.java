@@ -83,7 +83,7 @@ public class SignUpController {
             return "signUpPage";
         }
 
-        User user = userService.newUser(createUserForm.getUsername(), createUserForm.getPassword1(), createUserForm.getPassword2());
+        User user = userService.newUser(createUserForm.getUsername(), createUserForm.getPassword1());
 
         // Check whether the username is available and the passwords match.
         if (user == null) {

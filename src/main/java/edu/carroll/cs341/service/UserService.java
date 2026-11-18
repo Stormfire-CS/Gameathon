@@ -35,11 +35,10 @@ public interface UserService {
      * username is available and the password confirmation matches.
      *
      * @param username the username requested for the new account
-     * @param password1 the password entered initially
-     * @param password2 the password entered for confirmation
+     * @param password the password entered for the user
      * @return {@code true} if registration succeeds; {@code false} otherwise
      */
-     User newUser(String username, String password1, String password2);
+     User newUser(String username, String password);
 
     /**
      * Renames the currently selected user's account.
@@ -48,7 +47,7 @@ public interface UserService {
      * @param newName the new name to assign to the user
      * @return true if the user's name was successfully updated; false otherwise
      */
-     Boolean renameUser(User user, String newName);
+     boolean renameUser(User user, String newName);
 
     /**
      * Changes the password associated with a user account.
@@ -57,6 +56,6 @@ public interface UserService {
      * @param password the new password to assign to the user
      * @return true if the password was successfully changed; false otherwise
      */
-     Boolean changeUsersPassword(User user, String password);
+     boolean changeUsersPassword(User user, String password);
 
 }

@@ -93,14 +93,13 @@ public class UserServiceImpl implements UserService {
      * if the username is available and both passwords match.
      *
      * @param username the username requested for the new account
-     * @param password1 the password entered initially
-     * @param password2 the password entered for confirmation
+     * @param password the password entered for the new user
      * @return {@code true} if the account was registered successfully;
      * {@code false} if the username already exists or the passwords differ
      */
     @Transactional
     @Override
-    public User newUser(String username, String password1, String password2) {
+    public User newUser(String username, String password) {
         log.debug("validateNewUser: attempting to register username '{}'", username);
 
         if (username == null) {
@@ -114,13 +113,13 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
-        if (password1 == null || password2 == null) {
-            log.error("validateNewUser: One or both passwords is null");
+        if (password == null) {
+            log.error("validateNewUser: password is null");
             return null;
         }
 
-        if (password1.isEmpty() || password2.isEmpty()) {
-            log.error("validateNewUser: One or both passwords is blank");
+        if (password.isEmpty()) {
+            log.error("validateNewUser: password is blank");
             return null;
         }
 
@@ -131,12 +130,6 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
-        // Ensure the password confirmation matches before creating the account.
-        if (!password1.equals(password2)) {
-            log.error("validateNewUser: passwords do not match for '{}'", username);
-            return null;
-        }
-
         // Reject usernames containing whitespace.
         if (!username.matches("^\\S+$")) {
             log.error("validateNewUser: username contains whitespace");
@@ -144,13 +137,13 @@ public class UserServiceImpl implements UserService {
         }
 
         // Reject passwords containing whitespace.
-        if (!password1.matches("^\\S+$") || !password2.matches("^\\S+$")) {
-            log.error("validateNewUser: one or both passwords contain whitespace");
+        if (!password.matches("^\\S+$")) {
+            log.error("validateNewUser: The password contains whitespace");
             return null;
         }
 
         // Construct and save the new login record after validation succeeds.
-        User user = new User(username, password1);
+        User user = new User(username, password);
         userRepo.save(user);
 
         log.info("validateNewUser: successfully registered user '{}'", username);
@@ -166,7 +159,7 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @Override
-    public Boolean renameUser(User user, String newName) {
+    public boolean renameUser(User user, String newName) {
         log.debug("renameUser: user {} attempting to change name to '{}'", user, newName);
 
         if (user == null) {
@@ -213,7 +206,7 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @Override
-    public Boolean changeUsersPassword(User user, String password) {
+    public boolean changeUsersPassword(User user, String password) {
         log.debug("changeUsersPassword: user {} attempting to change password", user);
 
         if (user == null) {

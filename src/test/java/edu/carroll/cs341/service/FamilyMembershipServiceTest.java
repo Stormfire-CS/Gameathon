@@ -1020,7 +1020,7 @@ public class FamilyMembershipServiceTest {
     }
 
     private User insertTestingUser(String testUsername) {
-        userService.newUser(testUsername, password, password);
+        userService.newUser(testUsername, password);
         User user = userService.validateUser(testUsername, password);
 
         assertNotNull("insertTestingUser: should create the test user", user);

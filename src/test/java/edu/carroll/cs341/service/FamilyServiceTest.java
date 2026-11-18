@@ -469,7 +469,7 @@ public class FamilyServiceTest {
         insertTestingUser();
         User admin = userService.validateUser(username, password);
         Family family = insertTestingFamily(admin);
-        User outsider = userService.newUser("familyoutsider", password, password);
+        User outsider = userService.newUser("familyoutsider", password);
 
         boolean result = familyService.changeAdmin(admin, outsider);
 
@@ -487,7 +487,7 @@ public class FamilyServiceTest {
         insertTestingUser();
         User admin = userService.validateUser(username, password);
         Family family = insertTestingFamily(admin);
-        User otherAdmin = userService.newUser("otherfamilyadmin", password, password);
+        User otherAdmin = userService.newUser("otherfamilyadmin", password);
 
         assertTrue("changeAdminDifferentFamilyTest: should create the other family",
                 familyService.createFamily(otherAdmin, "Other Family"));
@@ -518,7 +518,7 @@ public class FamilyServiceTest {
         Family family = insertTestingFamily(admin);
         User member = insertTestingMember("familymember", family);
 
-        User otherAdmin = userService.newUser("otherfamilyadmin", password, password);
+        User otherAdmin = userService.newUser("otherfamilyadmin", password);
         assertTrue("deleteFamilySuccessTest: should create the other family",
                 familyService.createFamily(otherAdmin, "Other Family"));
         Family otherFamily = otherAdmin.getFamily();
@@ -604,7 +604,7 @@ public class FamilyServiceTest {
     }
 
     private void insertTestingUser() {
-        userService.newUser(username, password, password);
+        userService.newUser(username, password);
     }
 
     /**
@@ -625,7 +625,7 @@ public class FamilyServiceTest {
      * Creates an accepted member with a matching user family reference.
      */
     private User insertTestingMember(String memberUsername, Family family) {
-        User member = userService.newUser(memberUsername, password, password);
+        User member = userService.newUser(memberUsername, password);
 
         assertNotNull("insertTestingMember: should create the test user", member);
 

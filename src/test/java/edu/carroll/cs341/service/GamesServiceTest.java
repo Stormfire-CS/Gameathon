@@ -772,7 +772,7 @@ public class GamesServiceTest {
     public void getAvailableGamesVisibleGamesTest() {
         insertTestingUser();
         User user = userService.validateUser(username, password);
-        User otherUser = userService.newUser("otheruser", password, password);
+        User otherUser = userService.newUser("otheruser", password);
 
         Game publicGame = insertTestingGame("Public Game", null, true);
         Game userGame = insertTestingGame("User Game", user, true);
@@ -1134,7 +1134,7 @@ public class GamesServiceTest {
         insertTestingUser();
         User user = userService.validateUser(username, password);
         User otherUser = userService.newUser(
-                "otheruser", password, password);
+                "otheruser", password);
         Game publicGame = insertTestingGame(validName, null, true);
 
         assertTrue("editGameUpdatesCollectionReferencesTest: should add the user's copy",
@@ -1201,7 +1201,7 @@ public class GamesServiceTest {
         insertTestingUser();
         User user = userService.validateUser(username, password);
         User otherUser = userService.newUser(
-                "otheruser", password, password);
+                "otheruser", password);
         Game publicGame = insertTestingGame(validName, null, true);
 
         boolean result = gamesService.removeGame(user, publicGame.getGameID());
@@ -1299,7 +1299,7 @@ public class GamesServiceTest {
     }
 
     private void insertTestingUser() {
-        userService.newUser(username, password, password);
+        userService.newUser(username, password);
     }
 
     private User insertTestingUserWithVisibleGame() {

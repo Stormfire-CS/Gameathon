@@ -244,7 +244,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void removeGameFromCollectionWrongUserTest() {
         User user = insertTestingUser();
-        User otherUser = userService.newUser("ownedtestuser2", password, password);
+        User otherUser = userService.newUser("ownedtestuser2", password);
         Game game = insertTestingGame();
         gamesOwnedService.addGameToCollection(user, game.getGameID(), 2020);
         List<GameOwned> ownedGames = gamesOwnedService.getGamesOwnedByUsername(user);
@@ -430,7 +430,7 @@ public class GamesOwnedServiceTest {
     public void getGameOwnedByIDWrongUserTest() {
         User user = insertTestingUser();
         User otherUser = userService.newUser(
-                "ownedtestuser2", password, password);
+                "ownedtestuser2", password);
         GameOwned ownedGame = insertTestingOwnedGame(
                 user, insertTestingGame(), 2020);
 
@@ -455,7 +455,7 @@ public class GamesOwnedServiceTest {
     public void getNumberOfReferencesSuccessTest() {
         User user = insertTestingUser();
         User otherUser = userService.newUser(
-                "ownedtestuser2", password, password);
+                "ownedtestuser2", password);
         Game game = insertTestingGame();
         Game otherGame = gamesRepo.save(new Game("Other Game"));
 
@@ -540,7 +540,7 @@ public class GamesOwnedServiceTest {
     public void updateGameReferencesSuccessTest() {
         User user = insertTestingUser();
         User otherUser = userService.newUser(
-                "ownedtestuser2", password, password);
+                "ownedtestuser2", password);
         Game originalGame = insertTestingGame();
         Game replacementGame = gamesRepo.save(new Game("Replacement Game"));
         Game unrelatedGame = gamesRepo.save(new Game("Unrelated Game"));
@@ -768,7 +768,7 @@ public class GamesOwnedServiceTest {
     public void editGameInCollectionWrongUserTest() {
         User user = insertTestingUser();
         User otherUser = userService.newUser(
-                "ownedtestuser2", password, password);
+                "ownedtestuser2", password);
         Game originalGame = insertTestingGame();
         Game replacementGame = gamesRepo.save(new Game("Replacement Game"));
         GameOwned ownedGame = insertTestingOwnedGame(user, originalGame, 2020);
@@ -910,11 +910,11 @@ public class GamesOwnedServiceTest {
     public void getGamesOwnedByFamilyAcceptedMembersTest() {
         User user = insertTestingUser();
         User secondMember = userService.newUser(
-                "ownedtestuser2", password, password);
+                "ownedtestuser2", password);
         User pendingMember = userService.newUser(
-                "ownedtestuser3", password, password);
+                "ownedtestuser3", password);
         User outsider = userService.newUser(
-                "ownedtestuser4", password, password);
+                "ownedtestuser4", password);
 
         Family family = familiesRepo.save(new Family("Test Family", user));
         Family otherFamily = familiesRepo.save(new Family("Other Family", outsider));
@@ -982,7 +982,7 @@ public class GamesOwnedServiceTest {
     }
 
     private User insertTestingUser() {
-        return userService.newUser(username, password, password);
+        return userService.newUser(username, password);
     }
 
     private Game insertTestingGame() {
