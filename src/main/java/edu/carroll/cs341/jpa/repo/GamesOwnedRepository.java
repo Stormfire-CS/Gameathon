@@ -14,8 +14,9 @@ import java.util.List;
  * as the type of the entity's primary key.</p>
  *
  * <p>It also defines query methods for retrieving game ownership records
- * by user and by game ownership record ID, as well as retrieving records
- * associated with a list of users.</p>
+ * by user and by game ownership ID, as well as retrieving records
+ * associated with a list of users. It also provides a method to count the
+ * number of game ownership records associated with a specific game and user.</p>
  *
  * <p><b>Sources Used:</b></p>
  * <ul>
@@ -54,7 +55,22 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
      */
     List<GameOwned> findByUserIn(List<User> users);
 
+    /**
+     * Counts the number of game ownership records associated with the specified game and user.
+     *
+     * @param gameID the ID of the game
+     * @param user the user
+     * @return the count of matching game ownership records
+     */
     long countByGame_GameIDAndUser(Long gameID, User user);
 
+    /**
+     * Finds all game ownership records associated with the specified game and user.
+     *
+     * @param gameID the ID of the game
+     * @param user the user
+     * @return a list of matching game ownership records;
+     * an empty list if no matching records are found
+     */
     List<GameOwned> findByGame_GameIDAndUser(long gameID, User user);
 }
