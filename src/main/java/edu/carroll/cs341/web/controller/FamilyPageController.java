@@ -1,7 +1,6 @@
 package edu.carroll.cs341.web.controller;
 
 import edu.carroll.cs341.jpa.model.Family;
-import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyMembershipService;
 import edu.carroll.cs341.service.FamilyService;
@@ -41,6 +40,9 @@ public class FamilyPageController {
      */
     private final FamilyMembershipService familyMembershipService;
 
+    /**
+     * Service used to retrieve family-owned games.
+     */
     private final GamesOwnedService gamesOwnedService;
 
     /**
@@ -69,14 +71,13 @@ public class FamilyPageController {
      */
     @GetMapping("/familyPage")
     public String familyPage(HttpSession session, Model model) {
-
+        // Ensures the user is logged in, and if not redirects to the login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
-        // Make the username available to the view for display and subsequent actions.
+        // Make the user available to the view for display and subsequent actions.
         model.addAttribute("user", user);
 
         // Retrieve the family associated with the user's accepted membership.
@@ -89,6 +90,7 @@ public class FamilyPageController {
         // Only check administrator status when the user has an associated family.
         model.addAttribute("isFamilyAdmin", family != null && familyService.isFamilyAdmin(user, family));
 
+        // Only retrieve games owned by the family if the user is a member of a family.
         if (family != null) {
             model.addAttribute("games", gamesOwnedService.getGamesOwnedByFamily(family));
         }
@@ -104,14 +106,14 @@ public class FamilyPageController {
      */
     @PostMapping("/leaveFamily")
     public String leaveFamily(HttpSession session) {
+        // Ensures the user is logged in, and if not redirects to the login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
+        // Removes the user from their family.
         familyMembershipService.leaveFamily(user);
-
         return "redirect:/familyPage";
     }
 }
