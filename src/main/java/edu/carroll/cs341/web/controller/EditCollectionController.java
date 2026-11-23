@@ -44,22 +44,15 @@ public class EditCollectionController {
     private final GamesOwnedService gamesOwnedService;
 
     /**
-     * Service used to retrieve user account information.
-     */
-    private final UserService userService;
-
-    /**
      * Constructs the controller with the services required to manage
      * game availability, user accounts, and game ownership.
      *
      * @param gamesService      service for retrieving available games
      * @param gamesOwnedService service for managing owned games
-     * @param userService       service for retrieving user information
      */
-    public EditCollectionController(GamesService gamesService, GamesOwnedService gamesOwnedService, UserService userService) {
+    public EditCollectionController(GamesService gamesService, GamesOwnedService gamesOwnedService) {
         this.gamesService = gamesService;
         this.gamesOwnedService = gamesOwnedService;
-        this.userService = userService;
     }
 
     /**
@@ -74,8 +67,8 @@ public class EditCollectionController {
      */
     @GetMapping("/editCollectionPage")
     public String editCollectionPage(HttpSession session, Model model) {
+        // Ensure a user is logged in, redirect to login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
@@ -86,6 +79,7 @@ public class EditCollectionController {
         // Supply the available games to the view for the user to select from.
         model.addAttribute("games", gamesService.getAvailableGames(user));
 
+        // Supply the owned games to the view for the user to select from.
         model.addAttribute("ownedGames", gamesOwnedService.getGamesOwnedByUsername(user));
 
         // Supply an empty form object for adding a game to the colleciton.
@@ -113,8 +107,8 @@ public class EditCollectionController {
                                       BindingResult bindingResult,
                                       Model model) {
 
+        // Ensure a user is logged in, redirect to login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
@@ -124,7 +118,6 @@ public class EditCollectionController {
             model.addAttribute("user", user);
             model.addAttribute("games", gamesService.getAvailableGames(user));
             model.addAttribute("ownedGames", gamesOwnedService.getGamesOwnedByUsername(user));
-
             return "editCollection";
         }
 
@@ -147,16 +140,14 @@ public class EditCollectionController {
      */
     @PostMapping("/deleteGameFromCollection")
     public String deleteGameFromCollection(HttpSession session, Long gameOwnedID) {
-
+        // Ensure a user is logged in, redirect to login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
         // Delegate removal of the ownership record to the service.
         gamesOwnedService.removeGameFromCollection(user, gameOwnedID);
-
         return "redirect:/editCollectionPage";
     }
 
