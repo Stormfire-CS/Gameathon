@@ -111,7 +111,6 @@ public class CreateUserForm {
         if (password1 == null || password2 == null) {
             return true;
         }
-
         return password1.equals(password2);
     }
 }
