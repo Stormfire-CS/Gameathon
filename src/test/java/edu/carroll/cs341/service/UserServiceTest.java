@@ -735,8 +735,8 @@ public class UserServiceTest {
     }
 
     /**
-     * Verifies that a null username cannot be registered when the database
-     * has zero, one, or two users.
+     * Verifies that null, empty, spaces-only, internally spaced, and
+     * out-of-range usernames cannot be registered with zero, one, or two users.
      */
     @Test
     public void newUserInvalidUserTest() {
@@ -744,83 +744,203 @@ public class UserServiceTest {
         final String password = "testPassword";
         final String username2 = "testUser2";
         final String password2 = "testPassword2";
+        final String usernameWithSpace = "test User";
+        final String tooShortUsername = "a";
+        final String tooLongUsername = "12345678901234567890123456789012345678901";
+        final String spacesOnlyUsername = "    ";
 
         // No users in the database
         User result = userService.newUser(null, password);
-        assertNull("newUserNullUserTest: should fail with no users", result);
+        assertNull("newUserInvalidUserTest: should reject a null username with no users", result);
+        result = userService.newUser(usernameWithSpace, password);
+        assertNull("newUserInvalidUserTest: should reject an internal space with no users", result);
+        result = userService.newUser("", password);
+        assertNull("newUserInvalidUserTest: should reject an empty username with no users", result);
+        result = userService.newUser(spacesOnlyUsername, password);
+        assertNull("newUserInvalidUserTest: should reject a spaces-only username with no users", result);
+        result = userService.newUser(tooShortUsername, password);
+        assertNull("newUserInvalidUserTest: should reject a one-character username with no users", result);
+        result = userService.newUser(tooLongUsername, password);
+        assertNull("newUserInvalidUserTest: should reject a 41-character username with no users", result);
 
         // One user in the database
         insertTestingUser(username, password);
         result = userService.newUser(null, password);
-        assertNull("newUserNullUserTest: should fail with one user", result);
+        assertNull("newUserInvalidUserTest: should reject a null username with one user", result);
+        result = userService.newUser(usernameWithSpace, password);
+        assertNull("newUserInvalidUserTest: should reject an internal space with one user", result);
+        result = userService.newUser("", password);
+        assertNull("newUserInvalidUserTest: should reject an empty username with one user", result);
+        result = userService.newUser(spacesOnlyUsername, password);
+        assertNull("newUserInvalidUserTest: should reject a spaces-only username with one user", result);
+        result = userService.newUser(tooShortUsername, password);
+        assertNull("newUserInvalidUserTest: should reject a one-character username with one user", result);
+        result = userService.newUser(tooLongUsername, password);
+        assertNull("newUserInvalidUserTest: should reject a 41-character username with one user", result);
 
         // Two users in the database
         insertTestingUser(username2, password2);
         result = userService.newUser(null, password2);
-        assertNull("newUserNullUserTest: should fail with two users", result);
+        assertNull("newUserInvalidUserTest: should reject a null username with two users", result);
+        result = userService.newUser(usernameWithSpace, password2);
+        assertNull("newUserInvalidUserTest: should reject an internal space with two users", result);
+        result = userService.newUser("", password2);
+        assertNull("newUserInvalidUserTest: should reject an empty username with two users", result);
+        result = userService.newUser(spacesOnlyUsername, password2);
+        assertNull("newUserInvalidUserTest: should reject a spaces-only username with two users", result);
+        result = userService.newUser(tooShortUsername, password2);
+        assertNull("newUserInvalidUserTest: should reject a one-character username with two users", result);
+        result = userService.newUser(tooLongUsername, password2);
+        assertNull("newUserInvalidUserTest: should reject a 41-character username with two users", result);
     }
 
     /**
-     * Verifies that a null password cannot be used for an available or
-     * existing username.
+     * Verifies that null, empty, and whitespace-containing passwords are
+     * rejected when the database has zero, one, or two users.
      */
     @Test
-    public void newUserNullPasswordTest() {
+    public void newUserInvalidPasswordTest() {
         final String username = "testUser";
         final String password = "testPassword";
         final String username2 = "testUser2";
         final String password2 = "testPassword2";
         final String newUsername = "differentTestUser";
+        final String newPassword = "differentPassword";
+        final String leadingSpacePassword = " " + newPassword;
+        final String trailingSpacePassword = newPassword + " ";
+        final String surroundingSpacesPassword = " " + newPassword + " ";
+        final String spacesOnlyPassword = "        ";
 
         // No users in the database
         User result = userService.newUser(newUsername, null);
-        assertNull("newUserNullPasswordTest: should fail with no users", result);
+        assertNull("newUserInvalidPasswordTest: should reject a null password with no users", result);
+        result = userService.newUser(newUsername, "");
+        assertNull("newUserInvalidPasswordTest: should reject an empty password with no users", result);
+        result = userService.newUser(newUsername, leadingSpacePassword);
+        assertNull("newUserInvalidPasswordTest: should reject a leading space with no users", result);
+        result = userService.newUser(newUsername, trailingSpacePassword);
+        assertNull("newUserInvalidPasswordTest: should reject a trailing space with no users", result);
+        result = userService.newUser(newUsername, surroundingSpacesPassword);
+        assertNull("newUserInvalidPasswordTest: should reject spaces on both ends with no users", result);
+        result = userService.newUser(newUsername, spacesOnlyPassword);
+        assertNull("newUserInvalidPasswordTest: should reject a spaces-only password with no users", result);
 
         // One user in the database
         User checkUser = insertTestingUser(username, password);
         result = userService.newUser(newUsername, null);
-        assertNull("newUserNullPasswordTest: should reject an available username with a null password", result);
+        assertNull("newUserInvalidPasswordTest: should reject a null password with one user", result);
+        result = userService.newUser(newUsername, "");
+        assertNull("newUserInvalidPasswordTest: should reject an empty password with one user", result);
+        result = userService.newUser(newUsername, leadingSpacePassword);
+        assertNull("newUserInvalidPasswordTest: should reject a leading space with one user", result);
+        result = userService.newUser(newUsername, trailingSpacePassword);
+        assertNull("newUserInvalidPasswordTest: should reject a trailing space with one user", result);
+        result = userService.newUser(newUsername, surroundingSpacesPassword);
+        assertNull("newUserInvalidPasswordTest: should reject spaces on both ends with one user", result);
+        result = userService.newUser(newUsername, spacesOnlyPassword);
+        assertNull("newUserInvalidPasswordTest: should reject a spaces-only password with one user", result);
         result = userService.newUser(username, null);
-        assertNull("newUserNullPasswordTest: should reject an existing username with a null password", result);
+        assertNull("newUserInvalidPasswordTest: should reject a null password for the existing username", result);
+
+        User loginResult = userService.validateUser(username, password);
+        assertEquals("newUserInvalidPasswordTest: first user's original credentials should still work",
+                checkUser, loginResult);
 
         // Two users in the database
         User checkUser2 = insertTestingUser(username2, password2);
         result = userService.newUser(newUsername, null);
-        assertNull("newUserNullPasswordTest: should still reject an available username with a null password", result);
+        assertNull("newUserInvalidPasswordTest: should reject a null password with two users", result);
+        result = userService.newUser(newUsername, "");
+        assertNull("newUserInvalidPasswordTest: should reject an empty password with two users", result);
+        result = userService.newUser(newUsername, leadingSpacePassword);
+        assertNull("newUserInvalidPasswordTest: should reject a leading space with two users", result);
+        result = userService.newUser(newUsername, trailingSpacePassword);
+        assertNull("newUserInvalidPasswordTest: should reject a trailing space with two users", result);
+        result = userService.newUser(newUsername, surroundingSpacesPassword);
+        assertNull("newUserInvalidPasswordTest: should reject spaces on both ends with two users", result);
+        result = userService.newUser(newUsername, spacesOnlyPassword);
+        assertNull("newUserInvalidPasswordTest: should reject a spaces-only password with two users", result);
         result = userService.newUser(username, null);
-        assertNull("newUserNullPasswordTest: should still reject the first username", result);
+        assertNull("newUserInvalidPasswordTest: should reject a null password for the first username", result);
         result = userService.newUser(username2, null);
-        assertNull("newUserNullPasswordTest: should reject the second username", result);
-        assertEquals("newUserNullPasswordTest: first user should remain unchanged",
-                checkUser, userService.validateUser(username, password));
-        assertEquals("newUserNullPasswordTest: second user should remain unchanged",
-                checkUser2, userService.validateUser(username2, password2));
+        assertNull("newUserInvalidPasswordTest: should reject a null password for the second username", result);
+
+        loginResult = userService.validateUser(username, password);
+        assertEquals("newUserInvalidPasswordTest: first user's original credentials should still work",
+                checkUser, loginResult);
+        User loginResult2 = userService.validateUser(username2, password2);
+        assertEquals("newUserInvalidPasswordTest: second user's original credentials should still work",
+                checkUser2, loginResult2);
     }
 
     /**
-     * Verifies that null registration credentials fail when the database
-     * has zero, one, or two users.
+     * Verifies that registration rejects every combination of an invalid
+     * username and an invalid password with zero, one, or two stored users.
      */
     @Test
-    public void newUserNullUserNullPasswordTest() {
+    public void newUserInvalidUserInvalidPasswordTest() {
         final String username = "testUser";
         final String password = "testPassword";
         final String username2 = "testUser2";
         final String password2 = "testPassword2";
 
         // No users in the database
-        User result = userService.newUser(null, null);
-        assertNull("newUserNullUserNullPasswordTest: should fail with no users", result);
+        assertInvalidRegistrationCombinations("no users");
 
         // One user in the database
-        insertTestingUser(username, password);
-        result = userService.newUser(null, null);
-        assertNull("newUserNullUserNullPasswordTest: should fail with one user", result);
+        User checkUser = insertTestingUser(username, password);
+        assertInvalidRegistrationCombinations("one user");
+
+        User loginResult = userService.validateUser(username, password);
+        assertEquals("newUserInvalidUserInvalidPasswordTest: first user's credentials should still work with one user",
+                checkUser, loginResult);
 
         // Two users in the database
-        insertTestingUser(username2, password2);
-        result = userService.newUser(null, null);
-        assertNull("newUserNullUserNullPasswordTest: should fail with two users", result);
+        User checkUser2 = insertTestingUser(username2, password2);
+        assertInvalidRegistrationCombinations("two users");
+
+        loginResult = userService.validateUser(username, password);
+        assertEquals("newUserInvalidUserInvalidPasswordTest: first user's credentials should still work with two users",
+                checkUser, loginResult);
+
+        User loginResult2 = userService.validateUser(username2, password2);
+        assertEquals("newUserInvalidUserInvalidPasswordTest: second user's credentials should still work with two users",
+                checkUser2, loginResult2);
+    }
+
+    private void assertInvalidRegistrationCombinations(String databaseState) {
+        assertRegistrationRejectsInvalidPasswords(null, "a null username", databaseState);
+        assertRegistrationRejectsInvalidPasswords("test User", "a username with an internal space", databaseState);
+        assertRegistrationRejectsInvalidPasswords("", "an empty username", databaseState);
+        assertRegistrationRejectsInvalidPasswords("    ", "a spaces-only username", databaseState);
+        assertRegistrationRejectsInvalidPasswords("a", "a one-character username", databaseState);
+        assertRegistrationRejectsInvalidPasswords(
+                "1234567890123456789012345678901", "a 31-character username", databaseState);
+    }
+
+    private void assertRegistrationRejectsInvalidPasswords(
+            String invalidUsername, String usernameDescription, String databaseState) {
+        final String password = "differentPassword";
+        final String message = "newUserInvalidUserInvalidPasswordTest: with " + databaseState
+                + ", should reject " + usernameDescription + " paired with ";
+
+        User result = userService.newUser(invalidUsername, null);
+        assertNull(message + "a null password", result);
+
+        result = userService.newUser(invalidUsername, "");
+        assertNull(message + "an empty password", result);
+
+        result = userService.newUser(invalidUsername, " " + password);
+        assertNull(message + "a password with a leading space", result);
+
+        result = userService.newUser(invalidUsername, password + " ");
+        assertNull(message + "a password with a trailing space", result);
+
+        result = userService.newUser(invalidUsername, " " + password + " ");
+        assertNull(message + "a password with spaces on both ends", result);
+
+        result = userService.newUser(invalidUsername, "        ");
+        assertNull(message + "a spaces-only password", result);
     }
 
     /*

@@ -142,6 +142,11 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
+        if (username.length() < 2 || username.length() > 30) {
+            log.error("validateNewUser: username must be between 2 and 40 characters");
+            return null;
+        }
+
         // Construct and save the new login record after validation succeeds.
         User user = new User(username, password);
         userRepo.save(user);
