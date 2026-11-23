@@ -3,7 +3,6 @@ package edu.carroll.cs341.web.controller;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.UserService;
 import edu.carroll.cs341.web.form.EditNameForm;
-import jakarta.persistence.ManyToOne;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -52,24 +51,23 @@ public class EditAccountController {
      * the user and a new name editing form to the model.
      *
      * @param session the HTTP session containing the logged-in user
-     * @param model the model used to provide attributes to the view
+     * @param model   the model used to provide attributes to the view
      * @return the account editing page, or a redirect to the login page
      */
     @GetMapping("/editAccount")
     public String editAccountGet(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("loggedInUser");
 
+        // Check if a user is logged in redirect to login page if not.
+        User user = (User) session.getAttribute("loggedInUser");
         if (user == null) {
             return "redirect:/login";
         }
 
-        // Make the username available to the view for subsequent form submissions.
+        // Make the user available to the view for subsequent form submissions.
         model.addAttribute("user", user);
-
         EditNameForm editNameForm = new EditNameForm();
         editNameForm.setName(user.getName());
         model.addAttribute("editNameForm", editNameForm);
-
         return "editAccount";
     }
 
@@ -82,27 +80,28 @@ public class EditAccountController {
      * to the account editing page with the user added back to the model.
      * Otherwise, passes the user and submitted name to the user service.
      *
-     * @param session the HTTP session containing the logged-in user
-     * @param model the model used to provide attributes to the view
-     * @param editNameForm the form containing the submitted new name
+     * @param session       the HTTP session containing the logged-in user
+     * @param model         the model used to provide attributes to the view
+     * @param editNameForm  the form containing the submitted new name
      * @param bindingResult the result of validating the submitted form
      * @return the account editing page, or a redirect to the login page
      */
     @PostMapping("/editAccount")
     public String editAccountPost(HttpSession session, Model model, @Valid @ModelAttribute EditNameForm editNameForm, BindingResult bindingResult) {
+        // Check if a user is logged in redirect to login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
-        if(bindingResult.hasErrors()) {
+        // If the form contains validation errors, return to the account editing page.
+        if (bindingResult.hasErrors()) {
             model.addAttribute("user", user);
             return "editAccount";
         }
 
+        // Rename the user.
         userService.renameUser(user, editNameForm.getName());
-
         return "redirect:/editAccount";
     }
 }
