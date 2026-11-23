@@ -51,13 +51,13 @@ public class ChangePasswordPageController {
      * password session before displaying the page. If that user is not
      * present, redirects to the account editing page.
      *
-     * @param session the HTTP session containing the logged-in user
+     * @param session         the HTTP session containing the logged-in user
      * @param passwordSession the HTTP session checked for password change access
-     * @param model the model used to provide attributes to the view
+     * @param model           the model used to provide attributes to the view
      * @return the password change page, or a redirect to another page
      */
     @GetMapping("/changePasswordPage")
-    public String changePassword (HttpSession session, HttpSession passwordSession, Model model) {
+    public String changePassword(HttpSession session, HttpSession passwordSession, Model model) {
 
         // Check if the user is logged in, redirects to the login page if not.
         User user = (User) session.getAttribute("loggedInUser");
@@ -86,18 +86,17 @@ public class ChangePasswordPageController {
      * returns to the password change page. Otherwise, passes the user and
      * submitted password to the user service and redirects to the home page.
      *
-     * @param session the HTTP session containing the logged-in user
-     * @param passwordSession the HTTP session checked for password change access
+     * @param session          the HTTP session containing the logged-in user
+     * @param passwordSession  the HTTP session checked for password change access
      * @param editPasswordForm the form containing the submitted password values
-     * @param bindingResult the result of validating the submitted form
-     * @param model the model used to provide attributes to the view
+     * @param bindingResult    the result of validating the submitted form
+     * @param model            the model used to provide attributes to the view
      * @return a redirect to the login page, account editing page, password
      * change page, or home page
      */
     @PostMapping("/changePassword")
     public String changePassword(HttpSession session, HttpSession passwordSession, @Valid @ModelAttribute("editPasswordForm") EditPasswordForm editPasswordForm,
-                                 BindingResult bindingResult, Model model)
-    {
+                                 BindingResult bindingResult, Model model) {
         // Check if the user is logged in, redirects to the login page if not.
         User user = (User) session.getAttribute("loggedInUser");
         if (user == null) {

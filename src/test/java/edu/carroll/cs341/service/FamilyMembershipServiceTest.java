@@ -1245,7 +1245,7 @@ public class FamilyMembershipServiceTest {
      *
      * @param username the username of the member to create
      * @param password the password of the member to create
-     * @param family the family to create a membership request for
+     * @param family   the family to create a membership request for
      * @return the created member
      */
     private User insertTestingMember(String username, String password, Family family) {
@@ -1273,7 +1273,7 @@ public class FamilyMembershipServiceTest {
     /**
      * Submits a join request and verifies its persisted status and associations.
      *
-     * @param family the family to create a membership request for
+     * @param family    the family to create a membership request for
      * @param applicant the user to create a membership request for
      * @return the created membership request
      */
@@ -1297,7 +1297,7 @@ public class FamilyMembershipServiceTest {
     /**
      * Checks that the family has exactly one pending request for the applicant.
      *
-     * @param family the family to check pending requests for
+     * @param family    the family to check pending requests for
      * @param applicant the user to check pending requests for
      * @return the pending membership request for the applicant in the family
      */
@@ -1324,7 +1324,7 @@ public class FamilyMembershipServiceTest {
     /**
      * Submits and rejects a request, then checks its status and family assignment.
      *
-     * @param family the family to create a membership request for
+     * @param family    the family to create a membership request for
      * @param applicant the user to create a membership request for
      * @return the created membership request
      */
@@ -1349,7 +1349,7 @@ public class FamilyMembershipServiceTest {
      * Persists a membership that the public service workflow would reject.
      *
      * @param family the family to create a membership for
-     * @param user the user to create a membership for
+     * @param user   the user to create a membership for
      * @param status the status of the membership to create
      * @return the created membership
      */
@@ -1378,7 +1378,7 @@ public class FamilyMembershipServiceTest {
      * Checks that an accepted user has exactly one membership in the specified family.
      *
      * @param family the family to check memberships for
-     * @param user the user to check memberships for
+     * @param user   the user to check memberships for
      * @return the accepted membership for the user in the family
      */
     private FamilyMembership findTestingAcceptedMembership(Family family, User user) {
@@ -1427,9 +1427,9 @@ public class FamilyMembershipServiceTest {
         // Execute a JPQL query that counts every membership associated with the specified user.
         // No status condition is applied, so pending, accepted, and rejected memberships are included.
         return entityManager.createQuery("""
-                    select count(membership) from FamilyMembership membership
-                    where membership.user = :user
-                    """, Long.class)
+                        select count(membership) from FamilyMembership membership
+                        where membership.user = :user
+                        """, Long.class)
                 .setParameter("user", user)
                 .getSingleResult();
     }

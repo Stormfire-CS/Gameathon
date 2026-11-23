@@ -11,7 +11,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
+import static org.springframework.test.util.AssertionErrors.assertNotEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertNull;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Tests the {@link GamesService} methods responsible for adding, looking up, editing,
@@ -1035,10 +1040,10 @@ public class GamesServiceTest {
     /**
      * Adds a visible user game and verifies its stored details.
      *
-     * @param name the name of the game to add
-     * @param user the user who owns the game
+     * @param name    the name of the game to add
+     * @param user    the user who owns the game
      * @param smaller the smaller number in the game
-     * @param larger the larger number in the game
+     * @param larger  the larger number in the game
      * @return the game that was added
      */
     private Game insertTestingGame(String name, User user, int smaller, int larger) {
@@ -1050,8 +1055,8 @@ public class GamesServiceTest {
      * Persists a public game for tests of the default catalog.
      *
      * @param gameName the name of the game to add
-     * @param smaller the smaller number in the game
-     * @param larger the larger number in the game
+     * @param smaller  the smaller number in the game
+     * @param larger   the larger number in the game
      * @return the game that was added
      */
     private Game insertTestingPublicGame(String gameName, int smaller, int larger) {
@@ -1063,10 +1068,10 @@ public class GamesServiceTest {
      * Creates a separate user copy of a public game, with the specified visibility.
      *
      * @param publicGame the public game to copy
-     * @param user the user who owns the copy
-     * @param visible whether the copy should be visible
-     * @param smaller the smaller number in the game
-     * @param larger the larger number in the game
+     * @param user       the user who owns the copy
+     * @param visible    whether the copy should be visible
+     * @param smaller    the smaller number in the game
+     * @param larger     the larger number in the game
      * @return the game that was added
      */
     private Game insertTestingUserCopy(Game publicGame, User user, boolean visible, int smaller, int larger) {
@@ -1081,11 +1086,11 @@ public class GamesServiceTest {
     /**
      * Persists catalog entries that cannot be created directly by the add operation.
      *
-     * @param name the name of the game to add
-     * @param user the user who owns the game
+     * @param name    the name of the game to add
+     * @param user    the user who owns the game
      * @param visible whether the game should be visible
      * @param smaller the smaller number in the game
-     * @param larger the larger number in the game
+     * @param larger  the larger number in the game
      * @return the game that was added
      */
     private Game insertTestingCatalogEntry(String name, User user, boolean visible, int smaller, int larger) {
@@ -1111,8 +1116,8 @@ public class GamesServiceTest {
     /**
      * Adds a game and checks that the catalog exposes the saved record.
      *
-     * @param name the name of the game to add
-     * @param user the user who owns the game
+     * @param name       the name of the game to add
+     * @param user       the user who owns the game
      * @param minPlayers the minimum number of players for the game
      * @param maxPlayers the maximum number of players for the game
      * @return the game that was added
@@ -1136,15 +1141,15 @@ public class GamesServiceTest {
     /**
      * Verifies that a game has the expected name, owner, player limits, and visibility.
      *
-     * @param test the name of the test case
-     * @param game the game to verify
-     * @param name the expected name of the game
-     * @param user the expected owner of the game
+     * @param test       the name of the test case
+     * @param game       the game to verify
+     * @param name       the expected name of the game
+     * @param user       the expected owner of the game
      * @param minPlayers the expected minimum number of players for the game
      * @param maxPlayers the expected maximum number of players for the game
-     * @param visible whether the game should be visible
+     * @param visible    whether the game should be visible
      */
-     private void assertGameDetails(String test, Game game, String name, User user,
+    private void assertGameDetails(String test, Game game, String name, User user,
                                    Integer minPlayers, Integer maxPlayers, boolean visible) {
         // Check that the game was retrieved and has a database ID.
         assertNotNull(test + ": should retrieve " + name, game);
@@ -1159,9 +1164,9 @@ public class GamesServiceTest {
     }
 
     /**
-     *  Finds a game by name in the list of games available to the specified user.
+     * Finds a game by name in the list of games available to the specified user.
      *
-     * @param user the user who owns the game
+     * @param user     the user who owns the game
      * @param gameName the name of the game to find
      * @return the game that was found, or null if no matching game was found
      */
@@ -1177,13 +1182,13 @@ public class GamesServiceTest {
     }
 
     /**
-     *  Verifies that adding a game is rejected for the supplied invalid player-count combinations.
+     * Verifies that adding a game is rejected for the supplied invalid player-count combinations.
      *
-     * @param test the name of the test case
-     * @param user the user who owns the game
-     * @param name the name of the game to add
+     * @param test    the name of the test case
+     * @param user    the user who owns the game
+     * @param name    the name of the game to add
      * @param smaller the smaller number in the game
-     * @param larger the larger number in the game
+     * @param larger  the larger number in the game
      */
     private void assertAddGameRejectsAllPlayerCounts(String test, User user, String name, int smaller, int larger) {
         // Test invalid minimum and maximum player counts.
@@ -1199,13 +1204,13 @@ public class GamesServiceTest {
     }
 
     /**
-     *  Tests additional invalid combinations involving negative or reversed player counts.
+     * Tests additional invalid combinations involving negative or reversed player counts.
      *
-     * @param test the name of the test case
-     * @param user the user who owns the game
-     * @param name the name of the game to add
+     * @param test    the name of the test case
+     * @param user    the user who owns the game
+     * @param name    the name of the game to add
      * @param smaller the smaller number in the game
-     * @param larger the larger number in the game
+     * @param larger  the larger number in the game
      */
     private void assertAddGameRejectsInvalidPlayerCounts(String test, User user, String name, int smaller, int larger) {
         // Verify that negative values and minimum counts greater than maximum counts are rejected.
@@ -1220,9 +1225,9 @@ public class GamesServiceTest {
     /**
      * Attempts to add a game with the supplied details and verifies that the operation is rejected.
      *
-     * @param test the name of the test case
-     * @param user the user who owns the game
-     * @param name the name of the game to add
+     * @param test       the name of the test case
+     * @param user       the user who owns the game
+     * @param name       the name of the game to add
      * @param minPlayers the minimum number of players in the game
      * @param maxPlayers the maximum number of players in the game
      */

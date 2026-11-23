@@ -1188,7 +1188,7 @@ public class GamesOwnedServiceTest {
     /**
      * Adds a catalog game and verifies that the owner can retrieve it.
      *
-     * @param user the user who owns the game
+     * @param user     the user who owns the game
      * @param gameName the name of the game to create
      * @return the created game
      */
@@ -1246,8 +1246,8 @@ public class GamesOwnedServiceTest {
     /**
      * Adds one ownership record and validates the generated record and its details.
      *
-     * @param user the user who owns the game
-     * @param game the game being owned
+     * @param user         the user who owns the game
+     * @param game         the game being owned
      * @param yearProduced the year the game was produced
      * @return the created ownership record
      */
@@ -1286,7 +1286,7 @@ public class GamesOwnedServiceTest {
     /**
      * Creates a family and checks its administrator and initial membership.
      *
-     * @param admin the administrator of the family
+     * @param admin      the administrator of the family
      * @param familyName the name of the family
      * @return the created family
      */
@@ -1317,7 +1317,7 @@ public class GamesOwnedServiceTest {
     /**
      * Submits a join request and verifies its persisted status and associations.
      *
-     * @param family the family to request to join
+     * @param family    the family to request to join
      * @param applicant the user requesting to join the family
      * @return the created pending membership request
      */
@@ -1365,9 +1365,9 @@ public class GamesOwnedServiceTest {
         // Verify that the family was saved and that no membership records were created for it.
         assertNotNull("insertTestingFamilyWithoutMembers: family should have an ID", family.getFamilyID());
         Long count = entityManager.createQuery("""
-                    select count(membership) from FamilyMembership membership
-                    where membership.family = :family
-                    """, Long.class)
+                        select count(membership) from FamilyMembership membership
+                        where membership.family = :family
+                        """, Long.class)
                 .setParameter("family", family)
                 .getSingleResult();
         assertEquals("insertTestingFamilyWithoutMembers: family should have no memberships", 0L, count);

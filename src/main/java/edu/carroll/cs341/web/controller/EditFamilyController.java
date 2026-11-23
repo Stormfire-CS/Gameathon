@@ -50,7 +50,7 @@ public class EditFamilyController {
      * Constructs the controller with the services required to manage
      * family information and family membership.
      *
-     * @param familyService service for family-related operations
+     * @param familyService           service for family-related operations
      * @param familyMembershipService service for family membership operations
      */
     public EditFamilyController(FamilyService familyService, FamilyMembershipService familyMembershipService) {
@@ -64,7 +64,7 @@ public class EditFamilyController {
      * requests to the model for use by the view.
      *
      * @param session the HTTP session containing the logged-in user
-     * @param model the model used to supply data to the view
+     * @param model   the model used to supply data to the view
      * @return the family management view, or a redirect to the login page
      * if no user is logged in
      */
@@ -93,7 +93,7 @@ public class EditFamilyController {
      * Accepts a pending family membership request and redirects back to
      * the family membership management page.
      *
-     * @param session the HTTP session containing the logged-in user
+     * @param session      the HTTP session containing the logged-in user
      * @param membershipID the ID of the membership request to accept
      * @return a redirect to the family management page, or a redirect to
      * the family page if the membership record cannot be found
@@ -123,7 +123,7 @@ public class EditFamilyController {
      * Rejects a pending family membership request and redirects back to
      * the family membership management page.
      *
-     * @param session the HTTP session containing the logged-in user
+     * @param session      the HTTP session containing the logged-in user
      * @param membershipID the ID of the membership request to reject
      * @return a redirect to the family management page, or a redirect to
      * the family page if the membership record cannot be found
@@ -156,10 +156,10 @@ public class EditFamilyController {
      * Validates the submitted family name before passing the request
      * to the family service.
      *
-     * @param session the HTTP session containing the logged-in user
+     * @param session        the HTTP session containing the logged-in user
      * @param familyNameForm the form containing the new family name
-     * @param bindingResult the result of validating the submitted form
-     * @param model the model used to supply data to the view if validation fails
+     * @param bindingResult  the result of validating the submitted form
+     * @param model          the model used to supply data to the view if validation fails
      * @return a redirect to the family management page, the edit family view
      * if validation fails, or a redirect to the login page if no user is logged in
      */
@@ -192,7 +192,7 @@ public class EditFamilyController {
      * Removes a member from the family associated with the logged-in user.
      * Delegates the removal operation to the family membership service.
      *
-     * @param session the HTTP session containing the logged-in user
+     * @param session      the HTTP session containing the logged-in user
      * @param membershipID the ID of the family membership record to remove
      * @return a redirect to the family management page, or a redirect to
      * the login page if no user is logged in
@@ -215,9 +215,9 @@ public class EditFamilyController {
      * Retrieves the user associated with the specified membership record and
      * delegates the administrator change to the family service.
      *
-     * @param session the HTTP session containing the logged-in user
+     * @param session      the HTTP session containing the logged-in user
      * @param membershipID the ID of the membership record belonging to the
-     * user who will become the new family administrator
+     *                     user who will become the new family administrator
      * @return a redirect to the family page, or a redirect to the login page
      * if no user is logged in
      */

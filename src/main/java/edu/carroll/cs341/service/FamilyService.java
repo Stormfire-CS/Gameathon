@@ -1,10 +1,7 @@
 package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.Family;
-import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.User;
-
-import java.util.List;
 
 /**
  * Provides service operations for managing families and their memberships.
@@ -27,30 +24,30 @@ public interface FamilyService {
     /**
      * Creates a new family and establishes the creator's membership.
      *
-     * @param user the user creating the family
+     * @param user       the user creating the family
      * @param familyName the name to assign to the new family
      * @return {@code true} if the family was created successfully;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean createFamily(User user, String familyName);
 
     /**
      * Checks whether the specified user administers the given family.
      *
-     * @param user the user whose administrator permissions are being checked
+     * @param user   the user whose administrator permissions are being checked
      * @param family the family to check
      * @return {@code true} if the user is the family's administrator;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean isFamilyAdmin(User user, Family family);
 
     /**
      * Renames the family associated with the specified user.
      *
-     * @param user the user requesting the rename
+     * @param user       the user requesting the rename
      * @param familyName the new name for the family
      * @return {@code true} if the family was renamed successfully;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean renameFamily(User user, String familyName);
 
@@ -58,9 +55,9 @@ public interface FamilyService {
      * Changes the administrator of the family associated with the specified user.
      *
      * @param currentAdmin the current administrator of the family
-     * @param newAdmin the new administrator of the family
+     * @param newAdmin     the new administrator of the family
      * @return {@code true} if the administrator was changed successfully;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean changeAdmin(User currentAdmin, User newAdmin);
 
@@ -72,7 +69,7 @@ public interface FamilyService {
      *
      * @param user the user requesting the family deletion
      * @return {@code true} if the family was deleted successfully;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean deleteFamily(User user);
 
