@@ -254,6 +254,12 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
             return false;
         }
 
+        // Verify the family the user is administrating is the same family as the family assocaited with the membership
+        if (!family.equals(familyMembership.getFamily())) {
+            log.warn("acceptRequest: family '{}' is not the same as the family associated with the membership", family);
+            return false;
+        }
+
         // A user cannot be accepted into another family if they already
         // have an accepted membership.
         if (hasAcceptedMembership(familyMembership.getUser())) {
@@ -328,6 +334,12 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
         }
         if (!family.getFamilyAdmin().equals(user)) {
             log.warn("rejectRequest: user '{}' is not the family admin", user);
+            return false;
+        }
+
+        // Verify the family the user is administrating is the same family as the family assocaited with the membership
+        if (!family.equals(familyMembership.getFamily())) {
+            log.warn("rejectRequest: family '{}' is not the same as the family associated with the membership", family);
             return false;
         }
 
