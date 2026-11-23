@@ -12,7 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertNull;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Tests the {@link FamilyService} methods responsible for creating, renaming, and deleting families
@@ -22,6 +26,13 @@ import static org.springframework.test.util.AssertionErrors.*;
  * context so that the services use their configured dependencies. The
  * {@link Transactional} annotation rolls back database changes after each
  * test.</p>
+ *
+ * <p><b>Sources Used:</b></p>
+ * <ul>
+ *   <li>ChatGPT – Assisted with generating Javadoc comments and tests for this file
+ *   in conjunction with Max Montowski.
+ *   All comments were reviewed by the author and tests followed authors layout.</li>
+ * </ul>
  */
 @SpringBootTest
 @Transactional
