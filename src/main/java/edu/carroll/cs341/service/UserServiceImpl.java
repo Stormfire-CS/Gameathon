@@ -14,7 +14,7 @@ import java.util.List;
  * Implements the service operations for managing user accounts.
  * This class validates login credentials, registers new users, and retrieves
  * user IDs based on usernames.
- *
+ * <p>
  * The service uses the login repository to look up and save user account
  * information. It also logs relevant events to assist with debugging
  * and monitoring authentication and registration operations.
@@ -29,10 +29,14 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
-    /** Logger used to record authentication and account-management activity. */
+    /**
+     * Logger used to record authentication and account-management activity.
+     */
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    /** Repository used to look up and save user accounts. */
+    /**
+     * Repository used to look up and save user accounts.
+     */
     private final UserRepository userRepo;
 
     /**
@@ -57,12 +61,14 @@ public class UserServiceImpl implements UserService {
     public User validateUser(String username, String password) {
         log.debug("validateUser: user '{}' attempted login", username);
 
+        // Ensure that the username is not null or empty.
         if (username == null || username.trim().isEmpty()) {
             log.debug("validateUser: username is blank");
             return null;
         }
 
-        if (password == null || password.isBlank()) {
+        // Ensure that the password is not null or empty.
+        if (password == null || password.isEmpty()) {
             log.error("validateUser: password is blank");
             return null;
         }
@@ -78,6 +84,7 @@ public class UserServiceImpl implements UserService {
         }
         User u = users.getFirst();
 
+        // Ensure that the password matches the stored hash.
         if (!BCrypt.checkpw(password, u.getHashedPassword())) {
             log.debug("validateUser: password !match");
             return null;
@@ -102,22 +109,26 @@ public class UserServiceImpl implements UserService {
     public User newUser(String username, String password) {
         log.debug("validateNewUser: attempting to register username '{}'", username);
 
+        // Ensure that the username is not null
         if (username == null) {
             log.error("validateNewUser: username is null");
             return null;
         }
 
+        // Ensure that the username is not empty.
         username = username.trim();
         if (username.isEmpty()) {
             log.error("validateNewUser: username is blank");
             return null;
         }
 
+        // Ensure that the password is not null.
         if (password == null) {
             log.error("validateNewUser: password is null");
             return null;
         }
 
+        // Ensure that the password is not empty.
         if (password.isEmpty()) {
             log.error("validateNewUser: password is blank");
             return null;
@@ -142,6 +153,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
+        // Ensure that the username is not too short or too long.
         if (username.length() < 2 || username.length() > 30) {
             log.error("validateNewUser: username must be between 2 and 40 characters");
             return null;
@@ -150,15 +162,14 @@ public class UserServiceImpl implements UserService {
         // Construct and save the new login record after validation succeeds.
         User user = new User(username, password);
         userRepo.save(user);
-
-        log.info("validateNewUser: successfully registered user '{}'", username);
+        log.info("validateNewUser: successfully registered '{}'", user);
         return user;
     }
 
     /**
      * Renames the currently selected user's account.
      *
-     * @param user the user whose name is being changed
+     * @param user    the user whose name is being changed
      * @param newName the new name to assign to the user
      * @return true if the user's name was successfully updated; false otherwise
      */
@@ -167,22 +178,26 @@ public class UserServiceImpl implements UserService {
     public boolean renameUser(User user, String newName) {
         log.debug("renameUser: user {} attempting to change name to '{}'", user, newName);
 
+        // Ensure the user is not null
         if (user == null) {
             log.error("renameUser: user is null");
             return false;
         }
 
+        // Ensure the new name is not null
         if (newName == null) {
             log.error("renameUser: newName is null");
             return false;
         }
 
+        // Ensure the new name is not empty
         newName = newName.trim();
         if (newName.isEmpty()) {
             log.error("renameUser: newName is empty");
             return false;
         }
 
+        // Ensure the new name is not too short or too long.
         if (newName.length() < 2 || newName.length() > 40) {
             log.error("renameUser: new name must be between 2 and 40 characters");
             return false;
@@ -197,33 +212,35 @@ public class UserServiceImpl implements UserService {
         // Update and save the user's name.
         user.setName(newName);
         userRepo.save(user);
-
-        log.info("renameUser: successfully renamed user '{}'", user);
+        log.info("renameUser: successfully renamed '{}'", user);
         return true;
     }
 
     /**
      * Changes the password associated with a user account.
      *
-     * @param user the user whose password will be changed
+     * @param user     the user whose password will be changed
      * @param password the new password to assign to the user
      * @return true if the password was successfully changed; false otherwise
      */
     @Transactional
     @Override
     public boolean changeUsersPassword(User user, String password) {
-        log.debug("changeUsersPassword: user {} attempting to change password", user);
+        log.debug("changeUsersPassword: '{}' attempting to change password", user);
 
+        // Ensure the user is not null
         if (user == null) {
             log.error("changeUsersPassword: user is null");
             return false;
         }
 
+        // Ensure the password is not null
         if (password == null) {
             log.error("changeUsersPassword: password is null");
             return false;
         }
 
+        // Ensure the password is not empty
         if (password.isEmpty()) {
             log.error("changeUsersPassword: password is empty");
             return false;
@@ -244,7 +261,6 @@ public class UserServiceImpl implements UserService {
         // Hash and store the new password.
         user.setRawPassword(password);
         userRepo.save(user);
-
         log.info("changeUsersPassword: successfully changed password for '{}'", user);
         return true;
     }

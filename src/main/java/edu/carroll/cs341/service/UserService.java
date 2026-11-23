@@ -38,24 +38,24 @@ public interface UserService {
      * @param password the password entered for the user
      * @return {@code true} if registration succeeds; {@code false} otherwise
      */
-     User newUser(String username, String password);
+    User newUser(String username, String password);
 
     /**
      * Renames the currently selected user's account.
      *
-     * @param user the user whose name is being changed
+     * @param user    the user whose name is being changed
      * @param newName the new name to assign to the user
      * @return true if the user's name was successfully updated; false otherwise
      */
-     boolean renameUser(User user, String newName);
+    boolean renameUser(User user, String newName);
 
     /**
      * Changes the password associated with a user account.
      *
-     * @param user the user whose password will be changed
+     * @param user     the user whose password will be changed
      * @param password the new password to assign to the user
      * @return true if the password was successfully changed; false otherwise
      */
-     boolean changeUsersPassword(User user, String password);
+    boolean changeUsersPassword(User user, String password);
 
 }
