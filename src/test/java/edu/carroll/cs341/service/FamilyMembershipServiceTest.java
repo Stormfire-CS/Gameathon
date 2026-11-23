@@ -3,9 +3,8 @@ package edu.carroll.cs341.service;
 import edu.carroll.cs341.jpa.model.Family;
 import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.User;
-import edu.carroll.cs341.jpa.repo.FamiliesRepository;
-import edu.carroll.cs341.jpa.repo.FamilyMembershipRepository;
-import edu.carroll.cs341.jpa.repo.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +15,13 @@ import java.util.List;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Tests family membership requests, permissions, retrieval,
- * member removal, and leaving a family.
+ * Tests the {@link FamilyMembershipService} methods responsible for retrieving family memberships
+ * and managing join requests, member removal, and departures.
  *
- * <p>ChatGPT assisted with generating these tests.
- * Review and adapt them before use.</p>
+ * <p>The {@link SpringBootTest} annotation loads the Spring application
+ * context so that the services use their configured dependencies. The
+ * {@link Transactional} annotation rolls back database changes after each
+ * test.</p>
  */
 @SpringBootTest
 @Transactional
@@ -37,14 +38,8 @@ public class FamilyMembershipServiceTest {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private FamiliesRepository familiesRepo;
-
-    @Autowired
-    private FamilyMembershipRepository membershipRepo;
-
-    @Autowired
-    private UserRepository userRepo;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /*
      * = = = = = = = = = = =
@@ -87,13 +82,20 @@ public class FamilyMembershipServiceTest {
         User applicant = insertTestingUser("applicant");
         User rejectedUser = insertTestingUser("rejecteduser");
 
-        insertTestingMembership(family, applicant, "PENDING");
-        insertTestingMembership(family, rejectedUser, "REJECTED");
+        // No membership requests for the applicant
+        Family result = membershipService.getFamilyForUser(applicant);
+        assertNull("getFamilyForUserNoAcceptedMembershipTest: a user with no requests should have no family", result);
 
+        // Pending and rejected requests
+        insertTestingPendingRequest(family, applicant);
+        insertTestingRejectedRequest(family, rejectedUser);
+
+        var actualFamilyForUser = membershipService.getFamilyForUser(applicant);
         assertNull("getFamilyForUserNoAcceptedMembershipTest: pending user should have no family",
-                membershipService.getFamilyForUser(applicant));
+                actualFamilyForUser);
+        var actualFamilyForUser2 = membershipService.getFamilyForUser(rejectedUser);
         assertNull("getFamilyForUserNoAcceptedMembershipTest: rejected user should have no family",
-                membershipService.getFamilyForUser(rejectedUser));
+                actualFamilyForUser2);
     }
 
     /**
@@ -104,7 +106,7 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User member = insertTestingUser("member");
-        insertTestingMembership(family, member, "ACCEPTED");
+        insertTestingInconsistentMembership(family, member, "ACCEPTED");
 
         Family result = membershipService.getFamilyForUser(member);
 
@@ -123,9 +125,9 @@ public class FamilyMembershipServiceTest {
         Family otherFamily = insertTestingFamily(otherAdmin);
         User member = insertTestingUser("member");
 
-        insertTestingMembership(family, member, "ACCEPTED");
+        insertTestingInconsistentMembership(family, member, "ACCEPTED");
         member.setFamily(otherFamily);
-        userRepo.save(member);
+        entityManager.flush();
 
         Family result = membershipService.getFamilyForUser(member);
 
@@ -144,7 +146,7 @@ public class FamilyMembershipServiceTest {
         Family otherFamily = insertTestingFamily(otherAdmin);
         User member = insertTestingMember("member", family);
 
-        insertTestingMembership(otherFamily, member, "ACCEPTED");
+        insertTestingInconsistentMembership(otherFamily, member, "ACCEPTED");
 
         Family result = membershipService.getFamilyForUser(member);
 
@@ -172,13 +174,15 @@ public class FamilyMembershipServiceTest {
 
         assertTrue("requestToJoinFamilySuccessTest: should submit the request", result);
 
-        FamilyMembership request = membershipRepo.findByFamilyAndUser(family, applicant);
+        FamilyMembership request = findTestingPendingRequest(family, applicant);
 
         assertNotNull("requestToJoinFamilySuccessTest: should save the request", request);
+        var actualStatus = request.getStatus();
         assertEquals("requestToJoinFamilySuccessTest: should mark the request pending",
-                "PENDING", request.getStatus());
+                "PENDING", actualStatus);
+        var actualFamily = applicant.getFamily();
         assertNull("requestToJoinFamilySuccessTest: should not assign a family yet",
-                applicant.getFamily());
+                actualFamily);
     }
 
     /**
@@ -220,8 +224,7 @@ public class FamilyMembershipServiceTest {
 
         assertFalse("requestToJoinFamilyNonexistentFamilyTest: should reject a nonexistent family",
                 result);
-        assertTrue("requestToJoinFamilyNonexistentFamilyTest: should not save a request",
-                membershipRepo.findByUserAndStatus(user, "PENDING").isEmpty());
+        assertEquals("requestToJoinFamilyNonexistentFamilyTest: should not save a membership", 0L, countMemberships(user));
     }
 
     /**
@@ -230,7 +233,7 @@ public class FamilyMembershipServiceTest {
     @Test
     public void requestToJoinFamilyAlreadyMemberTest() {
         User admin = insertTestingUser();
-        insertTestingFamily(admin);
+        Family family = insertTestingFamily(admin);
         User otherAdmin = insertTestingUser("otheradmin");
         Family otherFamily = insertTestingFamily(otherAdmin);
 
@@ -239,8 +242,10 @@ public class FamilyMembershipServiceTest {
 
         assertFalse("requestToJoinFamilyAlreadyMemberTest: should reject an existing member",
                 result);
-        assertNull("requestToJoinFamilyAlreadyMemberTest: should not create a request",
-                membershipRepo.findByFamilyAndUser(otherFamily, admin));
+        assertEquals("requestToJoinFamilyAlreadyMemberTest: should preserve only the original membership",
+                1L, countMemberships(admin));
+        assertEquals("requestToJoinFamilyAlreadyMemberTest: should preserve the original family",
+                family, membershipService.getFamilyForUser(admin));
     }
 
     /**
@@ -251,18 +256,20 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User applicant = insertTestingUser("applicant");
-        FamilyMembership request = insertTestingMembership(family, applicant, "PENDING");
-        long previousCount = membershipRepo.count();
+        FamilyMembership request = insertTestingPendingRequest(family, applicant);
+        long previousCount = countMemberships(applicant);
 
         boolean result = membershipService.requestToJoinFamily(
                 applicant, family.getFamilyID());
 
         assertFalse("requestToJoinFamilyDuplicatePendingTest: should reject a duplicate",
                 result);
+        var savedCount = countMemberships(applicant);
         assertEquals("requestToJoinFamilyDuplicatePendingTest: should preserve the record count",
-                previousCount, membershipRepo.count());
+                previousCount, savedCount);
+        var actualStatus = request.getStatus();
         assertEquals("requestToJoinFamilyDuplicatePendingTest: should keep the request pending",
-                "PENDING", request.getStatus());
+                "PENDING", actualStatus);
     }
 
     /**
@@ -273,9 +280,9 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User applicant = insertTestingUser("applicant");
-        FamilyMembership request = insertTestingMembership(family, applicant, "REJECTED");
+        FamilyMembership request = insertTestingRejectedRequest(family, applicant);
         Long originalID = request.getMembershipID();
-        long previousCount = membershipRepo.count();
+        long previousCount = countMemberships(applicant);
 
         boolean result = membershipService.requestToJoinFamily(
                 applicant, family.getFamilyID());
@@ -283,14 +290,17 @@ public class FamilyMembershipServiceTest {
         assertTrue("requestToJoinFamilyRejectedRequestTest: should reopen the request",
                 result);
 
-        FamilyMembership reopened = membershipRepo.findByFamilyAndUser(family, applicant);
+        FamilyMembership reopened = findTestingPendingRequest(family, applicant);
 
+        var actualMembershipID = reopened.getMembershipID();
         assertEquals("requestToJoinFamilyRejectedRequestTest: should reuse the record",
-                originalID, reopened.getMembershipID());
+                originalID, actualMembershipID);
+        var actualStatus = reopened.getStatus();
         assertEquals("requestToJoinFamilyRejectedRequestTest: should mark it pending",
-                "PENDING", reopened.getStatus());
+                "PENDING", actualStatus);
+        var savedCount = countMemberships(applicant);
         assertEquals("requestToJoinFamilyRejectedRequestTest: should preserve the record count",
-                previousCount, membershipRepo.count());
+                previousCount, savedCount);
     }
 
     /*
@@ -306,21 +316,36 @@ public class FamilyMembershipServiceTest {
     public void getPendingRequestsSuccessTest() {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
+
+        // One family without any pending requests
+        List<FamilyMembership> result = membershipService.getPendingRequests(admin);
+        assertNotNull("getPendingRequestsSuccessTest: should return a list before any requests", result);
+        assertTrue("getPendingRequestsSuccessTest: should start with no pending requests", result.isEmpty());
+
+        // Two families with separate pending requests
         User otherAdmin = insertTestingUser("otheradmin");
         Family otherFamily = insertTestingFamily(otherAdmin);
 
-        FamilyMembership pending = insertTestingMembership(
-                family, insertTestingUser("applicant"), "PENDING");
+        FamilyMembership pending = insertTestingPendingRequest(family, insertTestingUser("applicant"));
         insertTestingMember("member", family);
-        insertTestingMembership(family, insertTestingUser("rejecteduser"), "REJECTED");
-        insertTestingMembership(otherFamily, insertTestingUser("otherapplicant"), "PENDING");
+        insertTestingRejectedRequest(family, insertTestingUser("rejecteduser"));
+        FamilyMembership otherPending = insertTestingPendingRequest(otherFamily, insertTestingUser("otherapplicant"));
 
-        List<FamilyMembership> result = membershipService.getPendingRequests(admin);
+        // Check the first family's pending requests.
+        result = membershipService.getPendingRequests(admin);
+        int requestCount = result.size();
+        assertEquals("getPendingRequestsSuccessTest: first administrator should see one request", 1, requestCount);
+        Long membershipID = result.getFirst().getMembershipID();
+        assertEquals("getPendingRequestsSuccessTest: first administrator should see their family's request",
+                pending.getMembershipID(), membershipID);
 
-        assertEquals("getPendingRequestsSuccessTest: should return one request",
-                1, result.size());
-        assertEquals("getPendingRequestsSuccessTest: should return the matching request",
-                pending.getMembershipID(), result.getFirst().getMembershipID());
+        // Check the second family's pending requests.
+        result = membershipService.getPendingRequests(otherAdmin);
+        requestCount = result.size();
+        assertEquals("getPendingRequestsSuccessTest: second administrator should see one request", 1, requestCount);
+        membershipID = result.getFirst().getMembershipID();
+        assertEquals("getPendingRequestsSuccessTest: second administrator should see their family's request",
+                otherPending.getMembershipID(), membershipID);
     }
 
     /**
@@ -331,8 +356,9 @@ public class FamilyMembershipServiceTest {
         List<FamilyMembership> result = membershipService.getPendingRequests(null);
 
         assertNotNull("getPendingRequestsNullUserTest: should return a list", result);
+        var emptyResult = result.isEmpty();
         assertTrue("getPendingRequestsNullUserTest: should return an empty list",
-                result.isEmpty());
+                emptyResult);
     }
 
     /**
@@ -343,12 +369,13 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User member = insertTestingMember("member", family);
-        insertTestingMembership(family, insertTestingUser("applicant"), "PENDING");
+        insertTestingPendingRequest(family, insertTestingUser("applicant"));
 
         List<FamilyMembership> result = membershipService.getPendingRequests(member);
 
+        var emptyResult = result.isEmpty();
         assertTrue("getPendingRequestsNotAdminTest: should return an empty list",
-                result.isEmpty());
+                emptyResult);
     }
 
     /*
@@ -368,9 +395,9 @@ public class FamilyMembershipServiceTest {
         Family otherFamily = insertTestingFamily(otherAdmin);
         User applicant = insertTestingUser("applicant");
 
-        FamilyMembership request = insertTestingMembership(family, applicant, "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, applicant);
         FamilyMembership otherRequest =
-                insertTestingMembership(otherFamily, applicant, "PENDING");
+                insertTestingPendingRequest(otherFamily, applicant);
 
         boolean result = membershipService.acceptRequest(admin, request);
 
@@ -390,8 +417,7 @@ public class FamilyMembershipServiceTest {
     public void acceptRequestNullUserTest() {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
-        FamilyMembership request = insertTestingMembership(
-                family, insertTestingUser("applicant"), "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
 
         boolean result = membershipService.acceptRequest(null, request);
 
@@ -421,8 +447,7 @@ public class FamilyMembershipServiceTest {
     public void acceptRequestNotPendingTest() {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
-        FamilyMembership request = insertTestingMembership(
-                family, insertTestingUser("applicant"), "REJECTED");
+        FamilyMembership request = insertTestingRejectedRequest(family, insertTestingUser("applicant"));
 
         boolean result = membershipService.acceptRequest(admin, request);
 
@@ -440,13 +465,14 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User outsider = insertTestingUser("outsider");
-        FamilyMembership request = insertTestingMembership(
-                family, insertTestingUser("applicant"), "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
 
         boolean result = membershipService.acceptRequest(outsider, request);
 
         assertFalse("acceptRequestNoFamilyTest: should reject a user without a family",
                 result);
+        assertEquals("acceptRequestNoFamilyTest: should preserve the pending status",
+                "PENDING", savedMembership(request).getStatus());
     }
 
     /**
@@ -457,8 +483,7 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User member = insertTestingMember("member", family);
-        FamilyMembership request = insertTestingMembership(
-                family, insertTestingUser("applicant"), "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
 
         boolean result = membershipService.acceptRequest(member, request);
 
@@ -477,14 +502,15 @@ public class FamilyMembershipServiceTest {
         User otherAdmin = insertTestingUser("otheradmin");
         Family otherFamily = insertTestingFamily(otherAdmin);
         User applicant = insertTestingMember("applicant", otherFamily);
-        FamilyMembership request = insertTestingMembership(family, applicant, "PENDING");
+        FamilyMembership request = insertTestingInconsistentMembership(family, applicant, "PENDING");
 
         boolean result = membershipService.acceptRequest(admin, request);
 
         assertFalse("acceptRequestAlreadyMemberTest: should reject an existing member",
                 result);
+        var actualFamily = applicant.getFamily();
         assertEquals("acceptRequestAlreadyMemberTest: should preserve the original family",
-                otherFamily, applicant.getFamily());
+                otherFamily, actualFamily);
         assertEquals("acceptRequestAlreadyMemberTest: should preserve the pending status",
                 "PENDING", savedMembership(request).getStatus());
     }
@@ -500,7 +526,7 @@ public class FamilyMembershipServiceTest {
         Family otherFamily = insertTestingFamily(otherAdmin);
         User applicant = insertTestingUser("applicant");
         FamilyMembership request =
-                insertTestingMembership(otherFamily, applicant, "PENDING");
+                insertTestingPendingRequest(otherFamily, applicant);
 
         boolean result = membershipService.acceptRequest(admin, request);
 
@@ -508,8 +534,9 @@ public class FamilyMembershipServiceTest {
                 result);
         assertEquals("acceptRequestDifferentFamilyTest: should preserve the pending status",
                 "PENDING", savedMembership(request).getStatus());
+        var actualFamily = applicant.getFamily();
         assertNull("acceptRequestDifferentFamilyTest: should not assign a family",
-                applicant.getFamily());
+                actualFamily);
     }
 
     /*
@@ -529,9 +556,9 @@ public class FamilyMembershipServiceTest {
         Family otherFamily = insertTestingFamily(otherAdmin);
         User applicant = insertTestingUser("applicant");
 
-        FamilyMembership request = insertTestingMembership(family, applicant, "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, applicant);
         FamilyMembership otherRequest =
-                insertTestingMembership(otherFamily, applicant, "PENDING");
+                insertTestingPendingRequest(otherFamily, applicant);
 
         boolean result = membershipService.rejectRequest(admin, request);
 
@@ -540,8 +567,9 @@ public class FamilyMembershipServiceTest {
                 "REJECTED", savedMembership(request).getStatus());
         assertEquals("rejectRequestSuccessTest: should preserve other pending requests",
                 "PENDING", savedMembership(otherRequest).getStatus());
+        var actualFamily = applicant.getFamily();
         assertNull("rejectRequestSuccessTest: should not assign a family",
-                applicant.getFamily());
+                actualFamily);
     }
 
     /**
@@ -551,8 +579,7 @@ public class FamilyMembershipServiceTest {
     public void rejectRequestNullUserTest() {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
-        FamilyMembership request = insertTestingMembership(
-                family, insertTestingUser("applicant"), "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
 
         boolean result = membershipService.rejectRequest(null, request);
 
@@ -583,7 +610,7 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User member = insertTestingMember("member", family);
-        FamilyMembership membership = membershipRepo.findByFamilyAndUser(family, member);
+        FamilyMembership membership = findTestingAcceptedMembership(family, member);
 
         boolean result = membershipService.rejectRequest(admin, membership);
 
@@ -591,8 +618,9 @@ public class FamilyMembershipServiceTest {
                 result);
         assertEquals("rejectRequestNotPendingTest: should preserve accepted status",
                 "ACCEPTED", savedMembership(membership).getStatus());
+        var actualFamily = member.getFamily();
         assertEquals("rejectRequestNotPendingTest: should preserve the member's family",
-                family, member.getFamily());
+                family, actualFamily);
     }
 
     /**
@@ -603,13 +631,14 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User outsider = insertTestingUser("outsider");
-        FamilyMembership request = insertTestingMembership(
-                family, insertTestingUser("applicant"), "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
 
         boolean result = membershipService.rejectRequest(outsider, request);
 
         assertFalse("rejectRequestNoFamilyTest: should reject a user without a family",
                 result);
+        assertEquals("rejectRequestNoFamilyTest: should preserve the pending status",
+                "PENDING", savedMembership(request).getStatus());
     }
 
     /**
@@ -620,8 +649,7 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User member = insertTestingMember("member", family);
-        FamilyMembership request = insertTestingMembership(
-                family, insertTestingUser("applicant"), "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
 
         boolean result = membershipService.rejectRequest(member, request);
 
@@ -639,8 +667,7 @@ public class FamilyMembershipServiceTest {
         insertTestingFamily(admin);
         User otherAdmin = insertTestingUser("otheradmin");
         Family otherFamily = insertTestingFamily(otherAdmin);
-        FamilyMembership request = insertTestingMembership(
-                otherFamily, insertTestingUser("applicant"), "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(otherFamily, insertTestingUser("applicant"));
 
         boolean result = membershipService.rejectRequest(admin, request);
 
@@ -663,14 +690,15 @@ public class FamilyMembershipServiceTest {
     public void getMembershipByIDSuccessTest() {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
-        FamilyMembership membership = membershipRepo.findByFamilyAndUser(family, admin);
+        FamilyMembership membership = findTestingAcceptedMembership(family, admin);
 
         FamilyMembership result =
                 membershipService.getMembershipByID(membership.getMembershipID());
 
         assertNotNull("getMembershipByIDSuccessTest: should find the membership", result);
+        var actualMembershipID = result.getMembershipID();
         assertEquals("getMembershipByIDSuccessTest: should return the matching membership",
-                membership.getMembershipID(), result.getMembershipID());
+                membership.getMembershipID(), actualMembershipID);
     }
 
     /**
@@ -678,8 +706,9 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getMembershipByIDNullIDTest() {
+        var actualMembershipByID = membershipService.getMembershipByID(null);
         assertNull("getMembershipByIDNullIDTest: should return null",
-                membershipService.getMembershipByID(null));
+                actualMembershipByID);
     }
 
     /**
@@ -698,7 +727,7 @@ public class FamilyMembershipServiceTest {
     public void getUserByMembershipIDSuccessTest() {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
-        FamilyMembership membership = membershipRepo.findByFamilyAndUser(family, admin);
+        FamilyMembership membership = findTestingAcceptedMembership(family, admin);
 
         User result = membershipService.getUserByMembershipID(
                 membership.getMembershipID());
@@ -712,8 +741,9 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getUserByMembershipIDNullIDTest() {
+        var actualUserByMembershipID = membershipService.getUserByMembershipID(null);
         assertNull("getUserByMembershipIDNullIDTest: should return null",
-                membershipService.getUserByMembershipID(null));
+                actualUserByMembershipID);
     }
 
     /**
@@ -739,18 +769,18 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User member = insertTestingMember("member", family);
-        FamilyMembership membership = membershipRepo.findByFamilyAndUser(family, member);
+        FamilyMembership membership = findTestingAcceptedMembership(family, member);
 
         boolean result = membershipService.removeFamilyMember(
                 admin, membership.getMembershipID());
 
         assertTrue("removeFamilyMemberSuccessTest: should remove the member", result);
-        assertFalse("removeFamilyMemberSuccessTest: should delete the membership",
-                membershipRepo.existsById(membership.getMembershipID()));
+        assertNull("removeFamilyMemberSuccessTest: should delete the membership",
+                membershipService.getMembershipByID(membership.getMembershipID()));
         assertNull("removeFamilyMemberSuccessTest: should clear the user's family",
                 userService.validateUser("member", password).getFamily());
-        assertTrue("removeFamilyMemberSuccessTest: should preserve the family",
-                familiesRepo.existsById(family.getFamilyID()));
+        assertEquals("removeFamilyMemberSuccessTest: should preserve the family",
+                family, membershipService.getFamilyForUser(admin));
     }
 
     /**
@@ -796,15 +826,15 @@ public class FamilyMembershipServiceTest {
         User member = insertTestingMember("member", family);
         User otherMember = insertTestingMember("othermember", family);
         FamilyMembership membership =
-                membershipRepo.findByFamilyAndUser(family, otherMember);
+                findTestingAcceptedMembership(family, otherMember);
 
         boolean result = membershipService.removeFamilyMember(
                 member, membership.getMembershipID());
 
         assertFalse("removeFamilyMemberNotAdminTest: should reject a regular member",
                 result);
-        assertTrue("removeFamilyMemberNotAdminTest: should preserve the membership",
-                membershipRepo.existsById(membership.getMembershipID()));
+        assertNotNull("removeFamilyMemberNotAdminTest: should preserve the membership",
+                membershipService.getMembershipByID(membership.getMembershipID()));
     }
 
     /**
@@ -814,17 +844,18 @@ public class FamilyMembershipServiceTest {
     public void removeFamilyMemberSelfTest() {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
-        FamilyMembership membership = membershipRepo.findByFamilyAndUser(family, admin);
+        FamilyMembership membership = findTestingAcceptedMembership(family, admin);
 
         boolean result = membershipService.removeFamilyMember(
                 admin, membership.getMembershipID());
 
         assertFalse("removeFamilyMemberSelfTest: should reject administrator removal",
                 result);
-        assertTrue("removeFamilyMemberSelfTest: should preserve the membership",
-                membershipRepo.existsById(membership.getMembershipID()));
+        assertNotNull("removeFamilyMemberSelfTest: should preserve the membership",
+                membershipService.getMembershipByID(membership.getMembershipID()));
+        var actualFamily = admin.getFamily();
         assertEquals("removeFamilyMemberSelfTest: should preserve the family reference",
-                family, admin.getFamily());
+                family, actualFamily);
     }
 
     /**
@@ -834,16 +865,15 @@ public class FamilyMembershipServiceTest {
     public void removeFamilyMemberPendingTest() {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
-        FamilyMembership request = insertTestingMembership(
-                family, insertTestingUser("applicant"), "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
 
         boolean result = membershipService.removeFamilyMember(
                 admin, request.getMembershipID());
 
         assertFalse("removeFamilyMemberPendingTest: should reject a pending membership",
                 result);
-        assertTrue("removeFamilyMemberPendingTest: should preserve the request",
-                membershipRepo.existsById(request.getMembershipID()));
+        assertNotNull("removeFamilyMemberPendingTest: should preserve the request",
+                membershipService.getMembershipByID(request.getMembershipID()));
     }
 
     /**
@@ -857,17 +887,18 @@ public class FamilyMembershipServiceTest {
         Family otherFamily = insertTestingFamily(otherAdmin);
         User member = insertTestingMember("member", otherFamily);
         FamilyMembership membership =
-                membershipRepo.findByFamilyAndUser(otherFamily, member);
+                findTestingAcceptedMembership(otherFamily, member);
 
         boolean result = membershipService.removeFamilyMember(
                 admin, membership.getMembershipID());
 
         assertFalse("removeFamilyMemberDifferentFamilyTest: should reject another family's member",
                 result);
-        assertTrue("removeFamilyMemberDifferentFamilyTest: should preserve the membership",
-                membershipRepo.existsById(membership.getMembershipID()));
+        assertNotNull("removeFamilyMemberDifferentFamilyTest: should preserve the membership",
+                membershipService.getMembershipByID(membership.getMembershipID()));
+        var actualFamily = member.getFamily();
         assertEquals("removeFamilyMemberDifferentFamilyTest: should preserve the family reference",
-                otherFamily, member.getFamily());
+                otherFamily, actualFamily);
     }
 
     /*
@@ -886,28 +917,31 @@ public class FamilyMembershipServiceTest {
         Family family = insertTestingFamily(admin);
         User member = insertTestingMember("member", family);
 
-        insertTestingMembership(family, insertTestingUser("applicant"), "PENDING");
-        insertTestingMembership(family, insertTestingUser("rejecteduser"), "REJECTED");
+        insertTestingPendingRequest(family, insertTestingUser("applicant"));
+        insertTestingRejectedRequest(family, insertTestingUser("rejecteduser"));
 
         User otherAdmin = insertTestingUser("otheradmin");
         insertTestingFamily(otherAdmin);
 
-        FamilyMembership adminMembership =
-                membershipRepo.findByFamilyAndUser(family, admin);
-        FamilyMembership memberMembership =
-                membershipRepo.findByFamilyAndUser(family, member);
-
         List<FamilyMembership> adminResult = membershipService.getFamilyMembers(admin);
         List<FamilyMembership> memberResult = membershipService.getFamilyMembers(member);
 
+        var resultSize = adminResult.size();
         assertEquals("getFamilyMembersSuccessTest: admin should see two accepted members",
-                2, adminResult.size());
+                2, resultSize);
+        var resultSize2 = memberResult.size();
         assertEquals("getFamilyMembersSuccessTest: member should see two accepted members",
-                2, memberResult.size());
+                2, resultSize2);
         assertTrue("getFamilyMembersSuccessTest: admin should see both accepted memberships",
-                adminResult.contains(adminMembership) && adminResult.contains(memberMembership));
+                adminResult.stream().map(FamilyMembership::getUser).toList().containsAll(List.of(admin, member)));
         assertTrue("getFamilyMembersSuccessTest: member should see both accepted memberships",
-                memberResult.contains(adminMembership) && memberResult.contains(memberMembership));
+                memberResult.stream().map(FamilyMembership::getUser).toList().containsAll(List.of(admin, member)));
+        assertTrue("getFamilyMembersSuccessTest: admin's results should all be accepted members of this family",
+                adminResult.stream().allMatch(membership -> family.equals(membership.getFamily())
+                        && "ACCEPTED".equals(membership.getStatus())));
+        assertTrue("getFamilyMembersSuccessTest: member's results should all be accepted members of this family",
+                memberResult.stream().allMatch(membership -> family.equals(membership.getFamily())
+                        && "ACCEPTED".equals(membership.getStatus())));
     }
 
     /**
@@ -918,8 +952,9 @@ public class FamilyMembershipServiceTest {
         List<FamilyMembership> result = membershipService.getFamilyMembers(null);
 
         assertNotNull("getFamilyMembersNullUserTest: should return a list", result);
+        var emptyResult = result.isEmpty();
         assertTrue("getFamilyMembersNullUserTest: should return an empty list",
-                result.isEmpty());
+                emptyResult);
     }
 
     /**
@@ -931,8 +966,9 @@ public class FamilyMembershipServiceTest {
 
         List<FamilyMembership> result = membershipService.getFamilyMembers(user);
 
+        var emptyResult = result.isEmpty();
         assertTrue("getFamilyMembersNoFamilyTest: should return an empty list",
-                result.isEmpty());
+                emptyResult);
     }
 
     /*
@@ -949,19 +985,20 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User member = insertTestingMember("member", family);
-        FamilyMembership membership = membershipRepo.findByFamilyAndUser(family, member);
+        FamilyMembership membership = findTestingAcceptedMembership(family, member);
 
         boolean result = membershipService.leaveFamily(member);
 
         assertTrue("leaveFamilySuccessTest: should leave the family", result);
-        assertFalse("leaveFamilySuccessTest: should delete the membership",
-                membershipRepo.existsById(membership.getMembershipID()));
+        assertNull("leaveFamilySuccessTest: should delete the membership",
+                membershipService.getMembershipByID(membership.getMembershipID()));
         assertNull("leaveFamilySuccessTest: should clear the user's family",
                 userService.validateUser("member", password).getFamily());
+        var actualFamily = admin.getFamily();
         assertEquals("leaveFamilySuccessTest: should preserve the administrator's family",
-                family, admin.getFamily());
-        assertTrue("leaveFamilySuccessTest: should preserve the family record",
-                familiesRepo.existsById(family.getFamilyID()));
+                family, actualFamily);
+        assertEquals("leaveFamilySuccessTest: should preserve the family record",
+                family, membershipService.getFamilyForUser(admin));
     }
 
     /**
@@ -981,14 +1018,14 @@ public class FamilyMembershipServiceTest {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
         User applicant = insertTestingUser("applicant");
-        FamilyMembership request = insertTestingMembership(family, applicant, "PENDING");
+        FamilyMembership request = insertTestingPendingRequest(family, applicant);
 
         boolean result = membershipService.leaveFamily(applicant);
 
         assertFalse("leaveFamilyNoAcceptedMembershipTest: should reject a pending applicant",
                 result);
-        assertTrue("leaveFamilyNoAcceptedMembershipTest: should preserve the pending request",
-                membershipRepo.existsById(request.getMembershipID()));
+        assertNotNull("leaveFamilyNoAcceptedMembershipTest: should preserve the pending request",
+                membershipService.getMembershipByID(request.getMembershipID()));
     }
 
     /**
@@ -998,15 +1035,16 @@ public class FamilyMembershipServiceTest {
     public void leaveFamilyAdminTest() {
         User admin = insertTestingUser();
         Family family = insertTestingFamily(admin);
-        FamilyMembership membership = membershipRepo.findByFamilyAndUser(family, admin);
+        FamilyMembership membership = findTestingAcceptedMembership(family, admin);
 
         boolean result = membershipService.leaveFamily(admin);
 
         assertFalse("leaveFamilyAdminTest: should reject the administrator", result);
-        assertTrue("leaveFamilyAdminTest: should preserve the membership",
-                membershipRepo.existsById(membership.getMembershipID()));
+        assertNotNull("leaveFamilyAdminTest: should preserve the membership",
+                membershipService.getMembershipByID(membership.getMembershipID()));
+        var actualFamily = admin.getFamily();
         assertEquals("leaveFamilyAdminTest: should preserve the family reference",
-                family, admin.getFamily());
+                family, actualFamily);
     }
 
     /*
@@ -1019,46 +1057,162 @@ public class FamilyMembershipServiceTest {
         return insertTestingUser(username);
     }
 
-    private User insertTestingUser(String testUsername) {
-        userService.newUser(testUsername, password);
-        User user = userService.validateUser(testUsername, password);
+    /**
+     * Creates a test user and verifies that the saved credentials work.
+     */
+    private User insertTestingUser(String username) {
+        User user = userService.validateUser(username, password);
+        assertNull("insertTestingUser: user should not exist yet", user);
 
-        assertNotNull("insertTestingUser: should create the test user", user);
-        return user;
+        user = userService.newUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after creation", user);
+        assertNotNull("insertTestingUser: user should have an ID", user.getId());
+        assertEquals("insertTestingUser: user should have the correct username", username, user.getUsername());
+
+        User userCheck = userService.validateUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after validation", userCheck);
+        assertEquals("insertTestingUser: login should return the created user's ID", user.getId(), userCheck.getId());
+        assertEquals("insertTestingUser: login should return the expected username", username, userCheck.getUsername());
+        return userCheck;
     }
 
     /**
-     * Creates a family with an administrator and accepted membership.
+     * Creates a family and checks its administrator and initial membership.
      */
     private Family insertTestingFamily(User admin) {
-        boolean result = familyService.createFamily(
-                admin, "Family of " + admin.getUsername());
+        final String familyName = "Family of " + admin.getUsername();
+        assertNull("insertTestingFamily: the administrator should start without a family",
+                membershipService.getFamilyForUser(admin));
 
+        boolean result = familyService.createFamily(admin, familyName);
         assertTrue("insertTestingFamily: should create the family", result);
 
-        Family family = familiesRepo.findByFamilyAdmin(admin);
-
-        assertNotNull("insertTestingFamily: should find the family", family);
+        Family family = membershipService.getFamilyForUser(admin);
+        assertNotNull("insertTestingFamily: should find the created family", family);
+        assertNotNull("insertTestingFamily: family should have an ID", family.getFamilyID());
+        assertEquals("insertTestingFamily: should store the expected name", familyName, family.getFamilyName());
+        assertEquals("insertTestingFamily: should assign the administrator", admin, family.getFamilyAdmin());
+        List<FamilyMembership> memberships = membershipService.getFamilyMembers(admin);
+        assertEquals("insertTestingFamily: should create exactly one membership", 1, memberships.size());
+        assertEquals("insertTestingFamily: should accept the administrator", "ACCEPTED", memberships.getFirst().getStatus());
+        assertEquals("insertTestingFamily: membership should belong to the administrator", admin, memberships.getFirst().getUser());
         return family;
     }
 
     /**
-     * Creates an accepted member with a matching user family reference.
+     * Creates a member through the request and acceptance workflow.
      */
-    private User insertTestingMember(String memberUsername, Family family) {
-        User member = insertTestingUser(memberUsername);
-        member.setFamily(family);
-        userRepo.save(member);
-        insertTestingMembership(family, member, "ACCEPTED");
+    private User insertTestingMember(String username, Family family) {
+        User member = insertTestingUser(username);
+        FamilyMembership request = insertTestingPendingRequest(family, member);
+
+        boolean result = membershipService.acceptRequest(family.getFamilyAdmin(), request);
+        assertTrue("insertTestingMember: should accept the member", result);
+
+        FamilyMembership membership = membershipService.getMembershipByID(request.getMembershipID());
+        assertNotNull("insertTestingMember: should find the accepted membership", membership);
+        assertEquals("insertTestingMember: should save accepted status", "ACCEPTED", membership.getStatus());
+        assertEquals("insertTestingMember: should associate the member with the family",
+                family, membershipService.getFamilyForUser(member));
         return member;
     }
 
-    private FamilyMembership insertTestingMembership(
-            Family family, User user, String status) {
-        return membershipRepo.save(new FamilyMembership(family, user, status));
+    /**
+     * Submits a join request and verifies its persisted status and associations.
+     */
+    private FamilyMembership insertTestingPendingRequest(Family family, User applicant) {
+        User admin = family.getFamilyAdmin();
+        assertTrue("insertTestingPendingRequest: applicant should have no pending request for this family",
+                membershipService.getPendingRequests(admin).stream()
+                        .noneMatch(request -> applicant.equals(request.getUser())));
+
+        boolean result = membershipService.requestToJoinFamily(applicant, family.getFamilyID());
+        assertTrue("insertTestingPendingRequest: should submit the request", result);
+
+        return findTestingPendingRequest(family, applicant);
     }
 
+    /**
+     * Checks that the family has exactly one pending request for the applicant.
+     */
+    private FamilyMembership findTestingPendingRequest(Family family, User applicant) {
+        List<FamilyMembership> requests = membershipService.getPendingRequests(family.getFamilyAdmin()).stream()
+                .filter(request -> applicant.equals(request.getUser()))
+                .toList();
+        assertEquals("findTestingPendingRequest: should find one request for the applicant", 1, requests.size());
+        FamilyMembership request = requests.getFirst();
+        assertNotNull("findTestingPendingRequest: request should have an ID", request.getMembershipID());
+        assertEquals("findTestingPendingRequest: should return the expected family", family, request.getFamily());
+        assertEquals("findTestingPendingRequest: should return pending status", "PENDING", request.getStatus());
+        return request;
+    }
+
+    /**
+     * Submits and rejects a request, then checks its status and family assignment.
+     */
+    private FamilyMembership insertTestingRejectedRequest(Family family, User applicant) {
+        FamilyMembership request = insertTestingPendingRequest(family, applicant);
+
+        boolean result = membershipService.rejectRequest(family.getFamilyAdmin(), request);
+        assertTrue("insertTestingRejectedRequest: should reject the request", result);
+
+        FamilyMembership rejected = savedMembership(request);
+        assertEquals("insertTestingRejectedRequest: should save rejected status", "REJECTED", rejected.getStatus());
+        assertNull("insertTestingRejectedRequest: applicant should have no family", applicant.getFamily());
+        return rejected;
+    }
+
+    /**
+     * Persists a membership that the public service workflow would reject.
+     */
+    private FamilyMembership insertTestingInconsistentMembership(Family family, User user, String status) {
+        FamilyMembership membership = new FamilyMembership(family, user, status);
+        entityManager.persist(membership);
+        entityManager.flush();
+
+        assertNotNull("insertTestingInconsistentMembership: membership should have an ID", membership.getMembershipID());
+        FamilyMembership saved = savedMembership(membership);
+        assertEquals("insertTestingInconsistentMembership: should save the expected family", family, saved.getFamily());
+        assertEquals("insertTestingInconsistentMembership: should save the expected user", user, saved.getUser());
+        assertEquals("insertTestingInconsistentMembership: should save the expected status", status, saved.getStatus());
+        return saved;
+    }
+
+    /**
+     * Checks that an accepted user has exactly one membership in the specified family.
+     */
+    private FamilyMembership findTestingAcceptedMembership(Family family, User user) {
+        List<FamilyMembership> memberships = membershipService.getFamilyMembers(family.getFamilyAdmin()).stream()
+                .filter(membership -> user.equals(membership.getUser()))
+                .toList();
+        assertEquals("findTestingAcceptedMembership: should find one membership for the user", 1, memberships.size());
+        FamilyMembership membership = memberships.getFirst();
+        assertNotNull("findTestingAcceptedMembership: membership should have an ID", membership.getMembershipID());
+        assertEquals("findTestingAcceptedMembership: should return the expected family", family, membership.getFamily());
+        assertEquals("findTestingAcceptedMembership: should return accepted status", "ACCEPTED", membership.getStatus());
+        return membership;
+    }
+
+    /**
+     * Retrieves an existing membership by its generated ID.
+     */
     private FamilyMembership savedMembership(FamilyMembership membership) {
-        return membershipRepo.findById(membership.getMembershipID()).orElseThrow();
+        FamilyMembership saved = membershipService.getMembershipByID(membership.getMembershipID());
+        assertNotNull("savedMembership: should find the membership", saved);
+        assertEquals("savedMembership: should return the same membership ID",
+                membership.getMembershipID(), saved.getMembershipID());
+        return saved;
+    }
+
+    /**
+     * Counts all of a user's memberships, regardless of status.
+     */
+    private long countMemberships(User user) {
+        return entityManager.createQuery("""
+                        select count(membership) from FamilyMembership membership
+                        where membership.user = :user
+                        """, Long.class)
+                .setParameter("user", user)
+                .getSingleResult();
     }
 }

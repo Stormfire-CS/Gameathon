@@ -3,9 +3,8 @@ package edu.carroll.cs341.service;
 import edu.carroll.cs341.jpa.model.Family;
 import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.User;
-import edu.carroll.cs341.jpa.repo.FamiliesRepository;
-import edu.carroll.cs341.jpa.repo.FamilyMembershipRepository;
-import edu.carroll.cs341.jpa.repo.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +15,17 @@ import java.util.List;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Tests family creation, administrator permissions, renaming,
- * administrator changes, and deletion.
+ * Tests the {@link FamilyService} methods responsible for creating, renaming, and deleting families
+ * and managing administrator permissions.
  *
- * <p>ChatGPT assisted with generating these tests.
- * Review and adapt them before use.</p>
+ * <p>The {@link SpringBootTest} annotation loads the Spring application
+ * context so that the services use their configured dependencies. The
+ * {@link Transactional} annotation rolls back database changes after each
+ * test.</p>
  */
 @SpringBootTest
 @Transactional
 public class FamilyServiceTest {
-    private static final String username = "familytestuser";
-    private static final String password = "familytestpass";
-    private static final String familyName = "Test Family";
 
     @Autowired
     private FamilyService familyService;
@@ -36,13 +34,10 @@ public class FamilyServiceTest {
     private UserService userService;
 
     @Autowired
-    private FamiliesRepository familiesRepo;
+    private FamilyMembershipService membershipService;
 
-    @Autowired
-    private FamilyMembershipRepository membershipRepo;
-
-    @Autowired
-    private UserRepository userRepo;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /*
      * = = = = = = = = = = =
@@ -56,27 +51,35 @@ public class FamilyServiceTest {
      */
     @Test
     public void createFamilySuccessTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = familyService.createFamily(user, familyName);
 
         assertTrue("createFamilySuccessTest: should create the family", result);
 
-        Family family = familiesRepo.findByFamilyAdmin(user);
+        Family family = membershipService.getFamilyForUser(user);
 
         assertNotNull("createFamilySuccessTest: should save the family", family);
+        var actualFamilyName = family.getFamilyName();
         assertEquals("createFamilySuccessTest: should save the name",
-                familyName, family.getFamilyName());
+                familyName, actualFamilyName);
+        var actualFamilyAdmin = family.getFamilyAdmin();
         assertEquals("createFamilySuccessTest: should assign the administrator",
-                user, family.getFamilyAdmin());
+                user, actualFamilyAdmin);
         assertEquals("createFamilySuccessTest: should update the user's family",
-                family, userRepo.findById(user.getId()).orElseThrow().getFamily());
+                family, userService.validateUser(username, password).getFamily());
 
-        List<FamilyMembership> memberships = membershipRepo.findByFamily(family);
+        List<FamilyMembership> memberships = membershipService.getFamilyMembers(user);
+        assertEquals("createFamilySuccessTest: should save only one membership for the family",
+                1L, countMemberships(family.getFamilyID()));
 
+        var resultSize = memberships.size();
         assertEquals("createFamilySuccessTest: should create one membership",
-                1, memberships.size());
+                1, resultSize);
         assertEquals("createFamilySuccessTest: should create the creator's membership",
                 user, memberships.getFirst().getUser());
         assertEquals("createFamilySuccessTest: should accept the creator",
@@ -88,14 +91,38 @@ public class FamilyServiceTest {
      */
     @Test
     public void createFamilyNameWithSpacesTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
 
-        boolean result = familyService.createFamily(user, "  Test Family  ");
+        User user = insertTestingUser(username, password);
 
-        assertTrue("createFamilyNameWithSpacesTest: should accept the name", result);
+        // No families in the database
+        boolean result = familyService.createFamily(user, "Test Family ");
+        assertTrue("createFamilyNameWithSpacesTest: should accept a trailing space", result);
+        Family family = membershipService.getFamilyForUser(user);
+        assertNotNull("createFamilyNameWithSpacesTest: should save the first family", family);
+        String savedName = family.getFamilyName();
         assertEquals("createFamilyNameWithSpacesTest: should trim the name",
-                familyName, familiesRepo.findByFamilyAdmin(user).getFamilyName());
+                familyName, savedName);
+
+        // One family in the database
+        User secondAdmin = insertTestingUser("secondadmin", password);
+        result = familyService.createFamily(secondAdmin, " Second Family");
+        assertTrue("createFamilyNameWithSpacesTest: should accept a leading space", result);
+        Family secondFamily = membershipService.getFamilyForUser(secondAdmin);
+        assertNotNull("createFamilyNameWithSpacesTest: should save the second family", secondFamily);
+        String secondName = secondFamily.getFamilyName();
+        assertEquals("createFamilyNameWithSpacesTest: should trim the leading space", "Second Family", secondName);
+
+        // Two families in the database
+        User thirdAdmin = insertTestingUser("thirdadmin", password);
+        result = familyService.createFamily(thirdAdmin, " Third Family ");
+        assertTrue("createFamilyNameWithSpacesTest: should accept spaces on both ends", result);
+        Family thirdFamily = membershipService.getFamilyForUser(thirdAdmin);
+        assertNotNull("createFamilyNameWithSpacesTest: should save the third family", thirdFamily);
+        String thirdName = thirdFamily.getFamilyName();
+        assertEquals("createFamilyNameWithSpacesTest: should trim spaces on both ends", "Third Family", thirdName);
     }
 
     /**
@@ -103,13 +130,26 @@ public class FamilyServiceTest {
      */
     @Test
     public void createFamilyNullUserTest() {
-        long previousCount = familiesRepo.count();
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
 
+        // No families in the database
+        long previousCount = countFamilies();
         boolean result = familyService.createFamily(null, familyName);
-
-        assertFalse("createFamilyNullUserTest: should reject a null user", result);
+        assertFalse("createFamilyNullUserTest: should reject a null user with no families", result);
         assertEquals("createFamilyNullUserTest: should not create a family",
-                previousCount, familiesRepo.count());
+                previousCount, countFamilies());
+
+        // One family in the database
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        result = familyService.createFamily(null, "Another Family");
+        assertFalse("createFamilyNullUserTest: should reject a null user with an existing family", result);
+        assertEquals("createFamilyNullUserTest: should leave the family count unchanged",
+                previousCount + 1, countFamilies());
+        assertEquals("createFamilyNullUserTest: should preserve the existing family",
+                family, membershipService.getFamilyForUser(admin));
     }
 
     /**
@@ -117,16 +157,18 @@ public class FamilyServiceTest {
      */
     @Test
     public void createFamilyNullNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+
+        User user = insertTestingUser(username, password);
+        long previousCount = countFamilies();
 
         boolean result = familyService.createFamily(user, null);
 
         assertFalse("createFamilyNullNameTest: should reject a null name", result);
-        assertNull("createFamilyNullNameTest: should leave the user without a family",
+        assertNull("createFamilyNullNameTest: should not assign a family",
                 user.getFamily());
-        assertNull("createFamilyNullNameTest: should not save a family",
-                familiesRepo.findByFamilyAdmin(user));
+        assertEquals("createFamilyNullNameTest: should not save a family", previousCount, countFamilies());
     }
 
     /**
@@ -134,14 +176,18 @@ public class FamilyServiceTest {
      */
     @Test
     public void createFamilyEmptyNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+
+        User user = insertTestingUser(username, password);
+        long previousCount = countFamilies();
 
         boolean result = familyService.createFamily(user, "");
 
         assertFalse("createFamilyEmptyNameTest: should reject an empty name", result);
-        assertNull("createFamilyEmptyNameTest: should not save a family",
-                familiesRepo.findByFamilyAdmin(user));
+        assertNull("createFamilyEmptyNameTest: should not assign a family",
+                user.getFamily());
+        assertEquals("createFamilyEmptyNameTest: should not save a family", previousCount, countFamilies());
     }
 
     /**
@@ -149,15 +195,19 @@ public class FamilyServiceTest {
      */
     @Test
     public void createFamilyWhitespaceNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+
+        User user = insertTestingUser(username, password);
+        long previousCount = countFamilies();
 
         boolean result = familyService.createFamily(user, "   ");
 
         assertFalse("createFamilyWhitespaceNameTest: should reject a blank name",
                 result);
-        assertNull("createFamilyWhitespaceNameTest: should not save a family",
-                familiesRepo.findByFamilyAdmin(user));
+        assertNull("createFamilyWhitespaceNameTest: should not assign a family",
+                user.getFamily());
+        assertEquals("createFamilyWhitespaceNameTest: should not save a family", previousCount, countFamilies());
     }
 
     /**
@@ -165,21 +215,27 @@ public class FamilyServiceTest {
      */
     @Test
     public void createFamilyExistingFamilyTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Family originalFamily = insertTestingFamily(user);
-        long previousCount = familiesRepo.count();
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User user = insertTestingUser(username, password);
+        Family originalFamily = insertTestingFamily(user, familyName);
+        long previousCount = countFamilies();
 
         boolean result = familyService.createFamily(user, "Another Family");
 
         assertFalse("createFamilyExistingFamilyTest: should reject an existing member",
                 result);
+        var actualFamily = user.getFamily();
         assertEquals("createFamilyExistingFamilyTest: should preserve the user's family",
-                originalFamily, user.getFamily());
+                originalFamily, actualFamily);
+        var savedCount = countFamilies();
         assertEquals("createFamilyExistingFamilyTest: should not create another family",
-                previousCount, familiesRepo.count());
+                previousCount, savedCount);
+        var actualFamilyName = originalFamily.getFamilyName();
         assertEquals("createFamilyExistingFamilyTest: should preserve the original name",
-                familyName, originalFamily.getFamilyName());
+                familyName, actualFamilyName);
     }
 
     /*
@@ -193,9 +249,12 @@ public class FamilyServiceTest {
      */
     @Test
     public void isFamilyAdminSuccessTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Family family = insertTestingFamily(user);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User user = insertTestingUser(username, password);
+        Family family = insertTestingFamily(user, familyName);
 
         boolean result = familyService.isFamilyAdmin(user, family);
 
@@ -208,10 +267,13 @@ public class FamilyServiceTest {
      */
     @Test
     public void isFamilyAdminRegularMemberTest() {
-        insertTestingUser();
-        User admin = userService.validateUser(username, password);
-        Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("familymember", family);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        User member = insertTestingMember("familymember", password, family);
 
         boolean result = familyService.isFamilyAdmin(member, family);
 
@@ -224,9 +286,12 @@ public class FamilyServiceTest {
      */
     @Test
     public void isFamilyAdminNullUserTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Family family = insertTestingFamily(user);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User user = insertTestingUser(username, password);
+        Family family = insertTestingFamily(user, familyName);
 
         boolean result = familyService.isFamilyAdmin(null, family);
 
@@ -238,8 +303,10 @@ public class FamilyServiceTest {
      */
     @Test
     public void isFamilyAdminNullFamilyTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = familyService.isFamilyAdmin(user, null);
 
@@ -254,22 +321,40 @@ public class FamilyServiceTest {
      */
 
     /**
-     * Verifies that the administrator can rename the family.
+     * Verifies that the administrator can rename the family independently of other families.
      */
     @Test
     public void renameFamilySuccessTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Family family = insertTestingFamily(user);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+        final String newName = "New Family Name";
+        final String secondName = "Second Family";
 
-        boolean result = familyService.renameFamily(user, "New Family Name");
+        User user = insertTestingUser(username, password);
+        Family family = insertTestingFamily(user, familyName);
 
+        // One family in the database
+        boolean result = familyService.renameFamily(user, newName);
         assertTrue("renameFamilySuccessTest: should rename the family", result);
+        Family renamedFamily = membershipService.getFamilyForUser(user);
+        assertNotNull("renameFamilySuccessTest: should find the renamed family", renamedFamily);
+        assertEquals("renameFamilySuccessTest: should keep the same family ID",
+                family.getFamilyID(), renamedFamily.getFamilyID());
         assertEquals("renameFamilySuccessTest: should save the new name",
-                "New Family Name",
-                familiesRepo.findById(family.getFamilyID()).orElseThrow().getFamilyName());
+                newName, renamedFamily.getFamilyName());
         assertEquals("renameFamilySuccessTest: should preserve the administrator",
-                user, family.getFamilyAdmin());
+                user, renamedFamily.getFamilyAdmin());
+
+        // Two families in the database
+        User secondAdmin = insertTestingUser("secondadmin", password);
+        insertTestingFamily(secondAdmin, secondName);
+        result = familyService.renameFamily(user, "Updated Family Name");
+        assertTrue("renameFamilySuccessTest: should rename the first family again", result);
+        assertEquals("renameFamilySuccessTest: should save the first family's updated name",
+                "Updated Family Name", membershipService.getFamilyForUser(user).getFamilyName());
+        assertEquals("renameFamilySuccessTest: should preserve the second family's name",
+                secondName, membershipService.getFamilyForUser(secondAdmin).getFamilyName());
     }
 
     /**
@@ -277,16 +362,19 @@ public class FamilyServiceTest {
      */
     @Test
     public void renameFamilyNameWithSpacesTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        insertTestingFamily(user);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User user = insertTestingUser(username, password);
+        insertTestingFamily(user, familyName);
 
         boolean result = familyService.renameFamily(user, "  New Family Name  ");
 
         assertTrue("renameFamilyNameWithSpacesTest: should accept the name", result);
         assertEquals("renameFamilyNameWithSpacesTest: should trim the new name",
                 "New Family Name",
-                familiesRepo.findByFamilyAdmin(user).getFamilyName());
+                membershipService.getFamilyForUser(user).getFamilyName());
     }
 
     /**
@@ -304,15 +392,19 @@ public class FamilyServiceTest {
      */
     @Test
     public void renameFamilyNullNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Family family = insertTestingFamily(user);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User user = insertTestingUser(username, password);
+        Family family = insertTestingFamily(user, familyName);
 
         boolean result = familyService.renameFamily(user, null);
 
         assertFalse("renameFamilyNullNameTest: should reject a null name", result);
+        var actualFamilyName = family.getFamilyName();
         assertEquals("renameFamilyNullNameTest: should preserve the original name",
-                familyName, family.getFamilyName());
+                familyName, actualFamilyName);
     }
 
     /**
@@ -320,15 +412,19 @@ public class FamilyServiceTest {
      */
     @Test
     public void renameFamilyEmptyNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Family family = insertTestingFamily(user);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User user = insertTestingUser(username, password);
+        Family family = insertTestingFamily(user, familyName);
 
         boolean result = familyService.renameFamily(user, "");
 
         assertFalse("renameFamilyEmptyNameTest: should reject an empty name", result);
+        var actualFamilyName = family.getFamilyName();
         assertEquals("renameFamilyEmptyNameTest: should preserve the original name",
-                familyName, family.getFamilyName());
+                familyName, actualFamilyName);
     }
 
     /**
@@ -336,16 +432,20 @@ public class FamilyServiceTest {
      */
     @Test
     public void renameFamilyWhitespaceNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Family family = insertTestingFamily(user);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User user = insertTestingUser(username, password);
+        Family family = insertTestingFamily(user, familyName);
 
         boolean result = familyService.renameFamily(user, "   ");
 
         assertFalse("renameFamilyWhitespaceNameTest: should reject a blank name",
                 result);
+        var actualFamilyName = family.getFamilyName();
         assertEquals("renameFamilyWhitespaceNameTest: should preserve the original name",
-                familyName, family.getFamilyName());
+                familyName, actualFamilyName);
     }
 
     /**
@@ -353,8 +453,10 @@ public class FamilyServiceTest {
      */
     @Test
     public void renameFamilyNoFamilyTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = familyService.renameFamily(user, "New Family Name");
 
@@ -367,17 +469,21 @@ public class FamilyServiceTest {
      */
     @Test
     public void renameFamilyNotAdminTest() {
-        insertTestingUser();
-        User admin = userService.validateUser(username, password);
-        Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("familymember", family);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        User member = insertTestingMember("familymember", password, family);
 
         boolean result = familyService.renameFamily(member, "New Family Name");
 
         assertFalse("renameFamilyNotAdminTest: should reject a regular member",
                 result);
+        var actualFamilyName = family.getFamilyName();
         assertEquals("renameFamilyNotAdminTest: should preserve the name",
-                familyName, family.getFamilyName());
+                familyName, actualFamilyName);
     }
 
     /*
@@ -392,25 +498,29 @@ public class FamilyServiceTest {
      */
     @Test
     public void changeAdminSuccessTest() {
-        insertTestingUser();
-        User admin = userService.validateUser(username, password);
-        Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("familymember", family);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        User member = insertTestingMember("familymember", password, family);
 
         boolean result = familyService.changeAdmin(admin, member);
 
         assertTrue("changeAdminSuccessTest: should change the administrator", result);
         assertEquals("changeAdminSuccessTest: should save the new administrator",
                 member,
-                familiesRepo.findById(family.getFamilyID()).orElseThrow().getFamilyAdmin());
+                membershipService.getFamilyForUser(member).getFamilyAdmin());
         assertTrue("changeAdminSuccessTest: should recognize the new administrator",
                 familyService.isFamilyAdmin(member, family));
         assertFalse("changeAdminSuccessTest: should remove the old administrator's permissions",
                 familyService.isFamilyAdmin(admin, family));
+        var actualFamily = admin.getFamily();
         assertEquals("changeAdminSuccessTest: should preserve the old administrator's membership",
-                family, admin.getFamily());
+                family, actualFamily);
         assertEquals("changeAdminSuccessTest: should preserve both accepted memberships",
-                2, membershipRepo.findByFamilyAndStatus(family, "ACCEPTED").size());
+                2, membershipService.getFamilyMembers(member).size());
     }
 
     /**
@@ -418,8 +528,10 @@ public class FamilyServiceTest {
      */
     @Test
     public void changeAdminNullCurrentAdminTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = familyService.changeAdmin(null, user);
 
@@ -432,16 +544,20 @@ public class FamilyServiceTest {
      */
     @Test
     public void changeAdminNullNewAdminTest() {
-        insertTestingUser();
-        User admin = userService.validateUser(username, password);
-        Family family = insertTestingFamily(admin);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
 
         boolean result = familyService.changeAdmin(admin, null);
 
         assertFalse("changeAdminNullNewAdminTest: should reject a null new admin",
                 result);
+        var actualFamilyAdmin = family.getFamilyAdmin();
         assertEquals("changeAdminNullNewAdminTest: should preserve the administrator",
-                admin, family.getFamilyAdmin());
+                admin, actualFamilyAdmin);
     }
 
     /**
@@ -449,16 +565,20 @@ public class FamilyServiceTest {
      */
     @Test
     public void changeAdminNotAdminTest() {
-        insertTestingUser();
-        User admin = userService.validateUser(username, password);
-        Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("familymember", family);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        User member = insertTestingMember("familymember", password, family);
 
         boolean result = familyService.changeAdmin(member, admin);
 
         assertFalse("changeAdminNotAdminTest: should reject a regular member", result);
+        var actualFamilyAdmin = family.getFamilyAdmin();
         assertEquals("changeAdminNotAdminTest: should preserve the administrator",
-                admin, family.getFamilyAdmin());
+                admin, actualFamilyAdmin);
     }
 
     /**
@@ -466,17 +586,21 @@ public class FamilyServiceTest {
      */
     @Test
     public void changeAdminNewAdminWithoutFamilyTest() {
-        insertTestingUser();
-        User admin = userService.validateUser(username, password);
-        Family family = insertTestingFamily(admin);
-        User outsider = userService.newUser("familyoutsider", password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        User outsider = insertTestingUser("familyoutsider", password);
 
         boolean result = familyService.changeAdmin(admin, outsider);
 
         assertFalse("changeAdminNewAdminWithoutFamilyTest: should reject an outsider",
                 result);
+        var actualFamilyAdmin = family.getFamilyAdmin();
         assertEquals("changeAdminNewAdminWithoutFamilyTest: should preserve the administrator",
-                admin, family.getFamilyAdmin());
+                admin, actualFamilyAdmin);
     }
 
     /**
@@ -484,20 +608,24 @@ public class FamilyServiceTest {
      */
     @Test
     public void changeAdminDifferentFamilyTest() {
-        insertTestingUser();
-        User admin = userService.validateUser(username, password);
-        Family family = insertTestingFamily(admin);
-        User otherAdmin = userService.newUser("otherfamilyadmin", password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
 
-        assertTrue("changeAdminDifferentFamilyTest: should create the other family",
-                familyService.createFamily(otherAdmin, "Other Family"));
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        User otherAdmin = insertTestingUser("otherfamilyadmin", password);
+
+        Family otherFamily = insertTestingFamily(otherAdmin, "Other Family");
 
         boolean result = familyService.changeAdmin(admin, otherAdmin);
 
         assertFalse("changeAdminDifferentFamilyTest: should reject another family's member",
                 result);
-        assertEquals("changeAdminDifferentFamilyTest: should preserve the administrator",
+        assertEquals("changeAdminDifferentFamilyTest: should preserve the first family's administrator",
                 admin, family.getFamilyAdmin());
+        assertEquals("changeAdminDifferentFamilyTest: should preserve the second family's administrator",
+                otherAdmin, otherFamily.getFamilyAdmin());
     }
 
     /*
@@ -513,17 +641,19 @@ public class FamilyServiceTest {
      */
     @Test
     public void deleteFamilySuccessTest() {
-        insertTestingUser();
-        User admin = userService.validateUser(username, password);
-        Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("familymember", family);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
 
-        User otherAdmin = userService.newUser("otherfamilyadmin", password);
-        assertTrue("deleteFamilySuccessTest: should create the other family",
-                familyService.createFamily(otherAdmin, "Other Family"));
-        Family otherFamily = otherAdmin.getFamily();
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        User member = insertTestingMember("familymember", password, family);
 
-        membershipRepo.save(new FamilyMembership(family, otherAdmin, "PENDING"));
+        User otherAdmin = insertTestingUser("otherfamilyadmin", password);
+        FamilyMembership pending = insertTestingPendingRequest(family, otherAdmin);
+        Family otherFamily = insertTestingFamily(otherAdmin, "Other Family");
+        assertEquals("deleteFamilySuccessTest: the request should still be pending before deletion",
+                "PENDING", membershipService.getMembershipByID(pending.getMembershipID()).getStatus());
 
         Long familyID = family.getFamilyID();
         Long otherFamilyID = otherFamily.getFamilyID();
@@ -532,24 +662,24 @@ public class FamilyServiceTest {
 
         assertTrue("deleteFamilySuccessTest: should delete the family", result);
 
-        familiesRepo.flush();
-        userRepo.flush();
+        entityManager.flush();
+        entityManager.clear();
 
-        assertFalse("deleteFamilySuccessTest: should remove the family record",
-                familiesRepo.existsById(familyID));
-        assertTrue("deleteFamilySuccessTest: should remove all associated memberships",
-                membershipRepo.findByFamily(family).isEmpty());
+        assertNull("deleteFamilySuccessTest: should remove the family record",
+                entityManager.find(Family.class, familyID));
+        assertEquals("deleteFamilySuccessTest: should remove all associated memberships",
+                0L, countMemberships(familyID));
         assertNull("deleteFamilySuccessTest: should clear the administrator's family",
-                userRepo.findById(admin.getId()).orElseThrow().getFamily());
+                userService.validateUser(admin.getUsername(), password).getFamily());
         assertNull("deleteFamilySuccessTest: should clear the member's family",
-                userRepo.findById(member.getId()).orElseThrow().getFamily());
+                userService.validateUser(member.getUsername(), password).getFamily());
         assertEquals("deleteFamilySuccessTest: should preserve the applicant's other family",
-                otherFamily,
-                userRepo.findById(otherAdmin.getId()).orElseThrow().getFamily());
-        assertTrue("deleteFamilySuccessTest: should preserve the other family record",
-                familiesRepo.existsById(otherFamilyID));
+                otherFamilyID,
+                userService.validateUser(otherAdmin.getUsername(), password).getFamily().getFamilyID());
+        assertNotNull("deleteFamilySuccessTest: should preserve the other family record",
+                entityManager.find(Family.class, otherFamilyID));
         assertEquals("deleteFamilySuccessTest: should preserve the other family's membership",
-                1, membershipRepo.findByFamily(otherFamily).size());
+                1L, countMemberships(otherFamilyID));
     }
 
     /**
@@ -557,13 +687,22 @@ public class FamilyServiceTest {
      */
     @Test
     public void deleteFamilyNullUserTest() {
-        long previousCount = familiesRepo.count();
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        long previousCount = countFamilies();
 
         boolean result = familyService.deleteFamily(null);
 
         assertFalse("deleteFamilyNullUserTest: should reject a null user", result);
+        var savedCount = countFamilies();
         assertEquals("deleteFamilyNullUserTest: should preserve existing families",
-                previousCount, familiesRepo.count());
+                previousCount, savedCount);
+        assertEquals("deleteFamilyNullUserTest: should preserve the administrator's family",
+                family, membershipService.getFamilyForUser(admin));
     }
 
     /**
@@ -571,8 +710,10 @@ public class FamilyServiceTest {
      */
     @Test
     public void deleteFamilyNoFamilyTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = familyService.deleteFamily(user);
 
@@ -585,54 +726,135 @@ public class FamilyServiceTest {
      */
     @Test
     public void deleteFamilyNotAdminTest() {
-        insertTestingUser();
-        User admin = userService.validateUser(username, password);
-        Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("familymember", family);
+        final String username = "familytestuser";
+        final String password = "familytestpass";
+        final String familyName = "Test Family";
+
+        User admin = insertTestingUser(username, password);
+        Family family = insertTestingFamily(admin, familyName);
+        User member = insertTestingMember("familymember", password, family);
 
         boolean result = familyService.deleteFamily(member);
 
         assertFalse("deleteFamilyNotAdminTest: should reject a regular member", result);
-        assertTrue("deleteFamilyNotAdminTest: should preserve the family record",
-                familiesRepo.existsById(family.getFamilyID()));
+        assertNotNull("deleteFamilyNotAdminTest: should preserve the family record",
+                entityManager.find(Family.class, family.getFamilyID()));
         assertEquals("deleteFamilyNotAdminTest: should preserve memberships",
-                2, membershipRepo.findByFamily(family).size());
+                2L, countMemberships(family.getFamilyID()));
+        var actualFamily = admin.getFamily();
         assertEquals("deleteFamilyNotAdminTest: should preserve the administrator's family",
-                family, admin.getFamily());
+                family, actualFamily);
+        var actualFamily2 = member.getFamily();
         assertEquals("deleteFamilyNotAdminTest: should preserve the member's family",
-                family, member.getFamily());
+                family, actualFamily2);
     }
 
-    private void insertTestingUser() {
-        userService.newUser(username, password);
+    /*
+     * = = = = = = = = = = =
+     * Test Helpers
+     * = = = = = = = = = = =
+     */
+
+    /**
+     * Creates a test user and verifies that the saved credentials work.
+     */
+    private User insertTestingUser(String username, String password) {
+        User user = userService.validateUser(username, password);
+        assertNull("insertTestingUser: user should not exist yet", user);
+
+        user = userService.newUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after creation", user);
+        assertNotNull("insertTestingUser: user should have an ID", user.getId());
+        assertEquals("insertTestingUser: user should have the correct username", username, user.getUsername());
+
+        User userCheck = userService.validateUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after validation", userCheck);
+        assertEquals("insertTestingUser: login should return the created user's ID", user.getId(), userCheck.getId());
+        assertEquals("insertTestingUser: login should return the expected username", username, userCheck.getUsername());
+        return userCheck;
     }
 
     /**
-     * Creates a family through the service, including its initial membership.
+     * Creates a family and checks its administrator and initial membership.
      */
-    private Family insertTestingFamily(User admin) {
+    private Family insertTestingFamily(User admin, String familyName) {
+        assertNull("insertTestingFamily: the administrator should start without a family",
+                membershipService.getFamilyForUser(admin));
+
         boolean result = familyService.createFamily(admin, familyName);
+        assertTrue("insertTestingFamily: should create the family", result);
 
-        assertTrue("insertTestingFamily: should create the test family", result);
-
-        Family family = familiesRepo.findByFamilyAdmin(admin);
-
-        assertNotNull("insertTestingFamily: should find the test family", family);
+        Family family = membershipService.getFamilyForUser(admin);
+        assertNotNull("insertTestingFamily: should find the created family", family);
+        assertNotNull("insertTestingFamily: family should have an ID", family.getFamilyID());
+        assertEquals("insertTestingFamily: should store the expected name", familyName, family.getFamilyName());
+        assertEquals("insertTestingFamily: should assign the administrator", admin, family.getFamilyAdmin());
+        List<FamilyMembership> memberships = membershipService.getFamilyMembers(admin);
+        assertEquals("insertTestingFamily: should create exactly one membership", 1, memberships.size());
+        assertEquals("insertTestingFamily: should accept the administrator", "ACCEPTED", memberships.getFirst().getStatus());
+        assertEquals("insertTestingFamily: membership should belong to the administrator", admin, memberships.getFirst().getUser());
         return family;
     }
 
     /**
-     * Creates an accepted member with a matching user family reference.
+     * Creates a member through the request and acceptance workflow.
      */
-    private User insertTestingMember(String memberUsername, Family family) {
-        User member = userService.newUser(memberUsername, password);
+    private User insertTestingMember(String username, String password, Family family) {
+        User member = insertTestingUser(username, password);
+        FamilyMembership request = insertTestingPendingRequest(family, member);
 
-        assertNotNull("insertTestingMember: should create the test user", member);
+        boolean result = membershipService.acceptRequest(family.getFamilyAdmin(), request);
+        assertTrue("insertTestingMember: should accept the member", result);
 
-        member.setFamily(family);
-        userRepo.save(member);
-        membershipRepo.save(new FamilyMembership(family, member, "ACCEPTED"));
-
+        FamilyMembership membership = membershipService.getMembershipByID(request.getMembershipID());
+        assertNotNull("insertTestingMember: should find the accepted membership", membership);
+        assertEquals("insertTestingMember: should save accepted status", "ACCEPTED", membership.getStatus());
+        assertEquals("insertTestingMember: should associate the member with the family",
+                family, membershipService.getFamilyForUser(member));
         return member;
+    }
+
+    /**
+     * Submits a join request and verifies its persisted status and associations.
+     */
+    private FamilyMembership insertTestingPendingRequest(Family family, User applicant) {
+        User admin = family.getFamilyAdmin();
+        assertTrue("insertTestingPendingRequest: applicant should have no pending request for this family",
+                membershipService.getPendingRequests(admin).stream()
+                        .noneMatch(request -> applicant.equals(request.getUser())));
+
+        boolean result = membershipService.requestToJoinFamily(applicant, family.getFamilyID());
+        assertTrue("insertTestingPendingRequest: should submit the request", result);
+
+        List<FamilyMembership> requests = membershipService.getPendingRequests(admin).stream()
+                .filter(request -> applicant.equals(request.getUser()))
+                .toList();
+        assertEquals("insertTestingPendingRequest: should find one request for the applicant", 1, requests.size());
+        FamilyMembership request = requests.getFirst();
+        assertNotNull("insertTestingPendingRequest: request should have an ID", request.getMembershipID());
+        assertEquals("insertTestingPendingRequest: should save the expected family", family, request.getFamily());
+        assertEquals("insertTestingPendingRequest: should save the expected applicant", applicant, request.getUser());
+        assertEquals("insertTestingPendingRequest: should save pending status", "PENDING", request.getStatus());
+        return request;
+    }
+
+    /**
+     * Counts family rows, including any family without a membership.
+     */
+    private long countFamilies() {
+        return entityManager.createQuery("select count(family) from Family family", Long.class)
+                .getSingleResult();
+    }
+
+    /**
+     * Counts memberships in every status, including pending and rejected requests.
+     */
+    private long countMemberships(Long familyID) {
+        return entityManager.createQuery("""
+                        select count(membership) from FamilyMembership membership
+                        where membership.family.familyID = :familyID
+                        """, Long.class)
+                .setParameter("familyID", familyID)
+                .getSingleResult();
     }
 }

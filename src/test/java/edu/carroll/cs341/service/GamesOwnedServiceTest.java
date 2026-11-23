@@ -5,9 +5,8 @@ import edu.carroll.cs341.jpa.model.FamilyMembership;
 import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.GameOwned;
 import edu.carroll.cs341.jpa.model.User;
-import edu.carroll.cs341.jpa.repo.FamiliesRepository;
-import edu.carroll.cs341.jpa.repo.FamilyMembershipRepository;
-import edu.carroll.cs341.jpa.repo.GamesRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +19,12 @@ import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * Tests the {@link GamesOwnedService} methods responsible for managing users'
- * game collections and retrieving owned games.
- *
- * <p>Each test creates only the user and game fixtures it needs, then verifies
- * the expected results for valid and invalid inputs, including null values,
- * nonexistent games, invalid ownership IDs, and attempts to remove games
- * belonging to another user.</p>
+ * game collections and retrieving the games owned by a family.
  *
  * <p>The {@link SpringBootTest} annotation loads the Spring application
- * context so that the service and repository can be tested using their
- * configured dependencies. The {@link Transactional} annotation allows
- * database operations performed during each test to participate in a
- * transaction that is normally rolled back after the test completes.</p>
- *
- * <p>ChatGPT assisted with Javadoc documentation; code reviewed by author.
- * No code generated.</p>
+ * context so that the services use their configured dependencies. The
+ * {@link Transactional} annotation rolls back database changes after each
+ * test.</p>
  *
  * @author Max Montowski
  */
@@ -51,13 +41,17 @@ public class GamesOwnedServiceTest {
     private UserService userService;
 
     @Autowired
-    private GamesRepository gamesRepo;
+    private GamesService gamesService;
 
     @Autowired
-    private FamiliesRepository familiesRepo;
+    private FamilyService familyService;
 
     @Autowired
-    private FamilyMembershipRepository membershipRepo;
+    private FamilyMembershipService membershipService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
     /*
      * = = = = = = = = = = =
      * Get Games Owned Tests
@@ -70,15 +64,37 @@ public class GamesOwnedServiceTest {
     @Test
     public void getGamesOwnedByUsernameReturnsListTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
-        gamesOwnedService.addGameToCollection(user, game.getGameID(), null);
+        Game game = insertTestingPublicGame("Owned Test Game");
+        insertTestingOwnedGame(user, game, null);
 
         List<GameOwned> result = gamesOwnedService.getGamesOwnedByUsername(user);
 
         assertNotNull("getGamesOwnedByUsernameReturnsListTest: result should not be null", result);
-        assertEquals("getGamesOwnedByUsernameReturnsListTest: result should contain one game", 1, result.size());
-        assertEquals("getGamesOwnedByUsernameReturnsListTest: result should contain the user's game",
-                game, result.getFirst().getGame());
+        int gameCount = result.size();
+        assertEquals("getGamesOwnedByUsernameReturnsListTest: result should contain one game", 1, gameCount);
+        GameOwned firstCopy = result.getFirst();
+        Game ownedGame = firstCopy.getGame();
+        assertEquals("getGamesOwnedByUsernameReturnsListTest: result should contain the user's game", game, ownedGame);
+
+        // Two owned copies, one per user
+        User otherUser = insertTestingUser("othercollector");
+        insertTestingOwnedGame(otherUser, game, null);
+
+        result = gamesOwnedService.getGamesOwnedByUsername(user);
+        gameCount = result.size();
+        assertEquals("getGamesOwnedByUsernameReturnsListTest: first user should still see one copy", 1, gameCount);
+        Long firstCopyID = result.getFirst().getGameOwnedID();
+        assertEquals("getGamesOwnedByUsernameReturnsListTest: first user should still see the original copy",
+                firstCopy.getGameOwnedID(), firstCopyID);
+
+        result = gamesOwnedService.getGamesOwnedByUsername(otherUser);
+        gameCount = result.size();
+        assertEquals("getGamesOwnedByUsernameReturnsListTest: second user should see one copy", 1, gameCount);
+        GameOwned secondCopy = result.getFirst();
+        ownedGame = secondCopy.getGame();
+        assertEquals("getGamesOwnedByUsernameReturnsListTest: second copy should point to the same game", game, ownedGame);
+        boolean sameCopy = firstCopyID.equals(secondCopy.getGameOwnedID());
+        assertFalse("getGamesOwnedByUsernameReturnsListTest: the copies should have different IDs", sameCopy);
     }
 
     /**
@@ -91,7 +107,8 @@ public class GamesOwnedServiceTest {
 
         List<GameOwned> result = gamesOwnedService.getGamesOwnedByUsername(user);
 
-        assertTrue("getGamesOwnedByUsernameEmptyListTest: result should be empty", result.isEmpty());
+        var emptyResult = result.isEmpty();
+        assertTrue("getGamesOwnedByUsernameEmptyListTest: result should be empty", emptyResult);
     }
 
     /**
@@ -102,7 +119,8 @@ public class GamesOwnedServiceTest {
         List<GameOwned> result = gamesOwnedService.getGamesOwnedByUsername(null);
 
         assertNotNull("getGamesOwnedByUsernameNullUserTest: result should not be null", result);
-        assertTrue("getGamesOwnedByUsernameNullUserTest: result should be empty", result.isEmpty());
+        var emptyResult = result.isEmpty();
+        assertTrue("getGamesOwnedByUsernameNullUserTest: result should be empty", emptyResult);
     }
 
     /*
@@ -117,12 +135,17 @@ public class GamesOwnedServiceTest {
     @Test
     public void addGameToCollectionSuccessTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingPublicGame("Owned Test Game");
 
         boolean result = gamesOwnedService.addGameToCollection(user, game.getGameID(), 2020);
         assertTrue("addGameToCollectionSuccessTest: should add the game successfully", result);
         List<GameOwned> ownedGames = gamesOwnedService.getGamesOwnedByUsername(user);
-        assertEquals("addGameToCollectionSuccessTest: user should own one game", 1, ownedGames.size());
+        var resultSize = ownedGames.size();
+        assertEquals("addGameToCollectionSuccessTest: user should own one game", 1, resultSize);
+        assertEquals("addGameToCollectionSuccessTest: should link the public game",
+                game.getGameID(), ownedGames.getFirst().getGame().getGameID());
+        assertEquals("addGameToCollectionSuccessTest: ownership should belong to the requesting user",
+                user, ownedGames.getFirst().getUser());
         assertEquals("addGameToCollectionSuccessTest: production year should match",
                 2020, ownedGames.getFirst().getYearProduced());
     }
@@ -133,12 +156,13 @@ public class GamesOwnedServiceTest {
     @Test
     public void addGameToCollectionNullYearTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.addGameToCollection(user, game.getGameID(), null);
         assertTrue("addGameToCollectionNullYearTest: should allow a null production year", result);
         List<GameOwned> ownedGames = gamesOwnedService.getGamesOwnedByUsername(user);
-        assertEquals("addGameToCollectionNullYearTest: user should own one game", 1, ownedGames.size());
+        var resultSize = ownedGames.size();
+        assertEquals("addGameToCollectionNullYearTest: user should own one game", 1, resultSize);
         assertNull("addGameToCollectionNullYearTest: production year should be null",
                 ownedGames.getFirst().getYearProduced());
     }
@@ -148,11 +172,14 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionNullUserTest() {
-        Game game = insertTestingGame();
+        User user = insertTestingUser();
+        Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.addGameToCollection(null, game.getGameID(), 2020);
 
         assertFalse("addGameToCollectionNullUserTest: should fail with a null user", result);
+        assertTrue("addGameToCollectionNullUserTest: should leave the collection empty",
+                gamesOwnedService.getGamesOwnedByUsername(user).isEmpty());
     }
 
     /**
@@ -179,6 +206,99 @@ public class GamesOwnedServiceTest {
         assertFalse("addGameToCollectionNonexistentGameTest: should fail with a nonexistent game", result);
     }
 
+    /**
+     * Verifies that production years below -2000 are rejected.
+     */
+    @Test
+    public void addGameToCollectionYearTooEarlyTest() {
+        User user = insertTestingUser();
+        Game game = insertTestingGame(user, "Owned Test Game");
+
+        boolean result = gamesOwnedService.addGameToCollection(
+                user, game.getGameID(), -2001);
+
+        assertFalse("addGameToCollectionYearTooEarlyTest: should reject an early year",
+                result);
+        assertTrue("addGameToCollectionYearTooEarlyTest: should leave the collection empty",
+                gamesOwnedService.getGamesOwnedByUsername(user).isEmpty());
+    }
+
+    /**
+     * Verifies that production years more than two years ahead are rejected.
+     */
+    @Test
+    public void addGameToCollectionYearTooLateTest() {
+        User user = insertTestingUser();
+        Game game = insertTestingGame(user, "Owned Test Game");
+
+        boolean result = gamesOwnedService.addGameToCollection(
+                user, game.getGameID(), Year.now().getValue() + 3);
+
+        assertFalse("addGameToCollectionYearTooLateTest: should reject a future year",
+                result);
+        assertTrue("addGameToCollectionYearTooLateTest: should leave the collection empty",
+                gamesOwnedService.getGamesOwnedByUsername(user).isEmpty());
+    }
+
+    /**
+     * Verifies that the earliest allowed production year is accepted.
+     */
+    @Test
+    public void addGameToCollectionMinimumYearTest() {
+        User user = insertTestingUser();
+        Game game = insertTestingGame(user, "Owned Test Game");
+
+        boolean result = gamesOwnedService.addGameToCollection(
+                user, game.getGameID(), -2000);
+
+        assertTrue("addGameToCollectionMinimumYearTest: should accept -2000", result);
+        assertEquals("addGameToCollectionMinimumYearTest: should save the year",
+                Integer.valueOf(-2000),
+                gamesOwnedService.getGamesOwnedByUsername(user)
+                        .getFirst().getYearProduced());
+    }
+
+    /**
+     * Verifies that a production year two years ahead is accepted.
+     */
+    @Test
+    public void addGameToCollectionMaximumYearTest() {
+        User user = insertTestingUser();
+        Game game = insertTestingGame(user, "Owned Test Game");
+        int maximumYear = Year.now().getValue() + 2;
+
+        boolean result = gamesOwnedService.addGameToCollection(
+                user, game.getGameID(), maximumYear);
+
+        assertTrue("addGameToCollectionMaximumYearTest: should accept the maximum year",
+                result);
+        assertEquals("addGameToCollectionMaximumYearTest: should save the year",
+                Integer.valueOf(maximumYear),
+                gamesOwnedService.getGamesOwnedByUsername(user)
+                        .getFirst().getYearProduced());
+    }
+
+    /**
+     * Verifies that a user can own multiple copies of the same game.
+     */
+    @Test
+    public void addGameToCollectionMultipleCopiesTest() {
+        User user = insertTestingUser();
+        Game game = insertTestingGame(user, "Owned Test Game");
+
+        boolean firstResult = gamesOwnedService.addGameToCollection(
+                user, game.getGameID(), 2020);
+        boolean secondResult = gamesOwnedService.addGameToCollection(
+                user, game.getGameID(), 2021);
+
+        assertTrue("addGameToCollectionMultipleCopiesTest: should add the first copy",
+                firstResult);
+        assertTrue("addGameToCollectionMultipleCopiesTest: should add the second copy",
+                secondResult);
+        assertEquals("addGameToCollectionMultipleCopiesTest: should save two records",
+                2, gamesOwnedService.getGamesOwnedByUsername(user).size());
+    }
+
     /*
      * = = = = = = = = = = =
      * Remove Game from Collection Tests
@@ -191,10 +311,11 @@ public class GamesOwnedServiceTest {
     @Test
     public void removeGameFromCollectionSuccessTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
-        gamesOwnedService.addGameToCollection(user, game.getGameID(), 2020);
+        Game game = insertTestingGame(user, "Owned Test Game");
+        insertTestingOwnedGame(user, game, 2020);
         List<GameOwned> ownedGames = gamesOwnedService.getGamesOwnedByUsername(user);
-        assertEquals("removeGameFromCollectionSuccessTest: user should own one game", 1, ownedGames.size());
+        var resultSize = ownedGames.size();
+        assertEquals("removeGameFromCollectionSuccessTest: user should own one game", 1, resultSize);
         Long gameOwnedID = ownedGames.getFirst().getGameOwnedID();
 
         boolean result = gamesOwnedService.removeGameFromCollection(user, gameOwnedID);
@@ -209,9 +330,18 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void removeGameFromCollectionNullUserTest() {
-        boolean result = gamesOwnedService.removeGameFromCollection(null, 1L);
+        // No owned games in the database
+        boolean result = gamesOwnedService.removeGameFromCollection(null, -1L);
+        assertFalse("removeGameFromCollectionNullUserTest: should fail with no owned games", result);
 
-        assertFalse("removeGameFromCollectionNullUserTest: should fail with a null user", result);
+        // One owned game in the database
+        User user = insertTestingUser();
+        Game game = insertTestingGame(user, "Owned Test Game");
+        GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
+        result = gamesOwnedService.removeGameFromCollection(null, ownedGame.getGameOwnedID());
+        assertFalse("removeGameFromCollectionNullUserTest: should fail even when the owned game exists", result);
+        assertEquals("removeGameFromCollectionNullUserTest: should preserve the user's copy",
+                ownedGame, gamesOwnedService.getGameOwnedByID(user, ownedGame.getGameOwnedID()));
     }
 
     /**
@@ -244,11 +374,12 @@ public class GamesOwnedServiceTest {
     @Test
     public void removeGameFromCollectionWrongUserTest() {
         User user = insertTestingUser();
-        User otherUser = userService.newUser("ownedtestuser2", password);
-        Game game = insertTestingGame();
-        gamesOwnedService.addGameToCollection(user, game.getGameID(), 2020);
+        User otherUser = insertTestingUser("ownedtestuser2");
+        Game game = insertTestingGame(user, "Owned Test Game");
+        insertTestingOwnedGame(user, game, 2020);
         List<GameOwned> ownedGames = gamesOwnedService.getGamesOwnedByUsername(user);
-        assertEquals("removeGameFromCollectionWrongUserTest: user should own one game", 1, ownedGames.size());
+        var resultSize = ownedGames.size();
+        assertEquals("removeGameFromCollectionWrongUserTest: user should own one game", 1, resultSize);
         Long gameOwnedID = ownedGames.getFirst().getGameOwnedID();
 
         boolean result = gamesOwnedService.removeGameFromCollection(otherUser, gameOwnedID);
@@ -257,105 +388,6 @@ public class GamesOwnedServiceTest {
                 result);
         assertEquals("removeGameFromCollectionWrongUserTest: original owner should still own the game",
                 1, gamesOwnedService.getGamesOwnedByUsername(user).size());
-    }
-
-    /*
-     * = = = = = = = = = = =
-     * Additional Add Game Tests
-     * = = = = = = = = = = =
-     */
-
-    /**
-     * Verifies that production years below -2000 are rejected.
-     */
-    @Test
-    public void addGameToCollectionYearTooEarlyTest() {
-        User user = insertTestingUser();
-        Game game = insertTestingGame();
-
-        boolean result = gamesOwnedService.addGameToCollection(
-                user, game.getGameID(), -2001);
-
-        assertFalse("addGameToCollectionYearTooEarlyTest: should reject an early year",
-                result);
-        assertTrue("addGameToCollectionYearTooEarlyTest: should leave the collection empty",
-                gamesOwnedService.getGamesOwnedByUsername(user).isEmpty());
-    }
-
-    /**
-     * Verifies that production years more than two years ahead are rejected.
-     */
-    @Test
-    public void addGameToCollectionYearTooLateTest() {
-        User user = insertTestingUser();
-        Game game = insertTestingGame();
-
-        boolean result = gamesOwnedService.addGameToCollection(
-                user, game.getGameID(), Year.now().getValue() + 3);
-
-        assertFalse("addGameToCollectionYearTooLateTest: should reject a future year",
-                result);
-        assertTrue("addGameToCollectionYearTooLateTest: should leave the collection empty",
-                gamesOwnedService.getGamesOwnedByUsername(user).isEmpty());
-    }
-
-    /**
-     * Verifies that the earliest allowed production year is accepted.
-     */
-    @Test
-    public void addGameToCollectionMinimumYearTest() {
-        User user = insertTestingUser();
-        Game game = insertTestingGame();
-
-        boolean result = gamesOwnedService.addGameToCollection(
-                user, game.getGameID(), -2000);
-
-        assertTrue("addGameToCollectionMinimumYearTest: should accept -2000", result);
-        assertEquals("addGameToCollectionMinimumYearTest: should save the year",
-                Integer.valueOf(-2000),
-                gamesOwnedService.getGamesOwnedByUsername(user)
-                        .getFirst().getYearProduced());
-    }
-
-    /**
-     * Verifies that a production year two years ahead is accepted.
-     */
-    @Test
-    public void addGameToCollectionMaximumYearTest() {
-        User user = insertTestingUser();
-        Game game = insertTestingGame();
-        int maximumYear = Year.now().getValue() + 2;
-
-        boolean result = gamesOwnedService.addGameToCollection(
-                user, game.getGameID(), maximumYear);
-
-        assertTrue("addGameToCollectionMaximumYearTest: should accept the maximum year",
-                result);
-        assertEquals("addGameToCollectionMaximumYearTest: should save the year",
-                Integer.valueOf(maximumYear),
-                gamesOwnedService.getGamesOwnedByUsername(user)
-                        .getFirst().getYearProduced());
-    }
-
-    /**
-     * Verifies that a user can own multiple copies of the same game.
-     */
-    @Test
-    public void addGameToCollectionMultipleCopiesTest() {
-        User user = insertTestingUser();
-        Game game = insertTestingGame();
-
-        boolean firstResult = gamesOwnedService.addGameToCollection(
-                user, game.getGameID(), 2020);
-        boolean secondResult = gamesOwnedService.addGameToCollection(
-                user, game.getGameID(), 2021);
-
-        assertTrue("addGameToCollectionMultipleCopiesTest: should add the first copy",
-                firstResult);
-        assertTrue("addGameToCollectionMultipleCopiesTest: should add the second copy",
-                secondResult);
-        assertEquals("addGameToCollectionMultipleCopiesTest: should save two records",
-                2, gamesOwnedService.getGamesOwnedByUsername(user).size());
     }
 
     /*
@@ -370,7 +402,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void getGameOwnedByIDSuccessTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
         GameOwned result = gamesOwnedService.getGameOwnedByID(
@@ -378,8 +410,9 @@ public class GamesOwnedServiceTest {
 
         assertNotNull("getGameOwnedByIDSuccessTest: should find the ownership record",
                 result);
+        var actualGameOwnedID = result.getGameOwnedID();
         assertEquals("getGameOwnedByIDSuccessTest: should return the matching record",
-                ownedGame.getGameOwnedID(), result.getGameOwnedID());
+                ownedGame.getGameOwnedID(), actualGameOwnedID);
         assertEquals("getGameOwnedByIDSuccessTest: should return the correct game",
                 game.getGameID(), result.getGame().getGameID());
     }
@@ -391,7 +424,7 @@ public class GamesOwnedServiceTest {
     public void getGameOwnedByIDNullUserTest() {
         User user = insertTestingUser();
         GameOwned ownedGame = insertTestingOwnedGame(
-                user, insertTestingGame(), 2020);
+                user, insertTestingGame(user, "Owned Test Game"), 2020);
 
         GameOwned result = gamesOwnedService.getGameOwnedByID(
                 null, ownedGame.getGameOwnedID());
@@ -429,10 +462,9 @@ public class GamesOwnedServiceTest {
     @Test
     public void getGameOwnedByIDWrongUserTest() {
         User user = insertTestingUser();
-        User otherUser = userService.newUser(
-                "ownedtestuser2", password);
+        User otherUser = insertTestingUser("ownedtestuser2");
         GameOwned ownedGame = insertTestingOwnedGame(
-                user, insertTestingGame(), 2020);
+                user, insertTestingGame(user, "Owned Test Game"), 2020);
 
         GameOwned result = gamesOwnedService.getGameOwnedByID(
                 otherUser, ownedGame.getGameOwnedID());
@@ -454,10 +486,9 @@ public class GamesOwnedServiceTest {
     @Test
     public void getNumberOfReferencesSuccessTest() {
         User user = insertTestingUser();
-        User otherUser = userService.newUser(
-                "ownedtestuser2", password);
-        Game game = insertTestingGame();
-        Game otherGame = gamesRepo.save(new Game("Other Game"));
+        User otherUser = insertTestingUser("ownedtestuser2");
+        Game game = insertTestingGame(user, "Owned Test Game");
+        Game otherGame = insertTestingGame(user, "Other Game");
 
         insertTestingOwnedGame(user, game, 2020);
         insertTestingOwnedGame(user, game, 2021);
@@ -477,7 +508,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void getNumberOfReferencesNoReferencesTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
 
         long result = gamesOwnedService.getNumberOfReferences(
                 game.getGameID(), user);
@@ -491,7 +522,8 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getNumberOfReferencesNullUserTest() {
-        Game game = insertTestingGame();
+        User user = insertTestingUser();
+        Game game = insertTestingGame(user, "Owned Test Game");
 
         long result = gamesOwnedService.getNumberOfReferences(
                 game.getGameID(), null);
@@ -539,11 +571,10 @@ public class GamesOwnedServiceTest {
     @Test
     public void updateGameReferencesSuccessTest() {
         User user = insertTestingUser();
-        User otherUser = userService.newUser(
-                "ownedtestuser2", password);
-        Game originalGame = insertTestingGame();
-        Game replacementGame = gamesRepo.save(new Game("Replacement Game"));
-        Game unrelatedGame = gamesRepo.save(new Game("Unrelated Game"));
+        User otherUser = insertTestingUser("ownedtestuser2");
+        Game originalGame = insertTestingGame(user, "Owned Test Game");
+        Game replacementGame = insertTestingGame(user, "Replacement Game");
+        Game unrelatedGame = insertTestingGame(user, "Unrelated Game");
 
         GameOwned firstCopy = insertTestingOwnedGame(user, originalGame, 2020);
         GameOwned secondCopy = insertTestingOwnedGame(user, originalGame, 2021);
@@ -564,10 +595,12 @@ public class GamesOwnedServiceTest {
                 replacementGame.getGameID(), updatedFirst.getGame().getGameID());
         assertEquals("updateGameReferencesSuccessTest: should update the second copy",
                 replacementGame.getGameID(), updatedSecond.getGame().getGameID());
+        var actualYearProduced = updatedFirst.getYearProduced();
         assertEquals("updateGameReferencesSuccessTest: should preserve the first year",
-                Integer.valueOf(2020), updatedFirst.getYearProduced());
+                Integer.valueOf(2020), actualYearProduced);
+        var actualYearProduced2 = updatedSecond.getYearProduced();
         assertEquals("updateGameReferencesSuccessTest: should preserve the second year",
-                Integer.valueOf(2021), updatedSecond.getYearProduced());
+                Integer.valueOf(2021), actualYearProduced2);
         assertEquals("updateGameReferencesSuccessTest: should preserve unrelated games",
                 unrelatedGame.getGameID(),
                 gamesOwnedService.getGameOwnedByID(user, unrelatedCopy.getGameOwnedID())
@@ -584,8 +617,8 @@ public class GamesOwnedServiceTest {
     @Test
     public void updateGameReferencesNoReferencesTest() {
         User user = insertTestingUser();
-        Game originalGame = insertTestingGame();
-        Game replacementGame = gamesRepo.save(new Game("Replacement Game"));
+        Game originalGame = insertTestingGame(user, "Owned Test Game");
+        Game replacementGame = insertTestingGame(user, "Replacement Game");
 
         boolean result = gamesOwnedService.updateGameReferences(
                 originalGame.getGameID(), user, replacementGame);
@@ -602,7 +635,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void updateGameReferencesNullGameIDTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.updateGameReferences(null, user, game);
 
@@ -615,7 +648,8 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void updateGameReferencesNullUserTest() {
-        Game game = insertTestingGame();
+        User user = insertTestingUser();
+        Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.updateGameReferences(
                 game.getGameID(), null, game);
@@ -631,7 +665,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void updateGameReferencesNullNewGameTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
         boolean result = gamesOwnedService.updateGameReferences(
@@ -657,8 +691,8 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionSuccessTest() {
         User user = insertTestingUser();
-        Game originalGame = insertTestingGame();
-        Game replacementGame = gamesRepo.save(new Game("Replacement Game"));
+        Game originalGame = insertTestingGame(user, "Owned Test Game");
+        Game replacementGame = insertTestingGame(user, "Replacement Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, originalGame, 2020);
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -671,10 +705,12 @@ public class GamesOwnedServiceTest {
 
         assertEquals("editGameInCollectionSuccessTest: should update the game",
                 replacementGame.getGameID(), updatedGame.getGame().getGameID());
+        var actualYearProduced = updatedGame.getYearProduced();
         assertEquals("editGameInCollectionSuccessTest: should update the year",
-                Integer.valueOf(2021), updatedGame.getYearProduced());
+                Integer.valueOf(2021), actualYearProduced);
+        var actualUser = updatedGame.getUser();
         assertEquals("editGameInCollectionSuccessTest: should preserve the owner",
-                user, updatedGame.getUser());
+                user, actualUser);
         assertEquals("editGameInCollectionSuccessTest: should preserve the record count",
                 1, gamesOwnedService.getGamesOwnedByUsername(user).size());
     }
@@ -685,7 +721,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionNullYearTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -703,7 +739,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionNullUserTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -719,7 +755,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionNullIDTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.editGameInCollection(
                 user, null, game, 2021);
@@ -734,7 +770,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionNullGameTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -742,8 +778,9 @@ public class GamesOwnedServiceTest {
 
         assertFalse("editGameInCollectionNullGameTest: should reject a null game",
                 result);
+        var actualYearProduced = ownedGame.getYearProduced();
         assertEquals("editGameInCollectionNullGameTest: should preserve the year",
-                Integer.valueOf(2020), ownedGame.getYearProduced());
+                Integer.valueOf(2020), actualYearProduced);
     }
 
     /**
@@ -752,7 +789,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionNonexistentIDTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.editGameInCollection(
                 user, -1L, game, 2021);
@@ -767,10 +804,9 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionWrongUserTest() {
         User user = insertTestingUser();
-        User otherUser = userService.newUser(
-                "ownedtestuser2", password);
-        Game originalGame = insertTestingGame();
-        Game replacementGame = gamesRepo.save(new Game("Replacement Game"));
+        User otherUser = insertTestingUser("ownedtestuser2");
+        Game originalGame = insertTestingGame(user, "Owned Test Game");
+        Game replacementGame = insertTestingGame(user, "Replacement Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, originalGame, 2020);
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -784,8 +820,9 @@ public class GamesOwnedServiceTest {
 
         assertEquals("editGameInCollectionWrongUserTest: should preserve the game",
                 originalGame.getGameID(), unchangedGame.getGame().getGameID());
+        var actualYearProduced = unchangedGame.getYearProduced();
         assertEquals("editGameInCollectionWrongUserTest: should preserve the year",
-                Integer.valueOf(2020), unchangedGame.getYearProduced());
+                Integer.valueOf(2020), actualYearProduced);
     }
 
     /**
@@ -794,8 +831,8 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionYearTooEarlyTest() {
         User user = insertTestingUser();
-        Game originalGame = insertTestingGame();
-        Game replacementGame = gamesRepo.save(new Game("Replacement Game"));
+        Game originalGame = insertTestingGame(user, "Owned Test Game");
+        Game replacementGame = insertTestingGame(user, "Replacement Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, originalGame, 2020);
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -809,8 +846,9 @@ public class GamesOwnedServiceTest {
 
         assertEquals("editGameInCollectionYearTooEarlyTest: should preserve the game",
                 originalGame.getGameID(), unchangedGame.getGame().getGameID());
+        var actualYearProduced = unchangedGame.getYearProduced();
         assertEquals("editGameInCollectionYearTooEarlyTest: should preserve the year",
-                Integer.valueOf(2020), unchangedGame.getYearProduced());
+                Integer.valueOf(2020), actualYearProduced);
     }
 
     /**
@@ -819,8 +857,8 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionYearTooLateTest() {
         User user = insertTestingUser();
-        Game originalGame = insertTestingGame();
-        Game replacementGame = gamesRepo.save(new Game("Replacement Game"));
+        Game originalGame = insertTestingGame(user, "Owned Test Game");
+        Game replacementGame = insertTestingGame(user, "Replacement Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, originalGame, 2020);
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -835,8 +873,9 @@ public class GamesOwnedServiceTest {
 
         assertEquals("editGameInCollectionYearTooLateTest: should preserve the game",
                 originalGame.getGameID(), unchangedGame.getGame().getGameID());
+        var actualYearProduced = unchangedGame.getYearProduced();
         assertEquals("editGameInCollectionYearTooLateTest: should preserve the year",
-                Integer.valueOf(2020), unchangedGame.getYearProduced());
+                Integer.valueOf(2020), actualYearProduced);
     }
 
     /**
@@ -845,7 +884,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionMinimumYearTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -864,7 +903,7 @@ public class GamesOwnedServiceTest {
     @Test
     public void editGameInCollectionMaximumYearTest() {
         User user = insertTestingUser();
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
         int maximumYear = Year.now().getValue() + 2;
 
@@ -881,7 +920,7 @@ public class GamesOwnedServiceTest {
 
     /*
      * = = = = = = = = = = =
-     * Additional Family Games Tests
+     * Get Games Owned By Family Tests
      * = = = = = = = = = = =
      */
 
@@ -891,15 +930,16 @@ public class GamesOwnedServiceTest {
     @Test
     public void getGamesOwnedByFamilyNoMembersTest() {
         User user = insertTestingUser();
-        Family family = familiesRepo.save(new Family("Test Family", user));
-        insertTestingOwnedGame(user, insertTestingGame(), 2020);
+        Family family = insertTestingFamilyWithoutMembers(user);
+        insertTestingOwnedGame(user, insertTestingGame(user, "Owned Test Game"), 2020);
 
         List<GameOwned> result = gamesOwnedService.getGamesOwnedByFamily(family);
 
         assertNotNull("getGamesOwnedByFamilyNoMembersTest: should return a list",
                 result);
+        var emptyResult = result.isEmpty();
         assertTrue("getGamesOwnedByFamilyNoMembersTest: should return an empty list",
-                result.isEmpty());
+                emptyResult);
     }
 
     /**
@@ -909,65 +949,54 @@ public class GamesOwnedServiceTest {
     @Test
     public void getGamesOwnedByFamilyAcceptedMembersTest() {
         User user = insertTestingUser();
-        User secondMember = userService.newUser(
-                "ownedtestuser2", password);
-        User pendingMember = userService.newUser(
-                "ownedtestuser3", password);
-        User outsider = userService.newUser(
-                "ownedtestuser4", password);
+        User secondMember = insertTestingUser("ownedtestuser2");
+        User pendingMember = insertTestingUser("ownedtestuser3");
+        User outsider = insertTestingUser("ownedtestuser4");
 
-        Family family = familiesRepo.save(new Family("Test Family", user));
-        Family otherFamily = familiesRepo.save(new Family("Other Family", outsider));
+        Family family = insertTestingFamily(user, "Test Family");
+        insertTestingFamily(outsider, "Other Family");
+        FamilyMembership memberRequest = insertTestingPendingRequest(family, secondMember);
+        boolean accepted = membershipService.acceptRequest(user, memberRequest);
+        assertTrue("getGamesOwnedByFamilyAcceptedMembersTest: should accept the second member", accepted);
+        assertEquals("getGamesOwnedByFamilyAcceptedMembersTest: new member should belong to the first family",
+                family, membershipService.getFamilyForUser(secondMember));
+        insertTestingPendingRequest(family, pendingMember);
 
-        membershipRepo.save(new FamilyMembership(family, user, "ACCEPTED"));
-        membershipRepo.save(new FamilyMembership(family, secondMember, "ACCEPTED"));
-        membershipRepo.save(new FamilyMembership(family, pendingMember, "PENDING"));
-        membershipRepo.save(new FamilyMembership(otherFamily, outsider, "ACCEPTED"));
+        User rejectedMember = insertTestingUser("rejectedcollector");
+        FamilyMembership rejectedRequest = insertTestingPendingRequest(family, rejectedMember);
+        boolean rejected = membershipService.rejectRequest(user, rejectedRequest);
+        assertTrue("getGamesOwnedByFamilyAcceptedMembersTest: should reject the other applicant", rejected);
 
-        Game game = insertTestingGame();
+        Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned firstCopy = insertTestingOwnedGame(user, game, 2020);
         GameOwned secondCopy = insertTestingOwnedGame(user, game, 2021);
         GameOwned memberCopy = insertTestingOwnedGame(secondMember, game, 2022);
         GameOwned pendingCopy = insertTestingOwnedGame(pendingMember, game, 2020);
         GameOwned outsiderCopy = insertTestingOwnedGame(outsider, game, 2020);
+        GameOwned rejectedCopy = insertTestingOwnedGame(rejectedMember, game, 2020);
 
         List<GameOwned> result = gamesOwnedService.getGamesOwnedByFamily(family);
 
+        var resultSize = result.size();
         assertEquals("getGamesOwnedByFamilyAcceptedMembersTest: should return three records",
-                3, result.size());
+                3, resultSize);
+        var containsExpectedItem = result.contains(firstCopy);
         assertTrue("getGamesOwnedByFamilyAcceptedMembersTest: should include the first copy",
-                result.contains(firstCopy));
+                containsExpectedItem);
+        var containsExpectedItem2 = result.contains(secondCopy);
         assertTrue("getGamesOwnedByFamilyAcceptedMembersTest: should include the second copy",
-                result.contains(secondCopy));
+                containsExpectedItem2);
+        var containsExpectedItem3 = result.contains(memberCopy);
         assertTrue("getGamesOwnedByFamilyAcceptedMembersTest: should include the other accepted member",
-                result.contains(memberCopy));
+                containsExpectedItem3);
+        var containsExpectedItem4 = result.contains(pendingCopy);
         assertFalse("getGamesOwnedByFamilyAcceptedMembersTest: should exclude pending members",
-                result.contains(pendingCopy));
+                containsExpectedItem4);
+        var containsExpectedItem5 = result.contains(outsiderCopy);
         assertFalse("getGamesOwnedByFamilyAcceptedMembersTest: should exclude another family's member",
-                result.contains(outsiderCopy));
-    }
-
-    /**
-     * Adds one ownership record and retrieves it using its generated ID.
-     */
-    private GameOwned insertTestingOwnedGame(User user, Game game, Integer yearProduced) {
-        List<GameOwned> previousGames =
-                gamesOwnedService.getGamesOwnedByUsername(user);
-        List<Long> previousIDs = previousGames.stream()
-                .map(GameOwned::getGameOwnedID)
-                .toList();
-
-        boolean result = gamesOwnedService.addGameToCollection(
-                user, game.getGameID(), yearProduced);
-
-        assertTrue("insertTestingOwnedGame: should add the test ownership record",
-                result);
-
-        return gamesOwnedService.getGamesOwnedByUsername(user).stream()
-                .filter(ownedGame -> !previousIDs.contains(ownedGame.getGameOwnedID()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(
-                        "insertTestingOwnedGame: could not find the new ownership record"));
+                containsExpectedItem5);
+        assertFalse("getGamesOwnedByFamilyAcceptedMembersTest: should exclude rejected applicants",
+                result.contains(rejectedCopy));
     }
 
     /**
@@ -978,14 +1007,171 @@ public class GamesOwnedServiceTest {
         List<GameOwned> result = gamesOwnedService.getGamesOwnedByFamily(null);
 
         assertNotNull("getGamesOwnedByFamilyNullFamilyTest: result should not be null", result);
-        assertTrue("getGamesOwnedByFamilyNullFamilyTest: result should be empty", result.isEmpty());
+        var emptyResult = result.isEmpty();
+        assertTrue("getGamesOwnedByFamilyNullFamilyTest: result should be empty", emptyResult);
     }
+
+    /*
+     * = = = = = = = = = = =
+     * Test Helpers
+     * = = = = = = = = = = =
+     */
 
     private User insertTestingUser() {
-        return userService.newUser(username, password);
+        return insertTestingUser(username);
     }
 
-    private Game insertTestingGame() {
-        return gamesRepo.save(new Game("OwnedTestGame"));
+    /**
+     * Creates a test user and verifies that the saved credentials work.
+     */
+    private User insertTestingUser(String username) {
+        User user = userService.validateUser(username, password);
+        assertNull("insertTestingUser: user should not exist yet", user);
+
+        user = userService.newUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after creation", user);
+        assertNotNull("insertTestingUser: user should have an ID", user.getId());
+        assertEquals("insertTestingUser: user should have the correct username", username, user.getUsername());
+
+        User userCheck = userService.validateUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after validation", userCheck);
+        assertEquals("insertTestingUser: login should return the created user's ID", user.getId(), userCheck.getId());
+        assertEquals("insertTestingUser: login should return the expected username", username, userCheck.getUsername());
+        return userCheck;
+    }
+
+    /**
+     * Adds a catalog game and verifies that the owner can retrieve it.
+     */
+    private Game insertTestingGame(User user, String gameName) {
+        boolean result = gamesService.addGame(user, gameName, 1, 4);
+        assertTrue("insertTestingGame: should add the catalog game", result);
+
+        List<Game> games = gamesService.getAvailableGames(user).stream()
+                .filter(game -> gameName.equals(game.getGameName()))
+                .toList();
+        assertEquals("insertTestingGame: should find one game with the expected name", 1, games.size());
+        Game game = games.getFirst();
+        assertNotNull("insertTestingGame: game should have an ID", game.getGameID());
+        assertEquals("insertTestingGame: should save the user who added the game", user, game.getUserWhoAdded());
+        Game saved = gamesService.getGameByGameID(game.getGameID());
+        assertNotNull("insertTestingGame: should retrieve the game by its ID", saved);
+        assertEquals("insertTestingGame: catalog lookup should return the created game ID", game.getGameID(), saved.getGameID());
+        assertEquals("insertTestingGame: should save the minimum player count", 1, saved.getMinPlayers());
+        assertEquals("insertTestingGame: should save the maximum player count", 4, saved.getMaxPlayers());
+        assertTrue("insertTestingGame: should save a visible game", saved.getCanSee());
+        return saved;
+    }
+
+    /**
+     * Persists a public catalog game for tests that exercise shared ownership.
+     */
+    private Game insertTestingPublicGame(String gameName) {
+        Game game = new Game(gameName);
+        game.setCanSee(true);
+        entityManager.persist(game);
+        entityManager.flush();
+
+        assertNotNull("insertTestingPublicGame: public game should have an ID", game.getGameID());
+        Game saved = gamesService.getGameByGameID(game.getGameID());
+        assertNotNull("insertTestingPublicGame: should retrieve the game by its ID", saved);
+        assertEquals("insertTestingPublicGame: should save the expected name", gameName, saved.getGameName());
+        assertNull("insertTestingPublicGame: should have no user owner", saved.getUserWhoAdded());
+        assertTrue("insertTestingPublicGame: should save a visible game", saved.getCanSee());
+        return saved;
+    }
+
+    /**
+     * Adds one ownership record and validates the generated record and its details.
+     */
+    private GameOwned insertTestingOwnedGame(User user, Game game, Integer yearProduced) {
+        List<Long> previousIDs = gamesOwnedService.getGamesOwnedByUsername(user).stream()
+                .map(GameOwned::getGameOwnedID)
+                .toList();
+
+        boolean result = gamesOwnedService.addGameToCollection(user, game.getGameID(), yearProduced);
+        assertTrue("insertTestingOwnedGame: should add the test ownership record", result);
+
+        List<GameOwned> ownedGames = gamesOwnedService.getGamesOwnedByUsername(user);
+        assertEquals("insertTestingOwnedGame: collection should grow by one", previousIDs.size() + 1, ownedGames.size());
+        List<GameOwned> newGames = ownedGames.stream()
+                .filter(ownedGame -> !previousIDs.contains(ownedGame.getGameOwnedID()))
+                .toList();
+        assertEquals("insertTestingOwnedGame: should find exactly one new copy", 1, newGames.size());
+        Long ownedID = newGames.getFirst().getGameOwnedID();
+        assertNotNull("insertTestingOwnedGame: copy should have an ID", ownedID);
+
+        GameOwned ownedGame = gamesOwnedService.getGameOwnedByID(user, ownedID);
+        assertNotNull("insertTestingOwnedGame: should find the copy by its ID", ownedGame);
+        assertEquals("insertTestingOwnedGame: should return the expected ownership ID", ownedID, ownedGame.getGameOwnedID());
+        assertEquals("insertTestingOwnedGame: should save the owner", user, ownedGame.getUser());
+        assertEquals("insertTestingOwnedGame: should save the game ID", game.getGameID(), ownedGame.getGame().getGameID());
+        assertEquals("insertTestingOwnedGame: should save the production year", yearProduced, ownedGame.getYearProduced());
+        return ownedGame;
+    }
+
+    /**
+     * Creates a family and checks its administrator and initial membership.
+     */
+    private Family insertTestingFamily(User admin, String familyName) {
+        assertNull("insertTestingFamily: the administrator should start without a family",
+                membershipService.getFamilyForUser(admin));
+
+        boolean result = familyService.createFamily(admin, familyName);
+        assertTrue("insertTestingFamily: should create the family", result);
+
+        Family family = membershipService.getFamilyForUser(admin);
+        assertNotNull("insertTestingFamily: should find the created family", family);
+        assertNotNull("insertTestingFamily: family should have an ID", family.getFamilyID());
+        assertEquals("insertTestingFamily: should store the expected name", familyName, family.getFamilyName());
+        assertEquals("insertTestingFamily: should assign the administrator", admin, family.getFamilyAdmin());
+        List<FamilyMembership> memberships = membershipService.getFamilyMembers(admin);
+        assertEquals("insertTestingFamily: should create exactly one membership", 1, memberships.size());
+        assertEquals("insertTestingFamily: should accept the administrator", "ACCEPTED", memberships.getFirst().getStatus());
+        assertEquals("insertTestingFamily: membership should belong to the administrator", admin, memberships.getFirst().getUser());
+        return family;
+    }
+
+    /**
+     * Submits a join request and verifies its persisted status and associations.
+     */
+    private FamilyMembership insertTestingPendingRequest(Family family, User applicant) {
+        User admin = family.getFamilyAdmin();
+        assertTrue("insertTestingPendingRequest: applicant should have no pending request for this family",
+                membershipService.getPendingRequests(admin).stream()
+                        .noneMatch(request -> applicant.equals(request.getUser())));
+
+        boolean result = membershipService.requestToJoinFamily(applicant, family.getFamilyID());
+        assertTrue("insertTestingPendingRequest: should submit the request", result);
+
+        List<FamilyMembership> requests = membershipService.getPendingRequests(admin).stream()
+                .filter(request -> applicant.equals(request.getUser()))
+                .toList();
+        assertEquals("insertTestingPendingRequest: should find one request for the applicant", 1, requests.size());
+        FamilyMembership request = requests.getFirst();
+        assertNotNull("insertTestingPendingRequest: request should have an ID", request.getMembershipID());
+        assertEquals("insertTestingPendingRequest: should save the expected family", family, request.getFamily());
+        assertEquals("insertTestingPendingRequest: should save the expected applicant", applicant, request.getUser());
+        assertEquals("insertTestingPendingRequest: should save pending status", "PENDING", request.getStatus());
+        return request;
+    }
+
+    /**
+     * Creates a family without the initial membership normally created by the service.
+     */
+    private Family insertTestingFamilyWithoutMembers(User admin) {
+        Family family = new Family("Test Family", admin);
+        entityManager.persist(family);
+        entityManager.flush();
+
+        assertNotNull("insertTestingFamilyWithoutMembers: family should have an ID", family.getFamilyID());
+        Long count = entityManager.createQuery("""
+                        select count(membership) from FamilyMembership membership
+                        where membership.family = :family
+                        """, Long.class)
+                .setParameter("family", family)
+                .getSingleResult();
+        assertEquals("insertTestingFamilyWithoutMembers: family should have no memberships", 0L, count);
+        return family;
     }
 }

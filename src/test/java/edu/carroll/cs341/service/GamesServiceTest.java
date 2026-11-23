@@ -2,7 +2,8 @@ package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.User;
-import edu.carroll.cs341.jpa.repo.GamesRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,20 +14,13 @@ import java.util.List;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Tests the {@link GamesService} methods responsible for adding games.
- *
- * <p>Each test creates only the user and game fixtures it needs, then verifies
- * the expected results for valid and invalid inputs, including null values,
- * duplicate game names, negative player counts, and invalid player-count
- * ranges.</p>
+ * Tests the {@link GamesService} methods responsible for adding, looking up, editing,
+ * and hiding catalog games.
  *
  * <p>The {@link SpringBootTest} annotation loads the Spring application
- * context so that the service and repository can be tested using their
- * configured dependencies. The {@link Transactional} annotation allows
- * database operations performed during each test to participate in a
- * transaction that is normally rolled back after the test completes.</p>
- *
- * <p>Codex assisted with writing the test class, it was given a format and then the worked was checked by the author.</p>
+ * context so that the services use their configured dependencies. The
+ * {@link Transactional} annotation rolls back database changes after each
+ * test.</p>
  *
  * @author Max Montowski
  */
@@ -35,12 +29,9 @@ import static org.springframework.test.util.AssertionErrors.*;
 public class GamesServiceTest {
     private static final String username = "testuser";
     private static final String password = "testpass";
-    private static final String invalidName = "used";
-    private static final String invalidName2 = "used2";
     private static final String validName = "free";
     private static final Integer smaller = 1;
     private static final Integer larger = 10;
-    private static final Integer negative = -1;
 
     @Autowired
     private GamesService gamesService;
@@ -49,701 +40,165 @@ public class GamesServiceTest {
     private GamesOwnedService gamesOwnedService;
 
     @Autowired
-    private GamesRepository gameRepo;
-
-    @Autowired
     private UserService userService;
 
-    /*
-     * = = = = = = = = = = =
-     * Valid User and Game Name Tests
-     * = = = = = = = = = = =
-     */
-
-    /**
-     * Verifies that a game cannot be added when the maximum player count
-     * is negative.
-     */
-    @Test
-    public void addGameValidUserValidGameNameValidMinPlayersNegativeMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, smaller, negative);
-        assertFalse("addGameValidUserValidGameNameValidMinPlayersNegativeMaxPlayers: should reject a negative maximum player count", result);
-    }
-
-    /**
-     * Verifies that a game cannot be added when the minimum player count
-     * is negative.
-     */
-    @Test
-    public void addGameValidUserValidGameNameNegativeMinPlayersValidMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, negative, larger);
-        assertFalse("addGameValidUserValidGameNameNegativeMinPlayersValidMaxPlayers: should reject a negative minimum player count", result);
-    }
-
-    /**
-     * Verifies that a game cannot be added when the minimum player count
-     * exceeds the maximum player count.
-     */
-    @Test
-    public void addGameValidUserValidGameNameLargerMinPlayersSmallerMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, larger, smaller);
-        assertFalse("addGameValidUserValidGameNameLargerMinPlayersSmallerMaxPlayers: should reject a minimum greater than the maximum", result);
-    }
-
-    /**
-     * Verifies that a game can be added when the maximum player count is null.
-     */
-    @Test
-    public void addGameValidUserValidGameNameValidMinPlayersNullMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, smaller, null);
-        assertTrue("addGameValidUserValidGameNameValidMinPlayersNullMaxPlayers: should allow a null maximum player count", result);
-    }
-
-    /**
-     * Verifies that a game cannot be added when the minimum player count
-     * is negative and the maximum player count is null.
-     */
-    @Test
-    public void addGameValidUserValidGameNameNegativeMinPlayersNullMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, negative, null);
-        assertFalse("addGameValidUserValidGameNameNegativeMinPlayersNullMaxPlayers: should reject a negative minimum player count", result);
-    }
-
-    /**
-     * Verifies that a game can be added when the minimum player count is null.
-     */
-    @Test
-    public void addGameValidUserValidGameNameNullMinPlayersValidMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, null, smaller);
-        assertTrue("addGameValidUserValidGameNameNullMinPlayersValidMaxPlayers: should allow a null minimum player count", result);
-    }
-
-    /**
-     * Verifies that a game cannot be added when the maximum player count
-     * is negative and the minimum player count is null.
-     */
-    @Test
-    public void addGameValidUserValidGameNameNullMinPlayersNegativeMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, null, negative);
-        assertFalse("addGameValidUserValidGameNameNullMinPlayersNegativeMaxPlayers: should reject a negative maximum player count", result);
-    }
-
-    /**
-     * Verifies that a game can be added when both player counts are null.
-     */
-    @Test
-    public void addGameValidUserValidGameNameNullMinPlayersNullMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, null, null);
-        assertTrue("addGameValidUserValidGameNameNullMinPlayersNullMaxPlayers: should allow both player counts to be null", result);
-    }
-
-    /**
-     * Verifies that a game cannot be added when both player counts are negative.
-     */
-    @Test
-    public void addGameValidUserValidGameNameNegativeMinPlayersNegativeMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, negative, negative);
-        assertFalse("addGameValidUserValidGameNameNegativeMinPlayersNegativeMaxPlayers: should reject negative player counts", result);
-    }
-
-    /**
-     * Verifies that a game can be added when the minimum and maximum
-     * player counts are equal.
-     */
-    @Test
-    public void addGameValidUserValidGameNameMinPlayersEqualsMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, validName, smaller, smaller);
-        assertTrue("addGameValidUserValidGameNameMinPlayersEqualsMaxPlayers: should allow equal minimum and maximum player counts", result);
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /*
      * = = = = = = = = = = =
-     * Valid User and Existing Game Name Tests
+     * Add Game Tests
      * = = = = = = = = = = =
      */
 
     /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when the maximum player count is negative.
+     * Verifies that valid bounds, equal bounds, zero, and unspecified bounds are saved.
      */
     @Test
-    public void addGameValidUserInvalidGameNameValidMinPlayersNegativeMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, smaller, negative);
-        assertFalse("addGameValidUserInvalidGameNameValidMinPlayersNegativeMaxPlayers: should reject this duplicate-name and player-count combination", result);
+    public void addGameSuccessTest() {
+        final String test = "addGameSuccessTest";
+        User user = insertTestingUser(username);
+
+        assertAddedGame(test, user, "Regular Game", smaller, larger);
+        assertAddedGame(test, user, "Single Player Game", smaller, smaller);
+        assertAddedGame(test, user, "Zero Players Game", 0, 0);
+        assertAddedGame(test, user, "No Maximum Game", smaller, null);
+        assertAddedGame(test, user, "No Minimum Game", null, smaller);
+        assertAddedGame(test, user, "No Player Limits Game", null, null);
     }
 
     /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when the minimum player count is negative.
+     * Verifies that negative and reversed bounds are rejected before and after a game exists.
      */
     @Test
-    public void addGameValidUserInvalidGameNameNegativeMinPlayersValidMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, negative, larger);
-        assertFalse("addGameValidUserInvalidGameNameNegativeMinPlayersValidMaxPlayers: should reject this duplicate-name and player-count combination", result);
+    public void addGameInvalidPlayerCountsTest() {
+        final String test = "addGameInvalidPlayerCountsTest";
+        User user = insertTestingUser(username);
+        List<Game> initialCatalog = gamesService.getAvailableGames(user);
+
+        // No user-owned games in the catalog
+        assertAddGameRejectsInvalidPlayerCounts(test, user, validName);
+        assertEquals(test + ": invalid counts should leave the initial catalog intact",
+                initialCatalog, gamesService.getAvailableGames(user));
+
+        // One user-owned game in the catalog
+        Game existingGame = insertTestingGame("Existing Game", user);
+        assertAddGameRejectsInvalidPlayerCounts(test, user, validName);
+        List<Game> catalog = gamesService.getAvailableGames(user);
+        assertEquals(test + ": invalid counts should leave the catalog size unchanged", initialCatalog.size() + 1, catalog.size());
+        assertTrue(test + ": the existing game should still be visible", catalog.contains(existingGame));
+        assertNull(test + ": the invalid game should not be visible", findAvailableGame(user, validName));
     }
 
     /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when the minimum player count exceeds the maximum.
+     * Verifies that a visible user game cannot be added again with any player bounds.
      */
     @Test
-    public void addGameValidUserInvalidGameNameLargerMinPlayersSmallerMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, larger, smaller);
-        assertFalse("addGameValidUserInvalidGameNameLargerMinPlayersSmallerMaxPlayers: should reject this duplicate-name and player-count combination", result);
+    public void addGameExistingUserGameTest() {
+        final String test = "addGameExistingUserGameTest";
+        final String gameName = "Existing Game";
+        User user = insertTestingUser(username);
+        Game existingGame = insertTestingGame(gameName, user);
+        List<Game> initialCatalog = gamesService.getAvailableGames(user);
+
+        assertAddGameRejectsAllPlayerCounts(test, user, gameName);
+        boolean result = gamesService.addGame(user, "  EXISTING GAME  ", smaller, larger);
+        assertFalse(test + ": should reject the same name with different case and surrounding spaces", result);
+        assertEquals(test + ": the catalog should still contain the original games", initialCatalog, gamesService.getAvailableGames(user));
+        assertGameDetails(test, existingGame, gameName, user, smaller, larger, true);
     }
 
     /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when the maximum player count is null.
+     * Verifies that a user cannot add a game with an existing public name.
      */
     @Test
-    public void addGameValidUserInvalidGameNameValidMinPlayersNullMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, smaller, null);
-        assertFalse("addGameValidUserInvalidGameNameValidMinPlayersNullMaxPlayers: should reject an existing visible game name", result);
+    public void addGameExistingPublicGameTest() {
+        final String gameName = "Public Game";
+        User user = insertTestingUser(username);
+        Game publicGame = insertTestingPublicGame(gameName);
+
+        boolean result = gamesService.addGame(user, "  PUBLIC GAME  ", smaller, larger);
+        assertFalse("addGameExistingPublicGameTest: should reject a public duplicate after trimming and ignoring case", result);
+        assertEquals("addGameExistingPublicGameTest: should keep the public game visible",
+                publicGame, findAvailableGame(user, gameName));
     }
 
     /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when the minimum player count is negative and the maximum is null.
+     * Verifies that a null game name is rejected for every player-count combination.
      */
     @Test
-    public void addGameValidUserInvalidGameNameNegativeMinPlayersNullMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, negative, null);
-        assertFalse("addGameValidUserInvalidGameNameNegativeMinPlayersNullMaxPlayers: should reject this duplicate-name and player-count combination", result);
+    public void addGameNullNameTest() {
+        final String test = "addGameNullNameTest";
+        User user = insertTestingUser(username);
+        List<Game> initialCatalog = gamesService.getAvailableGames(user);
+
+        assertAddGameRejectsAllPlayerCounts(test, user, null);
+        assertEquals(test + ": should preserve the catalog", initialCatalog, gamesService.getAvailableGames(user));
     }
 
     /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when the minimum player count is null.
+     * Verifies that a null user cannot add a new, existing, or unnamed game.
      */
     @Test
-    public void addGameValidUserInvalidGameNameNullMinPlayersValidMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, null, smaller);
-        assertFalse("addGameValidUserInvalidGameNameNullMinPlayersValidMaxPlayers: should reject an existing visible game name", result);
+    public void addGameNullUserTest() {
+        final String test = "addGameNullUserTest";
+        final String publicName = "Public Game";
+        User user = insertTestingUser(username);
+        insertTestingPublicGame(publicName);
+        List<Game> initialCatalog = gamesService.getAvailableGames(user);
+
+        assertAddGameRejectsAllPlayerCounts(test, null, validName);
+        assertAddGameRejectsAllPlayerCounts(test, null, publicName);
+        assertAddGameRejectsAllPlayerCounts(test, null, null);
+        assertEquals(test + ": should preserve the catalog", initialCatalog, gamesService.getAvailableGames(user));
     }
 
     /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when the maximum player count is negative and the minimum is null.
+     * Verifies that a name containing only whitespace or no characters is rejected.
      */
     @Test
-    public void addGameValidUserInvalidGameNameNullMinPlayersNegativeMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, null, negative);
-        assertFalse("addGameValidUserInvalidGameNameNullMinPlayersNegativeMaxPlayers: should reject this duplicate-name and player-count combination", result);
+    public void addGameBlankNameTest() {
+        User user = insertTestingUser(username);
+        List<Game> initialCatalog = gamesService.getAvailableGames(user);
+
+        boolean result = gamesService.addGame(user, "", smaller, larger);
+        assertFalse("addGameBlankNameTest: should reject an empty name", result);
+        result = gamesService.addGame(user, "  \t  ", smaller, larger);
+        assertFalse("addGameBlankNameTest: should reject whitespace only", result);
+        assertEquals("addGameBlankNameTest: should preserve the catalog", initialCatalog, gamesService.getAvailableGames(user));
     }
 
     /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when both player counts are null.
+     * Verifies that leading and trailing spaces are trimmed and users' catalogs remain independent.
      */
     @Test
-    public void addGameValidUserInvalidGameNameNullMinPlayersNullMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, null, null);
-        assertFalse("addGameValidUserInvalidGameNameNullMinPlayersNullMaxPlayers: should reject an existing visible game name", result);
+    public void addGameNameWithSpacesTest() {
+        final String test = "addGameNameWithSpacesTest";
+        User user = insertTestingUser(username);
+        User otherUser = insertTestingUser("otheruser");
+
+        assertAddedGame(test, user, "Trailing Game ", smaller, larger);
+        assertAddedGame(test, user, " Leading Game", smaller, larger);
+        Game firstGame = assertAddedGame(test, user, "  Shared Game  ", smaller, larger);
+        Game secondGame = assertAddedGame(test, otherUser, "  Shared Game  ", 2, 4);
+        assertNotEquals(test + ": users should have independent game IDs", firstGame.getGameID(), secondGame.getGameID());
+        assertGameDetails(test, findAvailableGame(user, "Shared Game"), "Shared Game", user, smaller, larger, true);
     }
 
     /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when both player counts are negative.
+     * Verifies that adding a hidden game restores the same record with updated bounds.
      */
     @Test
-    public void addGameValidUserInvalidGameNameNegativeMinPlayersNegativeMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, negative, negative);
-        assertFalse("addGameValidUserInvalidGameNameNegativeMinPlayersNegativeMaxPlayers: should reject this duplicate-name and player-count combination", result);
-    }
+    public void addGameRestoresHiddenGameTest() {
+        final String test = "addGameRestoresHiddenGameTest";
+        final String gameName = "Hidden Game";
+        User user = insertTestingUser(username);
+        Game hiddenGame = insertTestingCatalogEntry(gameName, user, false);
+        Long originalID = hiddenGame.getGameID();
+        assertNull(test + ": the hidden game should be absent from the catalog", findAvailableGame(user, gameName));
 
-    /**
-     * Verifies that adding a game with an existing user-owned game name
-     * fails when the minimum and maximum player counts are equal.
-     */
-    @Test
-    public void addGameValidUserInvalidGameNameMinPlayersEqualsMaxPlayers() {
-        User user = insertTestingUserWithVisibleGame();
-        boolean result = gamesService.addGame(user, invalidName2, smaller, smaller);
-        assertFalse("addGameValidUserInvalidGameNameMinPlayersEqualsMaxPlayers: should reject an existing visible game name", result);
-    }
-
-    /*
-     * = = = = = = = = = = =
-     * Valid User and Null Game Name Tests
-     * = = = = = = = = = = =
-     */
-
-    /**
-     * Verifies that adding a game with a null name fails when the maximum
-     * player count is negative.
-     */
-    @Test
-    public void addGameValidUserNullGameNameValidMinPlayersNegativeMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, smaller, negative);
-        assertFalse("addGameValidUserNullGameNameValidMinPlayersNegativeMaxPlayers: should reject a null game name", result);
-    }
-
-    /**
-     * Verifies that adding a game with a null name fails when the minimum
-     * player count is negative.
-     */
-    @Test
-    public void addGameValidUserNullGameNameNegativeMinPlayersValidMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, negative, larger);
-        assertFalse("addGameValidUserNullGameNameNegativeMinPlayersValidMaxPlayers: should reject a null game name", result);
-    }
-
-    /**
-     * Verifies that adding a game with a null name fails when the minimum
-     * player count exceeds the maximum.
-     */
-    @Test
-    public void addGameValidUserNullGameNameLargerMinPlayersSmallerMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, larger, smaller);
-        assertFalse("addGameValidUserNullGameNameLargerMinPlayersSmallerMaxPlayers: should reject a null game name", result);
-    }
-
-    /**
-     * Verifies that adding a game with a null name fails when the maximum
-     * player count is null.
-     */
-    @Test
-    public void addGameValidUserNullGameNameValidMinPlayersNullMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, smaller, null);
-        assertFalse("addGameValidUserNullGameNameValidMinPlayersNullMaxPlayers: should reject a null game name", result);
-    }
-
-    /**
-     * Verifies that adding a game with a null name fails when the minimum
-     * player count is negative and the maximum is null.
-     */
-    @Test
-    public void addGameValidUserNullGameNameNegativeMinPlayersNullMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, negative, null);
-        assertFalse("addGameValidUserNullGameNameNegativeMinPlayersNullMaxPlayers: should reject a null game name", result);
-    }
-
-    /**
-     * Verifies that adding a game with a null name fails when the minimum
-     * player count is null and the maximum is valid.
-     */
-    @Test
-    public void addGameValidUserNullGameNameNullMinPlayersValidMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, null, smaller);
-        assertFalse("addGameValidUserNullGameNameNullMinPlayersValidMaxPlayers: should reject a null game name", result);
-    }
-
-    /**
-     * Verifies that adding a game with a null name fails when the minimum
-     * player count is null and the maximum is negative.
-     */
-    @Test
-    public void addGameValidUserNullGameNameNullMinPlayersNegativeMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, null, negative);
-        assertFalse("addGameValidUserNullGameNameNullMinPlayersNegativeMaxPlayers: should reject a null game name", result);
-    }
-
-    /**
-     * Verifies that adding a game with a null name fails when both player
-     * counts are null.
-     */
-    @Test
-    public void addGameValidUserNullGameNameNullMinPlayersNullMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, null, null);
-        assertFalse("addGameValidUserNullGameNameNullMinPlayersNullMaxPlayers: should reject a null game name", result);
-    }
-
-    /**
-     * Verifies that adding a game with a null name fails when both player
-     * counts are negative.
-     */
-    @Test
-    public void addGameValidUserNullGameNameNegativeMinPlayersNegativeMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, negative, negative);
-        assertFalse("addGameValidUserNullGameNameNegativeMinPlayersNegativeMaxPlayers: should reject a null game name", result);
-    }
-
-    /**
-     * Verifies that adding a game with a null name fails when the minimum
-     * and maximum player counts are equal.
-     */
-    @Test
-    public void addGameValidUserNullGameNameMinPlayersEqualsMaxPlayers() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        boolean result = gamesService.addGame(user, null, smaller, smaller);
-        assertFalse("addGameValidUserNullGameNameMinPlayersEqualsMaxPlayers: should reject a null game name", result);
-    }
-
-    /*
-     * = = = = = = = = = = =
-     * Null User and Valid Game Name Tests
-     * = = = = = = = = = = =
-     */
-
-    /**
-     * Verifies that adding a game fails when the user is null and the
-     * maximum player count is negative.
-     */
-    @Test
-    public void addGameNullUserValidGameNameValidMinPlayersNegativeMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, smaller, negative);
-        assertFalse("addGameNullUserValidGameNameValidMinPlayersNegativeMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user is null and the
-     * minimum player count is negative.
-     */
-    @Test
-    public void addGameNullUserValidGameNameNegativeMinPlayersValidMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, negative, larger);
-        assertFalse("addGameNullUserValidGameNameNegativeMinPlayersValidMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user is null and the
-     * minimum player count exceeds the maximum.
-     */
-    @Test
-    public void addGameNullUserValidGameNameLargerMinPlayersSmallerMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, larger, smaller);
-        assertFalse("addGameNullUserValidGameNameLargerMinPlayersSmallerMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user is null and the
-     * maximum player count is null.
-     */
-    @Test
-    public void addGameNullUserValidGameNameValidMinPlayersNullMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, smaller, null);
-        assertFalse("addGameNullUserValidGameNameValidMinPlayersNullMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user is null, the minimum
-     * player count is negative, and the maximum is null.
-     */
-    @Test
-    public void addGameNullUserValidGameNameNegativeMinPlayersNullMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, negative, null);
-        assertFalse("addGameNullUserValidGameNameNegativeMinPlayersNullMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user is null and the
-     * minimum player count is null.
-     */
-    @Test
-    public void addGameNullUserValidGameNameNullMinPlayersValidMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, null, smaller);
-        assertFalse("addGameNullUserValidGameNameNullMinPlayersValidMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user is null, the minimum
-     * player count is null, and the maximum is negative.
-     */
-    @Test
-    public void addGameNullUserValidGameNameNullMinPlayersNegativeMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, null, negative);
-        assertFalse("addGameNullUserValidGameNameNullMinPlayersNegativeMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user and both player counts
-     * are null.
-     */
-    @Test
-    public void addGameNullUserValidGameNameNullMinPlayersNullMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, null, null);
-        assertFalse("addGameNullUserValidGameNameNullMinPlayersNullMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user and both player counts
-     * are negative.
-     */
-    @Test
-    public void addGameNullUserValidGameNameNegativeMinPlayersNegativeMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, negative, negative);
-        assertFalse("addGameNullUserValidGameNameNegativeMinPlayersNegativeMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user is null and the
-     * minimum and maximum player counts are equal.
-     */
-    @Test
-    public void addGameNullUserValidGameNameMinPlayersEqualsMaxPlayers() {
-        boolean result = gamesService.addGame(null, validName, smaller, smaller);
-        assertFalse("addGameNullUserValidGameNameMinPlayersEqualsMaxPlayers: should reject a null user", result);
-    }
-
-    /*
-     * = = = = = = = = = = =
-     * Null User and Existing Public Game Name Tests
-     * = = = = = = = = = = =
-     */
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameValidMinPlayersNegativeMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, smaller, negative);
-        assertFalse("addGameNullUserInvalidGameNameValidMinPlayersNegativeMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameNegativeMinPlayersValidMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, negative, larger);
-        assertFalse("addGameNullUserInvalidGameNameNegativeMinPlayersValidMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameLargerMinPlayersSmallerMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, larger, smaller);
-        assertFalse("addGameNullUserInvalidGameNameLargerMinPlayersSmallerMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameValidMinPlayersNullMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, smaller, null);
-        assertFalse("addGameNullUserInvalidGameNameValidMinPlayersNullMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameNegativeMinPlayersNullMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, negative, null);
-        assertFalse("addGameNullUserInvalidGameNameNegativeMinPlayersNullMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameNullMinPlayersValidMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, null, smaller);
-        assertFalse("addGameNullUserInvalidGameNameNullMinPlayersValidMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameNullMinPlayersNegativeMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, null, negative);
-        assertFalse("addGameNullUserInvalidGameNameNullMinPlayersNegativeMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameNullMinPlayersNullMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, null, null);
-        assertFalse("addGameNullUserInvalidGameNameNullMinPlayersNullMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameNegativeMinPlayersNegativeMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, negative, negative);
-        assertFalse("addGameNullUserInvalidGameNameNegativeMinPlayersNegativeMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /**
-     * Verifies that a null user is rejected even when the requested name
-     * belongs to a public game.
-     */
-    @Test
-    public void addGameNullUserInvalidGameNameMinPlayersEqualsMaxPlayers() {
-        insertTestingPublicGame();
-        boolean result = gamesService.addGame(null, invalidName, smaller, smaller);
-        assertFalse("addGameNullUserInvalidGameNameMinPlayersEqualsMaxPlayers: should reject a null user before checking the public game name", result);
-    }
-
-    /*
-     * = = = = = = = = = = =
-     * Null User and Null Game Name Tests
-     * = = = = = = = = = = =
-     */
-
-    /**
-     * Verifies that adding a game fails when both the user and game name
-     * are null and the maximum player count is negative.
-     */
-    @Test
-    public void addGameNullUserNullGameNameValidMinPlayersNegativeMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, smaller, negative);
-        assertFalse("addGameNullUserNullGameNameValidMinPlayersNegativeMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when both the user and game name
-     * are null and the minimum player count is negative.
-     */
-    @Test
-    public void addGameNullUserNullGameNameNegativeMinPlayersValidMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, negative, larger);
-        assertFalse("addGameNullUserNullGameNameNegativeMinPlayersValidMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when both the user and game name
-     * are null and the minimum count exceeds the maximum.
-     */
-    @Test
-    public void addGameNullUserNullGameNameLargerMinPlayersSmallerMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, larger, smaller);
-        assertFalse("addGameNullUserNullGameNameLargerMinPlayersSmallerMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when both the user and game name
-     * are null and the maximum player count is null.
-     */
-    @Test
-    public void addGameNullUserNullGameNameValidMinPlayersNullMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, smaller, null);
-        assertFalse("addGameNullUserNullGameNameValidMinPlayersNullMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when both the user and game name
-     * are null, the minimum player count is negative, and the maximum is null.
-     */
-    @Test
-    public void addGameNullUserNullGameNameNegativeMinPlayersNullMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, negative, null);
-        assertFalse("addGameNullUserNullGameNameNegativeMinPlayersNullMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when both the user and game name
-     * are null, the minimum count is null, and the maximum count is valid.
-     */
-    @Test
-    public void addGameNullUserNullGameNameNullMinPlayersValidMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, null, smaller);
-        assertFalse("addGameNullUserNullGameNameNullMinPlayersValidMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when both the user and game name
-     * are null, the minimum count is null, and the maximum count is negative.
-     */
-    @Test
-    public void addGameNullUserNullGameNameNullMinPlayersNegativeMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, null, negative);
-        assertFalse("addGameNullUserNullGameNameNullMinPlayersNegativeMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user and game name are null
-     * and both player counts are null.
-     */
-    @Test
-    public void addGameNullUserNullGameNameNullMinPlayersNullMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, null, null);
-        assertFalse("addGameNullUserNullGameNameNullMinPlayersNullMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user and game name are null
-     * and both player counts are negative.
-     */
-    @Test
-    public void addGameNullUserNullGameNameNegativeMinPlayersNegativeMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, negative, negative);
-        assertFalse("addGameNullUserNullGameNameNegativeMinPlayersNegativeMaxPlayers: should reject a null user", result);
-    }
-
-    /**
-     * Verifies that adding a game fails when the user and game name are null
-     * and the minimum and maximum player counts are equal.
-     */
-    @Test
-    public void addGameNullUserNullGameNameMinPlayersEqualsMaxPlayers() {
-        boolean result = gamesService.addGame(null, null, smaller, smaller);
-        assertFalse("addGameNullUserNullGameNameMinPlayersEqualsMaxPlayers: should reject a null user", result);
+        Game restored = assertAddedGame(test, user, gameName, 2, 6);
+        assertEquals(test + ": should restore the original record", originalID, restored.getGameID());
     }
 
     /*
@@ -760,8 +215,9 @@ public class GamesServiceTest {
         List<Game> result = gamesService.getAvailableGames(null);
 
         assertNotNull("getAvailableGamesNullUserTest: should return a list", result);
+        var emptyResult = result.isEmpty();
         assertTrue("getAvailableGamesNullUserTest: should return an empty list",
-                result.isEmpty());
+                emptyResult);
     }
 
     /**
@@ -770,25 +226,47 @@ public class GamesServiceTest {
      */
     @Test
     public void getAvailableGamesVisibleGamesTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        User otherUser = userService.newUser("otheruser", password);
+        User user = insertTestingUser(username);
+        User otherUser = insertTestingUser("otheruser");
 
-        Game publicGame = insertTestingGame("Public Game", null, true);
-        Game userGame = insertTestingGame("User Game", user, true);
-        Game hiddenGame = insertTestingGame("Hidden Game", user, false);
-        Game otherGame = insertTestingGame("Other Game", otherUser, true);
+        // Existing catalog before adding this test's games
+        List<Game> emptyCatalog = gamesService.getAvailableGames(user);
+        int initialGameCount = emptyCatalog.size();
+
+        // One public game
+        Game publicGame = insertTestingPublicGame("Public Game");
+        List<Game> publicCatalog = gamesService.getAvailableGames(user);
+        int gameCount = publicCatalog.size();
+        assertEquals("getAvailableGamesVisibleGamesTest: should add one visible public game", initialGameCount + 1, gameCount);
+        boolean containsPublicGame = publicCatalog.contains(publicGame);
+        assertTrue("getAvailableGamesVisibleGamesTest: should return the public game", containsPublicGame);
+
+        // Public, private, and hidden games
+        Game userGame = insertTestingGame("User Game", user);
+        Game hiddenGame = insertTestingCatalogEntry("Hidden Game", user, false);
+        Game otherGame = insertTestingGame("Other Game", otherUser);
 
         List<Game> result = gamesService.getAvailableGames(user);
 
+        var containsExpectedItem = result.contains(publicGame);
         assertTrue("getAvailableGamesVisibleGamesTest: should include public games",
-                result.contains(publicGame));
+                containsExpectedItem);
+        var containsExpectedItem2 = result.contains(userGame);
         assertTrue("getAvailableGamesVisibleGamesTest: should include the user's visible games",
-                result.contains(userGame));
+                containsExpectedItem2);
+        var containsExpectedItem3 = result.contains(hiddenGame);
         assertFalse("getAvailableGamesVisibleGamesTest: should exclude hidden games",
-                result.contains(hiddenGame));
-        assertFalse("getAvailableGamesVisibleGamesTest: should exclude another user's games",
-                result.contains(otherGame));
+                containsExpectedItem3);
+        boolean hasOtherGame = result.contains(otherGame);
+        assertFalse("getAvailableGamesVisibleGamesTest: should exclude another user's games", hasOtherGame);
+
+        result = gamesService.getAvailableGames(otherUser);
+        gameCount = result.size();
+        assertEquals("getAvailableGamesVisibleGamesTest: second user should see two additional games", initialGameCount + 2, gameCount);
+        boolean hasPublicGame = result.contains(publicGame);
+        assertTrue("getAvailableGamesVisibleGamesTest: second user should see the public game", hasPublicGame);
+        hasOtherGame = result.contains(otherGame);
+        assertTrue("getAvailableGamesVisibleGamesTest: second user should see their own game", hasOtherGame);
     }
 
     /**
@@ -796,17 +274,18 @@ public class GamesServiceTest {
      */
     @Test
     public void getAvailableGamesUserCopyOverridesPublicGameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game publicGame = insertTestingGame("Shared Game", null, true);
-        Game userGame = insertTestingGame("Shared Game", user, true);
+        User user = insertTestingUser(username);
+        Game publicGame = insertTestingPublicGame("Shared Game");
+        Game userGame = insertTestingUserCopy(publicGame, user, true);
 
         List<Game> result = gamesService.getAvailableGames(user);
 
+        var containsExpectedItem = result.contains(userGame);
         assertTrue("getAvailableGamesUserCopyOverridesPublicGameTest: should include the user's copy",
-                result.contains(userGame));
+                containsExpectedItem);
+        var containsExpectedItem2 = result.contains(publicGame);
         assertFalse("getAvailableGamesUserCopyOverridesPublicGameTest: should exclude the public copy",
-                result.contains(publicGame));
+                containsExpectedItem2);
     }
 
     /**
@@ -814,17 +293,18 @@ public class GamesServiceTest {
      */
     @Test
     public void getAvailableGamesHiddenCopyHidesPublicGameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game publicGame = insertTestingGame("Shared Game", null, true);
-        Game hiddenGame = insertTestingGame("Shared Game", user, false);
+        User user = insertTestingUser(username);
+        Game publicGame = insertTestingPublicGame("Shared Game");
+        Game hiddenGame = insertTestingUserCopy(publicGame, user, false);
 
         List<Game> result = gamesService.getAvailableGames(user);
 
+        var containsExpectedItem = result.contains(publicGame);
         assertFalse("getAvailableGamesHiddenCopyHidesPublicGameTest: should exclude the public copy",
-                result.contains(publicGame));
+                containsExpectedItem);
+        var containsExpectedItem2 = result.contains(hiddenGame);
         assertFalse("getAvailableGamesHiddenCopyHidesPublicGameTest: should exclude the hidden copy",
-                result.contains(hiddenGame));
+                containsExpectedItem2);
     }
 
     /**
@@ -833,11 +313,10 @@ public class GamesServiceTest {
      */
     @Test
     public void getAvailableGamesAlphabeticalOrderTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game zebra = insertTestingGame("zebra", user, true);
-        Game apple = insertTestingGame("apple", user, true);
-        Game banana = insertTestingGame("Banana", user, true);
+        User user = insertTestingUser(username);
+        Game zebra = insertTestingGame("zebra", user);
+        Game apple = insertTestingGame("apple", user);
+        Game banana = insertTestingGame("Banana", user);
 
         List<Game> result = gamesService.getAvailableGames(user);
 
@@ -860,13 +339,14 @@ public class GamesServiceTest {
      */
     @Test
     public void getGameByGameIDSuccessTest() {
-        Game game = insertTestingGame(validName, null, true);
+        Game game = insertTestingPublicGame(validName);
 
         Game result = gamesService.getGameByGameID(game.getGameID());
 
         assertNotNull("getGameByGameIDSuccessTest: should find the game", result);
+        var actualGameID = result.getGameID();
         assertEquals("getGameByGameIDSuccessTest: should return the matching game",
-                game.getGameID(), result.getGameID());
+                game.getGameID(), actualGameID);
     }
 
     /**
@@ -900,9 +380,8 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameSameNameSuccessTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), validName, 2, 6);
@@ -911,12 +390,15 @@ public class GamesServiceTest {
 
         Game updatedGame = gamesService.getGameByGameID(game.getGameID());
 
+        var actualMinPlayers = updatedGame.getMinPlayers();
         assertEquals("editGameSameNameSuccessTest: should update minimum players",
-                Integer.valueOf(2), updatedGame.getMinPlayers());
+                Integer.valueOf(2), actualMinPlayers);
+        var actualMaxPlayers = updatedGame.getMaxPlayers();
         assertEquals("editGameSameNameSuccessTest: should update maximum players",
-                Integer.valueOf(6), updatedGame.getMaxPlayers());
+                Integer.valueOf(6), actualMaxPlayers);
+        var actualCanSee = updatedGame.getCanSee();
         assertTrue("editGameSameNameSuccessTest: should keep the game visible",
-                updatedGame.getCanSee());
+                actualCanSee);
     }
 
     /**
@@ -925,30 +407,33 @@ public class GamesServiceTest {
      */
     @Test
     public void editGamePublicGameCreatesUserCopyTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game publicGame = insertTestingGame(validName, null, true);
+        User user = insertTestingUser(username);
+        Game publicGame = insertTestingPublicGame(validName);
 
         boolean result = gamesService.editGame(
                 user, publicGame.getGameID(), validName, 2, 6);
 
         assertTrue("editGamePublicGameCreatesUserCopyTest: should edit the game", result);
 
-        Game userCopy = gameRepo.findByGameNameIgnoreCaseAndUserWhoAdded(
-                validName, user);
+        Game userCopy = findAvailableGame(user, validName);
 
         assertNotNull("editGamePublicGameCreatesUserCopyTest: should create a user copy",
                 userCopy);
+        var actualGameID = userCopy.getGameID();
         assertNotEquals("editGamePublicGameCreatesUserCopyTest: should create a separate record",
-                publicGame.getGameID(), userCopy.getGameID());
+                publicGame.getGameID(), actualGameID);
+        var actualMinPlayers = userCopy.getMinPlayers();
         assertEquals("editGamePublicGameCreatesUserCopyTest: should set the user's minimum",
-                Integer.valueOf(2), userCopy.getMinPlayers());
+                Integer.valueOf(2), actualMinPlayers);
+        var actualMaxPlayers = userCopy.getMaxPlayers();
         assertEquals("editGamePublicGameCreatesUserCopyTest: should set the user's maximum",
-                Integer.valueOf(6), userCopy.getMaxPlayers());
+                Integer.valueOf(6), actualMaxPlayers);
+        var actualMinPlayers2 = publicGame.getMinPlayers();
         assertEquals("editGamePublicGameCreatesUserCopyTest: should preserve the public minimum",
-                smaller, publicGame.getMinPlayers());
+                smaller, actualMinPlayers2);
+        var actualMaxPlayers2 = publicGame.getMaxPlayers();
         assertEquals("editGamePublicGameCreatesUserCopyTest: should preserve the public maximum",
-                larger, publicGame.getMaxPlayers());
+                larger, actualMaxPlayers2);
     }
 
     /**
@@ -957,28 +442,29 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNewNameSuccessTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "Renamed Game", 2, 6);
 
         assertTrue("editGameNewNameSuccessTest: should rename the game", result);
 
-        Game renamedGame = gameRepo.findByGameNameIgnoreCaseAndUserWhoAdded(
-                "Renamed Game", user);
+        Game renamedGame = findAvailableGame(user, "Renamed Game");
 
         assertNotNull("editGameNewNameSuccessTest: should save the renamed game",
                 renamedGame);
+        var actualCanSee = renamedGame.getCanSee();
         assertTrue("editGameNewNameSuccessTest: should make the renamed game visible",
-                renamedGame.getCanSee());
+                actualCanSee);
         assertFalse("editGameNewNameSuccessTest: should hide the original game",
                 gamesService.getGameByGameID(game.getGameID()).getCanSee());
+        var actualMinPlayers = renamedGame.getMinPlayers();
         assertEquals("editGameNewNameSuccessTest: should save minimum players",
-                Integer.valueOf(2), renamedGame.getMinPlayers());
+                Integer.valueOf(2), actualMinPlayers);
+        var actualMaxPlayers = renamedGame.getMaxPlayers();
         assertEquals("editGameNewNameSuccessTest: should save maximum players",
-                Integer.valueOf(6), renamedGame.getMaxPlayers());
+                Integer.valueOf(6), actualMaxPlayers);
     }
 
     /**
@@ -986,16 +472,61 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNameWithSpacesTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "  Renamed Game  ", smaller, larger);
 
         assertTrue("editGameNameWithSpacesTest: should accept the trimmed name", result);
         assertNotNull("editGameNameWithSpacesTest: should save the trimmed name",
-                gameRepo.findByGameNameIgnoreCaseAndUserWhoAdded("Renamed Game", user));
+                findAvailableGame(user, "Renamed Game"));
+    }
+
+    /**
+     * Verifies that renaming a public game is isolated to the user who edited it.
+     */
+    @Test
+    public void editGamePublicGameNewNameTest() {
+        final String test = "editGamePublicGameNewNameTest";
+        User user = insertTestingUser(username);
+        User otherUser = insertTestingUser("otheruser");
+        Game publicGame = insertTestingPublicGame(validName);
+
+        boolean result = gamesService.editGame(user, publicGame.getGameID(), "Renamed Game", null, null);
+        assertTrue(test + ": should rename the game with unspecified player counts", result);
+        Game renamedGame = findAvailableGame(user, "Renamed Game");
+        assertGameDetails(test, renamedGame, "Renamed Game", user, null, null, true);
+        assertNull(test + ": original name should be hidden for the editor", findAvailableGame(user, validName));
+        assertEquals(test + ": the other user should still see the public game",
+                publicGame, findAvailableGame(otherUser, validName));
+        assertNull(test + ": the other user should not see the renamed game",
+                findAvailableGame(otherUser, "Renamed Game"));
+    }
+
+    /**
+     * Verifies that invalid player counts leave the original game intact.
+     */
+    @Test
+    public void editGameInvalidPlayerCountsTest() {
+        final String test = "editGameInvalidPlayerCountsTest";
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
+        Long gameID = game.getGameID();
+
+        boolean result = gamesService.editGame(user, gameID, validName, larger, smaller);
+        assertFalse(test + ": should reject a minimum greater than the maximum", result);
+        result = gamesService.editGame(user, gameID, validName, -1, larger);
+        assertFalse(test + ": should reject a negative minimum", result);
+        result = gamesService.editGame(user, gameID, validName, smaller, -1);
+        assertFalse(test + ": should reject a negative maximum", result);
+        result = gamesService.editGame(user, gameID, validName, -1, null);
+        assertFalse(test + ": should reject a negative minimum with no maximum", result);
+        result = gamesService.editGame(user, gameID, validName, null, -1);
+        assertFalse(test + ": should reject a negative maximum with no minimum", result);
+        result = gamesService.editGame(user, gameID, validName, -1, -1);
+        assertFalse(test + ": should reject two negative counts", result);
+        assertGameDetails(test, gamesService.getGameByGameID(gameID), validName, user, smaller, larger, true);
     }
 
     /**
@@ -1003,14 +534,15 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNullUserTest() {
-        Game game = insertTestingGame(validName, null, true);
+        Game game = insertTestingPublicGame(validName);
 
         boolean result = gamesService.editGame(
                 null, game.getGameID(), "Renamed Game", smaller, larger);
 
         assertFalse("editGameNullUserTest: should reject a null user", result);
+        var actualGameName = game.getGameName();
         assertEquals("editGameNullUserTest: should preserve the original name",
-                validName, game.getGameName());
+                validName, actualGameName);
     }
 
     /**
@@ -1018,8 +550,7 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNullGameIDTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        User user = insertTestingUser(username);
 
         boolean result = gamesService.editGame(
                 user, null, validName, smaller, larger);
@@ -1032,8 +563,7 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameInvalidGameIDTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        User user = insertTestingUser(username);
 
         boolean result = gamesService.editGame(
                 user, -1L, validName, smaller, larger);
@@ -1046,9 +576,8 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNullGameNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), null, smaller, larger);
@@ -1061,9 +590,8 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameEmptyGameNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "", smaller, larger);
@@ -1076,9 +604,8 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameWhitespaceGameNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "   ", smaller, larger);
@@ -1092,18 +619,18 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameExistingUserGameNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
-        insertTestingGame("Existing Game", user, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
+        insertTestingGame("Existing Game", user);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "EXISTING GAME", smaller, larger);
 
         assertFalse("editGameExistingUserGameNameTest: should reject a duplicate name",
                 result);
+        var actualCanSee = game.getCanSee();
         assertTrue("editGameExistingUserGameNameTest: should keep the original visible",
-                game.getCanSee());
+                actualCanSee);
     }
 
     /**
@@ -1111,18 +638,18 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameExistingPublicGameNameTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
-        insertTestingGame("Public Game", null, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
+        insertTestingPublicGame("Public Game");
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "Public Game", smaller, larger);
 
         assertFalse("editGameExistingPublicGameNameTest: should reject a public duplicate",
                 result);
+        var actualCanSee = game.getCanSee();
         assertTrue("editGameExistingPublicGameNameTest: should keep the original visible",
-                game.getCanSee());
+                actualCanSee);
     }
 
     /**
@@ -1131,11 +658,9 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameUpdatesCollectionReferencesTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        User otherUser = userService.newUser(
-                "otheruser", password);
-        Game publicGame = insertTestingGame(validName, null, true);
+        User user = insertTestingUser(username);
+        User otherUser = insertTestingUser("otheruser");
+        Game publicGame = insertTestingPublicGame(validName);
 
         assertTrue("editGameUpdatesCollectionReferencesTest: should add the user's copy",
                 gamesOwnedService.addGameToCollection(user, publicGame.getGameID(), 2020));
@@ -1148,8 +673,7 @@ public class GamesServiceTest {
         assertTrue("editGameUpdatesCollectionReferencesTest: should edit successfully",
                 result);
 
-        Game userCopy = gameRepo.findByGameNameIgnoreCaseAndUserWhoAdded(
-                validName, user);
+        Game userCopy = findAvailableGame(user, validName);
 
         assertNotNull("editGameUpdatesCollectionReferencesTest: should create a user copy",
                 userCopy);
@@ -1174,9 +698,8 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameUserGameSuccessTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
 
         boolean result = gamesService.removeGame(user, game.getGameID());
 
@@ -1186,8 +709,9 @@ public class GamesServiceTest {
 
         assertNotNull("removeGameUserGameSuccessTest: should preserve the database record",
                 removedGame);
+        var actualCanSee = removedGame.getCanSee();
         assertFalse("removeGameUserGameSuccessTest: should hide the game",
-                removedGame.getCanSee());
+                actualCanSee);
         assertFalse("removeGameUserGameSuccessTest: should exclude it from available games",
                 gamesService.getAvailableGames(user).contains(removedGame));
     }
@@ -1198,25 +722,31 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGamePublicGameSuccessTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        User otherUser = userService.newUser(
-                "otheruser", password);
-        Game publicGame = insertTestingGame(validName, null, true);
+        User user = insertTestingUser(username);
+        User otherUser = insertTestingUser("otheruser");
+        Game publicGame = insertTestingPublicGame(validName);
 
         boolean result = gamesService.removeGame(user, publicGame.getGameID());
 
         assertTrue("removeGamePublicGameSuccessTest: should remove the game", result);
 
-        Game hiddenCopy = gameRepo.findByGameNameIgnoreCaseAndUserWhoAdded(
-                validName, user);
+        List<Game> hiddenCopies = entityManager.createQuery("""
+                        select game from Game game where game.gameName = :name and game.userWhoAdded = :user
+                        """, Game.class)
+                .setParameter("name", validName)
+                .setParameter("user", user)
+                .getResultList();
+        assertEquals("removeGamePublicGameSuccessTest: should create one user copy", 1, hiddenCopies.size());
+        Game hiddenCopy = hiddenCopies.getFirst();
 
         assertNotNull("removeGamePublicGameSuccessTest: should create a user copy",
                 hiddenCopy);
+        var actualCanSee = hiddenCopy.getCanSee();
         assertFalse("removeGamePublicGameSuccessTest: should hide the user copy",
-                hiddenCopy.getCanSee());
+                actualCanSee);
+        var actualCanSee2 = publicGame.getCanSee();
         assertTrue("removeGamePublicGameSuccessTest: should preserve the public game",
-                publicGame.getCanSee());
+                actualCanSee2);
         assertFalse("removeGamePublicGameSuccessTest: should hide the public game for this user",
                 gamesService.getAvailableGames(user).contains(publicGame));
         assertTrue("removeGamePublicGameSuccessTest: should remain available to another user",
@@ -1228,13 +758,14 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameNullUserTest() {
-        Game game = insertTestingGame(validName, null, true);
+        Game game = insertTestingPublicGame(validName);
 
         boolean result = gamesService.removeGame(null, game.getGameID());
 
         assertFalse("removeGameNullUserTest: should reject a null user", result);
+        var actualCanSee = game.getCanSee();
         assertTrue("removeGameNullUserTest: should keep the game visible",
-                game.getCanSee());
+                actualCanSee);
     }
 
     /**
@@ -1242,8 +773,7 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameNullGameIDTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        User user = insertTestingUser(username);
 
         boolean result = gamesService.removeGame(user, null);
 
@@ -1255,8 +785,7 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameInvalidGameIDTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
+        User user = insertTestingUser(username);
 
         boolean result = gamesService.removeGame(user, -1L);
 
@@ -1270,9 +799,8 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameReferencedByCollectionTest() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = insertTestingGame(validName, user, true);
+        User user = insertTestingUser(username);
+        Game game = insertTestingGame(validName, user);
 
         assertTrue("removeGameReferencedByCollectionTest: should add the game to the collection",
                 gamesOwnedService.addGameToCollection(user, game.getGameID(), 2020));
@@ -1285,35 +813,129 @@ public class GamesServiceTest {
                 gamesService.getGameByGameID(game.getGameID()).getCanSee());
     }
 
-    /**
-     * Creates a game with explicit visibility and known player counts.
-     * A null user creates a public game.
+    /*
+     * = = = = = = = = = = =
+     * Test Helpers
+     * = = = = = = = = = = =
      */
-    private Game insertTestingGame(String gameName, User user, boolean canSee) {
-        Game game = new Game(gameName);
+
+    /**
+     * Creates a test user and verifies that the saved credentials work.
+     */
+    private User insertTestingUser(String username) {
+        User user = userService.validateUser(username, password);
+        assertNull("insertTestingUser: user should not exist yet", user);
+
+        user = userService.newUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after creation", user);
+        assertNotNull("insertTestingUser: user should have an ID", user.getId());
+        assertEquals("insertTestingUser: user should have the correct username", username, user.getUsername());
+
+        User userCheck = userService.validateUser(username, password);
+        assertNotNull("insertTestingUser: user should exist after validation", userCheck);
+        assertEquals("insertTestingUser: login should return the created user's ID", user.getId(), userCheck.getId());
+        assertEquals("insertTestingUser: login should return the expected username", username, userCheck.getUsername());
+        return userCheck;
+    }
+
+    /**
+     * Adds a visible user game and verifies its stored details.
+     */
+    private Game insertTestingGame(String name, User user) {
+        return assertAddedGame("insertTestingGame", user, name, smaller, larger);
+    }
+
+    /**
+     * Persists a public game for tests of the default catalog.
+     */
+    private Game insertTestingPublicGame(String gameName) {
+        return insertTestingCatalogEntry(gameName, null, true);
+    }
+
+    /**
+     * Creates a separate user copy of a public game, with the specified visibility.
+     */
+    private Game insertTestingUserCopy(Game publicGame, User user, boolean visible) {
+        Game userCopy = insertTestingCatalogEntry(publicGame.getGameName(), user, visible);
+        assertNotEquals("insertTestingUserCopy: should create a separate record", publicGame.getGameID(), userCopy.getGameID());
+        return userCopy;
+    }
+
+    /**
+     * Persists catalog entries that cannot be created directly by the add operation.
+     */
+    private Game insertTestingCatalogEntry(String name, User user, boolean visible) {
+        Game game = new Game(name);
         game.setUserWhoAdded(user);
-        game.setCanSee(canSee);
+        game.setCanSee(visible);
         game.setMinPlayers(smaller);
         game.setMaxPlayers(larger);
-        return gameRepo.save(game);
+        entityManager.persist(game);
+        entityManager.flush();
+
+        assertNotNull("insertTestingCatalogEntry: should assign an ID", game.getGameID());
+        Game saved = gamesService.getGameByGameID(game.getGameID());
+        assertGameDetails("insertTestingCatalogEntry", saved, name, user, smaller, larger, visible);
+        assertEquals("insertTestingCatalogEntry: should retrieve the saved ID", game.getGameID(), saved.getGameID());
+        return saved;
     }
 
-    private void insertTestingUser() {
-        userService.newUser(username, password);
+    /**
+     * Adds a game and checks that the catalog exposes the saved record.
+     */
+    private Game assertAddedGame(String test, User user, String name, Integer minPlayers, Integer maxPlayers) {
+        boolean result = gamesService.addGame(user, name, minPlayers, maxPlayers);
+        assertTrue(test + ": should add " + name, result);
+
+        Game game = findAvailableGame(user, name.trim());
+        assertGameDetails(test, game, name.trim(), user, minPlayers, maxPlayers, true);
+        Game saved = gamesService.getGameByGameID(game.getGameID());
+        assertGameDetails(test, saved, name.trim(), user, minPlayers, maxPlayers, true);
+        assertEquals(test + ": the saved ID should match the visible game", game.getGameID(), saved.getGameID());
+        return saved;
     }
 
-    private User insertTestingUserWithVisibleGame() {
-        insertTestingUser();
-        User user = userService.validateUser(username, password);
-        Game game = new Game(invalidName2);
-        game.setUserWhoAdded(user);
-        game.setCanSee(true);
-        gameRepo.save(game);
-        return user;
+    private void assertGameDetails(String test, Game game, String name, User user,
+                                   Integer minPlayers, Integer maxPlayers, boolean visible) {
+        assertNotNull(test + ": should retrieve " + name, game);
+        assertNotNull(test + ": game should have an ID", game.getGameID());
+        assertEquals(test + ": should save the expected name", name, game.getGameName());
+        assertEquals(test + ": should save the expected owner", user, game.getUserWhoAdded());
+        assertEquals(test + ": should save minimum players", minPlayers, game.getMinPlayers());
+        assertEquals(test + ": should save maximum players", maxPlayers, game.getMaxPlayers());
+        assertEquals(test + ": should save the expected visibility", visible, game.getCanSee());
     }
 
-    private void insertTestingPublicGame() {
-        gameRepo.save(new Game(invalidName));
+    private Game findAvailableGame(User user, String gameName) {
+        List<Game> matches = gamesService.getAvailableGames(user).stream()
+                .filter(game -> gameName.equals(game.getGameName()))
+                .toList();
+        assertTrue("findAvailableGame: should find at most one visible game named " + gameName, matches.size() <= 1);
+        return matches.isEmpty() ? null : matches.getFirst();
     }
 
+    private void assertAddGameRejectsAllPlayerCounts(String test, User user, String name) {
+        assertAddGameRejectsInvalidPlayerCounts(test, user, name);
+        assertAddGameRejected(test, user, name, smaller, larger);
+        assertAddGameRejected(test, user, name, smaller, smaller);
+        assertAddGameRejected(test, user, name, 0, 0);
+        assertAddGameRejected(test, user, name, smaller, null);
+        assertAddGameRejected(test, user, name, null, smaller);
+        assertAddGameRejected(test, user, name, null, null);
+    }
+
+    private void assertAddGameRejectsInvalidPlayerCounts(String test, User user, String name) {
+        assertAddGameRejected(test, user, name, smaller, -1);
+        assertAddGameRejected(test, user, name, -1, larger);
+        assertAddGameRejected(test, user, name, larger, smaller);
+        assertAddGameRejected(test, user, name, -1, null);
+        assertAddGameRejected(test, user, name, null, -1);
+        assertAddGameRejected(test, user, name, -1, -1);
+    }
+
+    private void assertAddGameRejected(String test, User user, String name, Integer minPlayers, Integer maxPlayers) {
+        boolean result = gamesService.addGame(user, name, minPlayers, maxPlayers);
+        assertFalse(test + ": should reject name " + name + " with minimum " + minPlayers
+                + " and maximum " + maxPlayers, result);
+    }
 }
