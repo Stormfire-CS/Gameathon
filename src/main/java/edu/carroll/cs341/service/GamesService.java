@@ -9,8 +9,9 @@ import java.util.List;
  * Defines the service operations for retrieving and managing games in the
  * game catalog.
  * This interface provides methods for retrieving games available to a
- * particular owner and adding new games to the catalog.
- *
+ * particular owner and adding new games to the catalog. It also includes
+ * methods for editing and removing games from the catalog.
+ * <p>
  * Implementations handle the business logic associated with game
  * availability and the creation of game records.
  *
@@ -35,8 +36,8 @@ public interface GamesService {
      * Adds a new game to the game catalog and associates it with the user
      * who submitted it.
      *
-     * @param user the user who is adding the game
-     * @param gameName the name of the game to add
+     * @param user       the user who is adding the game
+     * @param gameName   the name of the game to add
      * @param minPlayers the minimum number of players supported by the game
      * @param maxPlayers the maximum number of players supported by the game
      * @return true if the game was successfully added, false otherwise
@@ -46,9 +47,9 @@ public interface GamesService {
     /**
      * Edits an existing game in the game catalog.
      *
-     * @param user the user attempting to edit the game
-     * @param gameID the ID of the game to edit
-     * @param gameName the updated name of the game
+     * @param user       the user attempting to edit the game
+     * @param gameID     the ID of the game to edit
+     * @param gameName   the updated name of the game
      * @param minPlayers the updated minimum number of players
      * @param maxPlayers the updated maximum number of players
      * @return true if the game was successfully edited, false otherwise
@@ -58,7 +59,7 @@ public interface GamesService {
     /**
      * Removes a game from the game catalog.
      *
-     * @param user the user attempting to remove the game
+     * @param user   the user attempting to remove the game
      * @param gameID the ID of the game to remove
      * @return true if the game was successfully removed, false otherwise
      */
