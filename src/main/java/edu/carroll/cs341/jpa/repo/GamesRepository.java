@@ -16,7 +16,9 @@ import java.util.List;
  * <p>It also defines query methods for checking whether a game exists,
  * finding games by name or ID, and retrieving the games visible to a
  * particular user. The visible games include those automatically
- * populated in the database and those added by that specific user.</p>
+ * populated in the database and those added by that specific user.
+ * Also includes methods for finding a game by its name and the user who added it,
+ * as well as finding a game by its name where the game has no associated owner.</p>
  *
  * <p><b>Sources Used:</b></p>
  * <ul>
@@ -59,7 +61,20 @@ public interface GamesRepository extends JpaRepository<Game, Long> {
      */
     List<Game> findByUserWhoAddedIsNullOrUserWhoAddedOrderByGameNameAsc(User userWhoAdded);
 
+    /**
+     * Finds a game by its name and the user who added it.
+     *
+     * @param gameName the name of the game to search for
+     * @param userWhoAdded the user who added the game
+     * @return the matching game, or {@code null} if no match is found
+     */
     Game findByGameNameIgnoreCaseAndUserWhoAdded(String gameName, User userWhoAdded);
 
+    /**
+     * Finds a game by its name, where the game has no associated owner.
+     *
+     * @param gameName the name of the game to search for
+     * @return the matching game, or {@code null} if no match is found
+     */
     Game findByGameNameIgnoreCaseAndUserWhoAddedIsNull(String gameName);
 }
