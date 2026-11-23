@@ -8,7 +8,6 @@ import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.FamilyMembershipRepository;
 import edu.carroll.cs341.jpa.repo.GamesOwnedRepository;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
-import edu.carroll.cs341.jpa.repo.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +47,6 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
     private final GamesOwnedRepository gamesOwnedRepo;
 
     /**
-     * Repository for looking up user accounts.
-     */
-    private final UserRepository userRepo;
-
-    /**
      * Repository for looking up games in the game catalog.
      */
     private final GamesRepository gamesRepo;
@@ -67,13 +61,11 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      * game ownership records.
      *
      * @param gamesOwnedRepo repository for user-owned games
-     * @param userRepo       repository for user account information
      * @param gamesRepo      repository for game catalog records
      * @param membershipRepo repository for family membership records
      */
-    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, UserRepository userRepo, GamesRepository gamesRepo, FamilyMembershipRepository membershipRepo) {
+    public GamesOwnedServiceImpl(GamesOwnedRepository gamesOwnedRepo, GamesRepository gamesRepo, FamilyMembershipRepository membershipRepo) {
         this.gamesOwnedRepo = gamesOwnedRepo;
-        this.userRepo = userRepo;
         this.gamesRepo = gamesRepo;
         this.membershipRepo = membershipRepo;
     }
@@ -92,7 +84,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
     @Transactional
     @Override
     public boolean addGameToCollection(User user, Long gameID, Integer yearProduced) {
-        log.info("addGameToCollection: user {} attempted to add game with ID: {}", user, gameID);
+        log.info("addGameToCollection: '{}' attempted to add game with ID: {}", user, gameID);
 
         // Verify the user exists
         if (user == null) {
@@ -109,12 +101,13 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
         // Verify that the requested game exists before associating it with the user.
         Game game = gamesRepo.findByGameID(gameID);
         if (game == null) {
-            log.debug("addGameToCollection: game {} was not found", gameID);
+            log.debug("addGameToCollection: game with id: {} was not found", gameID);
             return false;
         }
 
+        // Verify that the yearProduced is valid
         if (yearProduced != null && (yearProduced > (Year.now().getValue() + 2) || yearProduced < -2000)) {
-            log.error("addGameToCollection: {} tried adding a game with an invalid year {}", user, yearProduced);
+            log.error("addGameToCollection: '{}' tried adding a game with an invalid year {}", user, yearProduced);
             return false;
         }
 
@@ -126,8 +119,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
 
         // Persist the ownership record so it can be retrieved later.
         gamesOwnedRepo.save(gameOwned);
-
-        log.debug("addGameToCollection: user {} added game {} with owned game ID: {} to their collection", user, game, gameOwned.getGameOwnedID());
+        log.debug("addGameToCollection: '{}' added '{}' with owned game ID: {} to their collection", user, game, gameOwned.getGameOwnedID());
         return true;
     }
 
@@ -141,14 +133,15 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
     public List<GameOwned> getGamesOwnedByUsername(User user) {
         log.info("getGamesOwnedByUsername: getting games for {}", user);
 
+        // Verify that the user is not null
         if (user == null) {
             log.error("getGamesOwnedByUsername: user was null");
             return new LinkedList<>();
         }
+
         // Use the user's database ID to retrieve their ownership records.
         List<GameOwned> games = gamesOwnedRepo.findByUser(user);
-
-        log.info("getGamesOwnedByUsername: found {} owned games for '{}'", games.size(), user.getUsername());
+        log.info("getGamesOwnedByUsername: found {} owned games for '{}'", games.size(), user);
         return games;
     }
 
@@ -164,7 +157,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
     @Transactional
     @Override
     public boolean removeGameFromCollection(User user, Long gameOwnedID) {
-        log.info("removeGameFromCollection: user {} attempted to remove game {} from collection", user, gameOwnedID);
+        log.info("removeGameFromCollection: '{}' attempted to remove owned game with id: {} from collection", user, gameOwnedID);
 
         // Verify the user exists
         if (user == null) {
@@ -180,20 +173,18 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
 
         // Verify that the requested game exists before removing it from the database.
         GameOwned gameOwned = gamesOwnedRepo.findByGameOwnedID(gameOwnedID);
-
         if (gameOwned == null) {
-            log.warn("removeGameFromCollection: game {} was not found", gameOwnedID);
+            log.warn("removeGameFromCollection: owned game with id: {} was not found", gameOwnedID);
             return false;
         }
 
         // Verify that the user requesting to remove the game from their collection is the owner of the game.
         if (!gameOwned.getUser().equals(user)) {
-            log.warn("removeGameFromCollection: game {} is not owned by {}, is owned by {}", gameOwnedID, user, gameOwned.getUser());
+            log.warn("removeGameFromCollection: owned game with id: {} is not owned by '{}', is owned by '{}'", gameOwnedID, user, gameOwned.getUser());
             return false;
         }
 
         gamesOwnedRepo.delete(gameOwned);
-
         log.debug("removeGameFromCollection: user {} removed game {} from their collection", user, gameOwned.getGame());
         return true;
     }
@@ -208,7 +199,7 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      */
     @Override
     public List<GameOwned> getGamesOwnedByFamily(Family family) {
-        log.info("getGamesOwnedByFamily: attempting to retrieve games for family: {}", family);
+        log.info("getGamesOwnedByFamily: attempting to retrieve games for '{}'", family);
 
         // Ensures the family is not null
         if (family == null) {
@@ -218,53 +209,60 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
 
         // Retrieve the accepted members of this family.
         List<FamilyMembership> memberships = membershipRepo.findByFamilyAndStatus(family, "ACCEPTED");
-
         List<User> users = new LinkedList<>();
-
         for (FamilyMembership membership : memberships) {
             users.add(membership.getUser());
         }
 
         // Retrieve all games owned by those users.
-        return gamesOwnedRepo.findByUserIn(users);
+        List<GameOwned> games = gamesOwnedRepo.findByUserIn(users);
+        log.debug("getGamesOwnedByFamily: retrieved {} games for '{}'", games.size(), family);
+        return games;
     }
 
+    /**
+     * Retrieves the number of references to a game owned by a user.
+     *
+     * @param gameID the ID of the game whose references are being counted
+     * @param user   the user whose game references are being counted
+     * @return the number of references to the game owned by the user
+     */
     @Override
     public long getNumberOfReferences(Long gameID, User user) {
+        // Ensures that gameID and user are not null
         if (gameID == null || user == null) {
-            log.warn("getNumberOfReferences: gameID or user was null");
+            log.error("getNumberOfReferences: gameID or user was null");
             return 0;
         }
-
         return gamesOwnedRepo.countByGame_GameIDAndUser(gameID, user);
     }
 
     /**
      * Updates the game references for the specified user's owned games.
      *
-     * @param gameID the ID of the game whose references are being updated
-     * @param user   the user whose game references are being updated
+     * @param gameID  the ID of the game whose references are being updated
+     * @param user    the user whose game references are being updated
      * @param newGame the new game to associate with the ownership records
      * @return {@code true} if the game references were updated successfully;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     @Transactional
     @Override
     public boolean updateGameReferences(Long gameID, User user, Game newGame) {
-
+        // Ensures that gameID, user, and newGame are not null
         if (gameID == null || user == null || newGame == null) {
-            log.warn("updateGameReferences: gameID, user, or newGame was null");
+            log.error("updateGameReferences: gameID, user, or newGame was null");
             return false;
         }
 
+        // Retrieve the game ownership records for the specified game and user and update them.
         List<GameOwned> ownedGames = gamesOwnedRepo.findByGame_GameIDAndUser(gameID, user);
-
         for (GameOwned ownedGame : ownedGames) {
             ownedGame.setGame(newGame);
         }
-        log.debug("updateGameReferences: {} updated {} owned games game refrences.", user, ownedGames.size());
 
         gamesOwnedRepo.saveAll(ownedGames);
+        log.debug("updateGameReferences: '{}' updated {} owned games game refrences.", user, ownedGames.size());
         return true;
     }
 
@@ -277,22 +275,26 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      */
     @Override
     public GameOwned getGameOwnedByID(User user, Long gameOwnedID) {
+        // Ensures that gameOwnedID and user are not null
         if (gameOwnedID == null || user == null) {
-            log.warn("getGameOwnedByID: gameOwnedID or user was null");
+            log.error("getGameOwnedByID: gameOwnedID or user was null");
             return null;
         }
-        GameOwned gameOwned = gamesOwnedRepo.findByGameOwnedID(gameOwnedID);
 
+        // Retrieve and ensure gameOwned with the specified ID is not null.
+        GameOwned gameOwned = gamesOwnedRepo.findByGameOwnedID(gameOwnedID);
         if (gameOwned == null) {
             log.warn("getGameOwnedByID: gameOwned {} was not found", gameOwnedID);
             return null;
         }
 
-        if(!gameOwned.getUser().equals(user)) {
-            log.error("getGameOwnedByID: {} tried to retrieve a game owned by {}", user, gameOwned.getUser());
+        // Ensure that the user owns the game.
+        if (!gameOwned.getUser().equals(user)) {
+            log.error("getGameOwnedByID: '{}' tried to retrieve a game owned by '{}'", user, gameOwned.getUser());
             return null;
         }
 
+        log.debug("getGameOwnedByID: '{}' retrieved '{}'", user, gameOwned);
         return gameOwned;
     }
 
@@ -307,27 +309,36 @@ public class GamesOwnedServiceImpl implements GamesOwnedService {
      */
     @Override
     public boolean editGameInCollection(User user, Long gameOwnedID, Game game, Integer yearProduced) {
+        // Ensures that user, gameOwnedID, and game are not null
         if (gameOwnedID == null || user == null || game == null) {
-            log.warn("editGameInCollection: user, gameOwnedID, or game was null");
+            log.error("editGameInCollection: user, gameOwnedID, or game was null");
             return false;
         }
 
+        // Retrieve and ensure gameOwned with the specified ID is not null.
         GameOwned gameOwned = getGameOwnedByID(user, gameOwnedID);
-
-        if(gameOwned == null) {
-            log.warn("editGameInCollection: the user did not own the passed gameID");
+        if (gameOwned == null) {
+            log.warn("editGameInCollection: the gameOwned was null");
             return false;
         }
 
+        // Ensure that the user owns the game.
+        if (!gameOwned.getUser().equals(user)) {
+            log.error("editGameInCollection: '{}' tried to edit a game owned by '{}'", user, gameOwned.getUser());
+            return false;
+        }
+
+        // Ensure that the yearProduced is valid.
         if (yearProduced != null && (yearProduced > (Year.now().getValue() + 2) || yearProduced < -2000)) {
             log.error("editGameInCollection: {} tried adding a game with an invalid year {}", user, yearProduced);
             return false;
         }
 
+        // Update the game and yearProduced of the gameOwned.
         gameOwned.setGame(game);
         gameOwned.setYearProduced(yearProduced);
         gamesOwnedRepo.save(gameOwned);
-
+        log.debug("editGameInCollection: '{}' edited '{}'", user, gameOwned);
         return true;
     }
 

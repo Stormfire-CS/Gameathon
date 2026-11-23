@@ -76,8 +76,8 @@ public interface GamesOwnedService {
     /**
      * Updates the game references associated with a user's collection.
      *
-     * @param gameID the ID of the game whose references are being updated
-     * @param user   the user whose game references are being updated
+     * @param gameID  the ID of the game whose references are being updated
+     * @param user    the user whose game references are being updated
      * @param newGame the new game to associate with the ownership records
      * @return {@code true} if the game references were updated successfully;
      * {@code false} otherwise
