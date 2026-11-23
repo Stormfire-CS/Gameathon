@@ -13,32 +13,53 @@ Install the following software before running Gameathon:
 - Git 2.55.0 -- used to download the source code
 - MySQL 8.0.46 -- used to store program data
 
+These are the versions used to develop and test Gameathon. Other versions may work, but have not been tested.
+The versions listed above are the recommended versions.
+
 ## Check your installed versions
 
 Open a terminal (Command Prompt on Windows, or Terminal on mac/Linux) and run the following commands;
 
-Check Java:
+### Check Java:
 ```
 java -version
 ```
-This will display the installed Java version. Make sure it is Java 25.
+This will display the installed Java version. The recommended version is Java 25.
 
-Check Git:
+### Check Git:
 ```
 git --version
 ```
-This will display the installed Git version, ensure it is 2.55.0
+This will display the installed Git version. The recommended version is 2.55.0
 
-Check MySQL
+### Check MySQL:
+
+To check the installed MySQL client version, run:
+```
+mysql --version
+```
+To check the MySQL server version, first connect to your MySQL server:
+```
+mysql -u root -p
+```
+Enter your MySQL password when prompted. Once connected, run:
 ```
 SELECT VERSION();
 ```
+This displays the version of the MySQL server you are connected to.
 
 ---
+# Setting Up SQL DataBase
 
-## Mac / Linux / Windows
+## 0. Install SQL if not installed
+
+Download and install MySQL from the official website and follow the setup wizard: https://dev.mysql.com/downloads/mysql/
+
+- Make sure to choose a version appropiate for your system.
+- Make sure to remember the root password you enter during setup.
 
 ## 1. Clone the repo
+Open a terminal and run the following commands.
 ```
 git clone https://github.com/Stormfire-CS/Gameathon.git
 cd Gameathon
@@ -46,47 +67,53 @@ cd Gameathon
 ## 2. Create the MySQL database
 Gameathon requires a lcoal MySQL database.
 
-### Start MySQL
+## 3. Create the MySQL Database
 
 Make sure your local MySQL server is running.
 
-Connect using MySQL Shell:
+Connect to MySQL:
+Open a terminal and connect to your local MySQL server:
 ```
-mysqlsh
+mysql -u root -p
 ```
-At the MySQL Shell prompt, switch to SQL mode:
-```
-\sql
-```
-Connect to your local MySQL server. Replace root with your MySQL username if necessary:
-```
-\connect root@localhost
-```
-Enter your MySQL password when prompted.
+Enter the root password you created during the MySQL installation process.
+
+If the mysql command is not recoqnized, you may need to try opening the MySQL command line installed with MySQL.
 
 ### Create the database
-
+Once connected to MySQL then run:
 ```
 CREATE DATABASE game_tracker;
 ```
-
-### Configure your database credentials
-
-Open:
+(game_tracker is the default database name, however, if desired, the database can be named something else. Be sure to update the application/properties file as explained later in step 4)
+### Create a Database User
+Gameathon needs a MySQL account with permission to access the game_tracker database.
+- The default account is named gt_app (gt_app can also be renamed and updated in the application/properties file in step 4)
+- And the default password is Max12 (Max12 can also be renamed and updated in the application/properties file in step 4)
+```
+CREATE USER 'gt_app'@'localhost' IDENTIFIED BY 'Max12';
+```
+Then grant the account permission to use the Gameathon database:
+```
+GRANT ALL PRIVILEGES ON game_tracker.* TO 'gt_app'@'localhost';
+```
+## 4. Configure Your Database Credentials
+Open the following file in the project:
 ```
 src/main/resources/application.properties
 ```
 Find the database configuration. It should contain settings for the database URL, username, and password.
 
-For example, a local MySQL conf:
+For example, the default configureation looks like this:
 ```
+spring.application.name=gameathon
 spring.datasource.url=jdbc:mysql://localhost/game_tracker
 spring.datasource.username = gt_app
-spring.datasource.password = Password01
+spring.datasource.password = Max12
+spring.jpa.hibernate.ddl-auto=update
 ```
-Replace the username and password with credentials for your local MySQL account.
-
-## 3. Run Gameathon
+If you did not use the default database name, username, or password, then now update the fields to match the values you entered.
+## 5. Run Gameathon
 
 ### Windows
 From the project directory, run:
