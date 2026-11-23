@@ -57,7 +57,6 @@ public class SignUpController {
     public String signUpGet(Model model) {
         // Provide a new form object for the user to complete.
         model.addAttribute("createUserForm", new CreateUserForm());
-
         return "signUpPage";
     }
 
@@ -77,28 +76,26 @@ public class SignUpController {
      */
     @PostMapping("/signUpPage")
     public String signUpPost(@Valid @ModelAttribute CreateUserForm createUserForm, BindingResult result, HttpSession session) {
-
         // Return to the form if any field-level validation rules fail.
         if (result.hasErrors()) {
             return "signUpPage";
         }
 
+        // Try to create a new user.
         User user = userService.newUser(createUserForm.getUsername(), createUserForm.getPassword1());
 
         // Check whether the username is available and the passwords match.
         if (user == null) {
-
             // Add a form-level error when registration details are invalid.
             result.addError(new ObjectError("globalError", "Username already exists"));
             return "signUpPage";
         }
 
         // Set the session to expire after 15 minutes of inactivity.
-        session.setMaxInactiveInterval(10 * 60);
+        session.setMaxInactiveInterval(15 * 60);
 
         // Store the logged-in User in the session.
         session.setAttribute("loggedInUser", user);
-
         return "redirect:/homePage";
     }
 }
