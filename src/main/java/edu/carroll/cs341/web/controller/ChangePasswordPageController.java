@@ -59,21 +59,21 @@ public class ChangePasswordPageController {
     @GetMapping("/changePasswordPage")
     public String changePassword (HttpSession session, HttpSession passwordSession, Model model) {
 
+        // Check if the user is logged in, redirects to the login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
+        // Check if the user is authorized to change their password, redirects to the account editing page if not.
         User passUser = (User) passwordSession.getAttribute("loggedInUser");
-
         if (passUser == null) {
             return "redirect:/editAccount";
         }
 
+        // Pass the user and edit password form to the change password page.
         model.addAttribute("user", user);
         model.addAttribute("editPasswordForm", new EditPasswordForm());
-
         return "changePasswordPage";
     }
 
@@ -98,25 +98,26 @@ public class ChangePasswordPageController {
     public String changePassword(HttpSession session, HttpSession passwordSession, @Valid @ModelAttribute("editPasswordForm") EditPasswordForm editPasswordForm,
                                  BindingResult bindingResult, Model model)
     {
+        // Check if the user is logged in, redirects to the login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
+        // Check if the user is authorized to change their password, redirects to the account editing page if not.
         User passUser = (User) passwordSession.getAttribute("loggedInUser");
-
         if (passUser == null) {
             return "redirect:/editAccount";
         }
 
+        // Check if the submitted password values are valid, redirects to the password change page if not.
         if (bindingResult.hasErrors()) {
             model.addAttribute("user", user);
             return "changePasswordPage";
         }
 
+        // Change the user's password and redirect to the account editing page.
         userService.changeUsersPassword(user, editPasswordForm.getPassword1());
-
         return "redirect:/editAccount";
     }
 }
