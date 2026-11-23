@@ -3,7 +3,6 @@ package edu.carroll.cs341.web.controller;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.service.FamilyService;
 import edu.carroll.cs341.web.form.FamilyNameForm;
-import edu.carroll.cs341.web.form.LoginForm;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -88,7 +87,7 @@ public class CreateFamilyController {
      * @param session        the HTTP session used to retrieve the logged-in user
      * @param model          the model used to provide attributes to the view
      * @return the name of the family creation view if validation fails,
-     *         or a redirect to the family page after processing
+     * or a redirect to the family page after processing
      */
     @PostMapping("/createFamily")
     public String createFamily(@Valid @ModelAttribute FamilyNameForm familyNameForm, BindingResult result, HttpSession session, Model model) {
@@ -101,7 +100,7 @@ public class CreateFamilyController {
 
         // Return to the form if any field-level validation rules fail.
         if (result.hasErrors()) {
-            model. addAttribute("user", user);
+            model.addAttribute("user", user);
             return "createFamily";
         }
 
