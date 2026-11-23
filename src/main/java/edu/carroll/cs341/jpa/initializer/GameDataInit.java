@@ -32,10 +32,14 @@ import java.util.Scanner;
 @Component
 public class GameDataInit implements CommandLineRunner {
 
-    /** Logger used to record database initialization progress and errors. */
+    /**
+     * Logger used to record database initialization progress and errors.
+     */
     private static final Logger log = LoggerFactory.getLogger(GameDataInit.class);
 
-    /** Repository used to check for existing games and save new game records. */
+    /**
+     * Repository used to check for existing games and save new game records.
+     */
     private final GamesRepository gamesRepo;
 
     /**
@@ -102,9 +106,9 @@ public class GameDataInit implements CommandLineRunner {
                 // Only add the game if it does not already exist in the database.
                 if (!gamesRepo.existsByGameName(data[0])) {
 
+                    // Saves the player limits for the game if they exist.
                     int minPlayers;
                     int maxPlayers;
-
                     try {
                         minPlayers = Integer.parseInt(data[1].trim());
                         maxPlayers = Integer.parseInt(data[2].trim());
@@ -121,6 +125,7 @@ public class GameDataInit implements CommandLineRunner {
                         continue;
                     }
 
+                    // Sets the player limits for the game.
                     game.setMinPlayers(minPlayers);
                     game.setMaxPlayers(maxPlayers);
                     game.setCanSee(true);
@@ -142,7 +147,7 @@ public class GameDataInit implements CommandLineRunner {
             return;
         }
 
-        log.info("Game data initialization completed. Added: {}, skipped: {}, failed: {}.",gamesAdded, gamesSkipped, gamesFailed);
+        log.info("Game data initialization completed. Added: {}, skipped: {}, failed: {}.", gamesAdded, gamesSkipped, gamesFailed);
 
     }
 }
