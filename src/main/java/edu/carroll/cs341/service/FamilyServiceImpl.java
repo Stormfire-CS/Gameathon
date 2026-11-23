@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -35,35 +34,39 @@ import java.util.List;
  * </ul>
  */
 @Service
-public class FamilyServiceImpl implements FamilyService{
+public class FamilyServiceImpl implements FamilyService {
 
-    /** Logger used to record service operations and validation outcomes. */
+    /**
+     * Logger used to record service operations and validation outcomes.
+     */
     private static final Logger log = LoggerFactory.getLogger(FamilyServiceImpl.class);
 
-    /** Status assigned to a membership request awaiting a decision. */
-    private static final String PENDING = "PENDING";
-
-    /** Status assigned to an approved family membership. */
+    /**
+     * Status assigned to an approved family membership.
+     */
     private static final String ACCEPTED = "ACCEPTED";
 
-    /** Status assigned to a rejected family membership request. */
-    private static final String REJECTED = "REJECTED";
-
-    /** Repository used to retrieve and save family records. */
+    /**
+     * Repository used to retrieve and save family records.
+     */
     private final FamiliesRepository familiesRepo;
 
-    /** Repository used to retrieve and update family membership records. */
+    /**
+     * Repository used to retrieve and update family membership records.
+     */
     private final FamilyMembershipRepository membershipRepo;
 
-    /** Repository used to retrieve login records for users. */
+    /**
+     * Repository used to retrieve login records for users.
+     */
     private final UserRepository userRepo;
 
     /**
      * Creates the family service with its required repositories.
      *
-     * @param familiesRepo repository for family records
+     * @param familiesRepo   repository for family records
      * @param membershipRepo repository for family membership records
-     * @param userRepo repository for login records
+     * @param userRepo       repository for login records
      */
     public FamilyServiceImpl(FamiliesRepository familiesRepo, FamilyMembershipRepository membershipRepo, UserRepository userRepo) {
         this.familiesRepo = familiesRepo;
@@ -79,15 +82,15 @@ public class FamilyServiceImpl implements FamilyService{
      * {@code null}, the user already has an accepted membership, or a family
      * with the same name already exists.</p>
      *
-     * @param user the username of the user creating the family
+     * @param user       the username of the user creating the family
      * @param familyName the proposed name of the family
      * @return {@code true} if the family and its initial membership are saved;
-     *         {@code false} if validation fails
+     * {@code false} if validation fails
      */
     @Transactional
     @Override
     public boolean createFamily(User user, String familyName) {
-        log.info("createFamily: user {} attempted to create family {}", user, familyName);
+        log.info("createFamily: '{}' attempted to create '{}'", user, familyName);
 
         // A user is required.
         if (user == null) {
@@ -126,42 +129,40 @@ public class FamilyServiceImpl implements FamilyService{
         FamilyMembership membership = new FamilyMembership(family, user, ACCEPTED);
         membershipRepo.save(membership);
 
+        // Save the user after setting the family.
         user.setFamily(family);
         userRepo.save(user);
-
-        log.debug("createFamily: user '{}' created family '{}'", user, family);
-
+        log.debug("createFamily: '{}' created '{}'", user, family);
         return true;
     }
 
     /**
      * Checks whether the specified user administers the given family.
      *
-     * @param user the user whose administrator permissions are being checked
+     * @param user   the user whose administrator permissions are being checked
      * @param family the family whose administrator is being checked
      * @return {@code true} if the user administers the family;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     @Override
     public boolean isFamilyAdmin(User user, Family family) {
-        log.info("isFamilyAdmin: checking to see if {} administers family {}", user, family);
+        log.info("isFamilyAdmin: checking to see if '{}' administers '{}'", user, family);
 
         // A valid user is required to check if the user is an admin.
-        if (user == null ) {
+        if (user == null) {
             log.error("isFamilyAdmin: user is null");
             return false;
         }
 
         // A valid family is required to check if the user is an admin.
-        if (family == null ) {
+        if (family == null) {
             log.error("isFamilyAdmin: family is null");
             return false;
         }
 
+        //
         boolean isAdmin = family.getFamilyAdmin().equals(user);
-
-        log.debug("isFamilyAdmin: user {} admins status is {} for {} family", user, isAdmin, family);
-
+        log.debug("isFamilyAdmin: '{}' admins status is {} for '{}'", user, isAdmin, family);
         return isAdmin;
     }
 
@@ -171,44 +172,46 @@ public class FamilyServiceImpl implements FamilyService{
      * <p>The operation fails if the user is {@code null}, the proposed family
      * name is {@code null} or blank, or the user does not administer a family.</p>
      *
-     * @param user the user requesting the family rename
+     * @param user       the user requesting the family rename
      * @param familyName the proposed new family name
      * @return {@code true} if the family was renamed successfully;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     @Transactional
     @Override
     public boolean renameFamily(User user, String familyName) {
-        log.info("renameFamily: user '{}' is attempting to rename their family to '{}'", user, familyName);
+        log.info("renameFamily: '{}' is attempting to rename their family to '{}'", user, familyName);
 
+        // Check if user is null
         if (user == null) {
             log.error("renameFamily: user is null");
             return false;
         }
 
+        // Check if family name is null
         if (familyName == null) {
             log.error("renameFamily: family name is null");
             return false;
         }
 
+        // Check if family name is empty
         if (familyName.trim().isEmpty()) {
-            log.warn("renameFamily: family name is empty");
+            log.error("renameFamily: family name is empty");
             return false;
         }
 
         // Find the family administered by this user.
         Family family = familiesRepo.findByFamilyAdmin(user);
         if (family == null || !family.getFamilyAdmin().equals(user)) {
-            log.debug("renameFamily: user '{}' is not the family admin", user);
+            log.error("renameFamily: '{}' is not the family admin", user);
             return false;
         }
 
-        // Update the family name.
+        // Update the family name and save.
         family.setFamilyName(familyName.trim());
         familiesRepo.save(family);
-
         user.setFamily(family);
-        log.debug("renameFamily: user '{}' renamed their family to '{}'", user, familyName.trim());
+        log.debug("renameFamily: '{}' renamed their family to '{}'", user, familyName.trim());
 
         return true;
     }
@@ -221,13 +224,13 @@ public class FamilyServiceImpl implements FamilyService{
      * accepted member of that family.</p>
      *
      * @param currentAdmin the user currently administering the family
-     * @param newAdmin the user who will become the new administrator
+     * @param newAdmin     the user who will become the new administrator
      * @return {@code true} if the administrator was changed successfully;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     @Override
     public boolean changeAdmin(User currentAdmin, User newAdmin) {
-        log.info("changeAdmin: user '{}' is attempting to change the family administrator to '{}'",currentAdmin, newAdmin);
+        log.info("changeAdmin: '{}' is attempting to change the family administrator to '{}'", currentAdmin, newAdmin);
 
         // Both users are required.
         if (currentAdmin == null || newAdmin == null) {
@@ -238,25 +241,22 @@ public class FamilyServiceImpl implements FamilyService{
         // Find the family administered by the current user.
         Family family = familiesRepo.findByFamilyAdmin(currentAdmin);
 
+        // Family must not be null and the user must be the family admin.
         if (family == null || !family.getFamilyAdmin().equals(currentAdmin)) {
-            log.debug("changeAdmin: user '{}' is not the family admin", currentAdmin);
+            log.error("changeAdmin: '{}' is not the family admin", currentAdmin);
             return false;
         }
 
         // The new administrator must already belong to the same family.
         if (!family.equals(newAdmin.getFamily())) {
-            log.debug("changeAdmin: user '{}' does not belong to family '{}'",
-                    newAdmin, family);
+            log.error("changeAdmin: '{}' does not belong to '{}'", newAdmin, family);
             return false;
         }
 
-        // Update the family administrator.
+        // Update the family administrator and save.
         family.setFamilyAdmin(newAdmin);
         familiesRepo.save(family);
-
-        log.debug("changeAdmin: user '{}' changed the administrator of family '{}' to '{}'",
-                currentAdmin, family, newAdmin);
-
+        log.debug("changeAdmin: '{}' changed the administrator of '{}' to '{}'", currentAdmin, family, newAdmin);
         return true;
     }
 
@@ -268,12 +268,12 @@ public class FamilyServiceImpl implements FamilyService{
      *
      * @param user the user requesting the family deletion
      * @return {@code true} if the family was deleted successfully;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     @Transactional
     @Override
     public boolean deleteFamily(User user) {
-        log.info("deleteFamily: user '{}' is attempting to delete their family", user);
+        log.info("deleteFamily: '{}' is attempting to delete their family", user);
 
         // A valid user is required.
         if (user == null) {
@@ -284,8 +284,9 @@ public class FamilyServiceImpl implements FamilyService{
         // Find the family administered by this user.
         Family family = familiesRepo.findByFamilyAdmin(user);
 
+        // Family must not be null and the user must be the family admin.
         if (family == null || !family.getFamilyAdmin().equals(user)) {
-            log.debug("deleteFamily: user '{}' is not the family admin", user);
+            log.error("deleteFamily: '{}' is not the family admin", user);
             return false;
         }
 
@@ -295,7 +296,6 @@ public class FamilyServiceImpl implements FamilyService{
         // Clear the family reference for each associated user.
         for (FamilyMembership membership : memberships) {
             User member = membership.getUser();
-
             if (family.equals(member.getFamily())) {
                 member.setFamily(null);
                 userRepo.save(member);
@@ -308,9 +308,7 @@ public class FamilyServiceImpl implements FamilyService{
 
         // Delete the family.
         familiesRepo.delete(family);
-
-        log.debug("deleteFamily: user '{}' successfully deleted family '{}'", user, family);
-
+        log.debug("deleteFamily: '{}' successfully deleted '{}'", user, family);
         return true;
     }
 }
