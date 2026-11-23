@@ -56,7 +56,6 @@ public class LoginController {
     public String loginGet(Model model) {
         // Provide a new form object for the user to fill out.
         model.addAttribute("loginForm", new LoginForm());
-
         return "login";
     }
 
@@ -91,8 +90,6 @@ public class LoginController {
 
         // Store the logged-in User in the session.
         session.setAttribute("loggedInUser", user);
-
-
         return "redirect:/homePage";
     }
 }
