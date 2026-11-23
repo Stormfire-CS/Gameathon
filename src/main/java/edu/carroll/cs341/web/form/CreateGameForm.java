@@ -115,7 +115,6 @@ public class CreateGameForm {
         if (minPlayers == null || maxPlayers == null) {
             return true;
         }
-
         return minPlayers <= maxPlayers;
     }
 }
