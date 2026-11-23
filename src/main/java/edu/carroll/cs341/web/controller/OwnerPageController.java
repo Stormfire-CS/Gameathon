@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * Handles web requests for the owner page.
- * Retrieves the username from the request and makes it available
+ * Retrieves the user from the session and makes it available
  * to the owner page view.
  *
  * <p><b>Sources Used:</b></p>
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class OwnerPageController {
 
     /**
-     * Displays the owner page and adds the username to the model
+     * Displays the owner page and adds the user to the model
      * so that it can be accessed by the view.
      *
      * @param session the HTTP session associated with the current user
@@ -31,16 +31,14 @@ public class OwnerPageController {
      */
     @GetMapping("/ownerPage")
     public String ownerPage(HttpSession session, Model model) {
-
+        // Ensures the user is logged in, and if not redirects to the login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
-        // Make the username available to the owner page template.
+        // Make the user available to the owner page template.
         model.addAttribute("user", user);
-
         return "ownerPage";
     }
 }
