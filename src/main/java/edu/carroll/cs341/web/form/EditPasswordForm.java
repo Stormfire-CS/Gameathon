@@ -83,7 +83,6 @@ public class EditPasswordForm {
         if (password1 == null || password2 == null) {
             return true;
         }
-
         return password1.equals(password2);
     }
 }
