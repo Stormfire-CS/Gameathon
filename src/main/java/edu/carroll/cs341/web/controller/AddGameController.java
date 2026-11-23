@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Handles web requests for adding new games to the game catalog.
@@ -41,6 +40,9 @@ public class AddGameController {
      */
     private final GamesService gamesService;
 
+    /**
+     * Service used to manage games owned by users.
+     */
     private final GamesOwnedService gamesOwnedService;
 
     /**
@@ -63,16 +65,14 @@ public class AddGameController {
      */
     @GetMapping("/addGamePage")
     public String addGame(HttpSession session, Model model) {
-
+        // If the user is not logged in, redirect to the login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
-        // Make the username available to the view for use during submission.
+        // Make the username available to the view for use during submission and add forms.
         model.addAttribute("user", user);
-
         model.addAttribute("addGameForm", new CreateGameForm());
         model.addAttribute("editGameForm", new EditGameForm());
         model.addAttribute("availableGames", gamesService.getAvailableGames(user));
@@ -95,12 +95,13 @@ public class AddGameController {
             Model model
     ) {
 
+        // Check if the user is logged in, redirects to the login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
+        // If there are validation errors, return to the add game page.
         if (result.hasErrors()) {
             model.addAttribute("user", user);
             model.addAttribute("availableGames", gamesService.getAvailableGames(user));
@@ -115,6 +116,7 @@ public class AddGameController {
                 addGameForm.getMaxPlayers()
         );
 
+        // If the game could not be added, return to the add game page.
         if (!added) {
             result.addError(new ObjectError(
                     "globalError",
@@ -130,6 +132,21 @@ public class AddGameController {
         return "redirect:/editCollectionPage";
     }
 
+    /**
+     * Processes a request to edit an existing game.
+     *
+     * <p>This method validates the submitted game information and checks that
+     * the user is logged in before attempting to update the game. If validation
+     * fails or the game cannot be edited, the user is returned to the add game
+     * page with the appropriate error messages. Otherwise, the user is redirected
+     * to the edit collection page.</p>
+     *
+     * @param editGameForm the form containing the updated game information
+     * @param result       the object containing validation results and errors
+     * @param session      the HTTP session used to retrieve the logged-in user
+     * @param model        the model used to provide attributes to the view
+     * @return the name of the view to display or a redirect to another page
+     */
     @PostMapping("/editGame")
     public String editGame(
             @Valid @ModelAttribute("editGameForm") EditGameForm editGameForm,
@@ -138,17 +155,19 @@ public class AddGameController {
             Model model
     ) {
 
+        // Check if the user is logged in, redirects to the login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
+        // Check if the user has selected a game to edit.
         if (editGameForm.getGameID() == null) {
             result.addError(new ObjectError("globalError", "Please select a game to edit."
             ));
         }
 
+        // Check if the user has provided valid input.
         if (result.hasErrors()) {
             model.addAttribute("user", user);
             model.addAttribute("availableGames", gamesService.getAvailableGames(user));
@@ -156,6 +175,7 @@ public class AddGameController {
             return "addGame";
         }
 
+        // Attempt to edit the game
         boolean edited = gamesService.editGame(
                 user,
                 editGameForm.getGameID(),
@@ -164,6 +184,7 @@ public class AddGameController {
                 editGameForm.getMaxPlayers()
         );
 
+        // Check if the game was edited successfully
         if (!edited) {
             result.addError(new ObjectError(
                     "globalError",
@@ -179,11 +200,27 @@ public class AddGameController {
         return "redirect:/editCollectionPage";
     }
 
+    /**
+     * Processes a request to remove a game from the available games.
+     *
+     * <p>Before removing a game, this method checks whether it is still
+     * referenced by any entries in the user's collection. If references
+     * exist, the game cannot be removed and an error message is displayed.
+     * Otherwise, the game is removed and a success message is provided.</p>
+     *
+     * <p>The method also reloads the model attributes required by the add
+     * game page so that the user can continue managing their games.</p>
+     *
+     * @param session the HTTP session used to retrieve the logged-in user
+     * @param gameID  the ID of the game to remove
+     * @param model   the model used to provide attributes and feedback to the view
+     * @return the name of the view to display or a redirect to the login page
+     */
     @PostMapping("/removeGame")
     public String removeGame(HttpSession session, Long gameID, Model model) {
 
+        // Check if the user is logged in, redirects to the login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
@@ -191,6 +228,7 @@ public class AddGameController {
         // Check whether the game is still associated with owned games.
         long referenceCount = gamesOwnedService.getNumberOfReferences(gameID, user);
 
+        // Check if the game is still associated with owned games.
         if (referenceCount > 0) {
             model.addAttribute("removeGameError",
                     "This game cannot be removed because it is still associated with " +
@@ -205,27 +243,42 @@ public class AddGameController {
             return "addGame";
         }
 
+        // Attempt to remove the game
         String gameName = gamesService.getGameByGameID(gameID).getGameName();
-
         gamesService.removeGame(user, gameID);
 
+        // Returns user to the addGame page with success message
         model.addAttribute("removeGameSuccess", "Successfully removed " + gameName + ".");
         model.addAttribute("user", user);
         model.addAttribute("addGameForm", new CreateGameForm());
         model.addAttribute("editGameForm", new EditGameForm());
         model.addAttribute("availableGames", gamesService.getAvailableGames(user));
-
         return "addGame";
     }
 
+    /**
+     * Retrieves the number of times a game is referenced in the logged-in
+     * user's collection.
+     *
+     * <p>This method provides a response body containing the reference count
+     * for a specified game. It is intended to be called by the client when
+     * checking whether a game can be safely removed from the available games.</p>
+     *
+     * <p>If no user is logged in, the method returns zero.</p>
+     *
+     * @param gameID  the ID of the game whose references are being counted
+     * @param session the HTTP session used to retrieve the logged-in user
+     * @return the number of collection entries referencing the specified game,
+     * or zero if no user is logged in
+     */
     @GetMapping("/gameReferenceCount")
     @ResponseBody
     public long getGameReferenceCount(
             @RequestParam Long gameID,
             HttpSession session) {
 
+        // Check if the user is logged in, redirects to the login page if not.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return 0;
         }
