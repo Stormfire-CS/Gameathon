@@ -1,16 +1,17 @@
 package edu.carroll.cs341.service;
 
 import edu.carroll.cs341.jpa.model.User;
-import edu.carroll.cs341.jpa.repo.UserRepository;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
-
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
+import static org.springframework.test.util.AssertionErrors.assertNotEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertNull;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 
 /**
@@ -30,7 +31,8 @@ import static org.springframework.test.util.AssertionErrors.*;
  * transaction that is normally rolled back after the test completes.</p>
  *
  * <p>ChatGPT assisted with Javadoc documentation; code reviewed by author.
- * No code generated.</p>
+ * Only validateUserInvalidUserInvalidPasswordTest and
+ * newUserInvalidUserInvalidPasswordTest were written by ChatGPT.</p>
  *
  * @author Max Montowski
  */
@@ -48,8 +50,6 @@ public class UserServiceTest {
      */
 
 
-    //Also test usersnames with all caps, that still work, or a username that is entered with all lower case, that works when you enter all caps,
-    // Try entering mix case, try setting the username as mixed case and then verify entering different cases works, try setting it as all caps, and then veryify works with different cases.
     /**
      * Verifies that a user can be validated when the username and password
      * match the credentials stored in the database, when the database is empty, has one user, or has two users.
@@ -63,11 +63,13 @@ public class UserServiceTest {
         final String password2 = "testpass2";
         User nullUser = userService.validateUser(username, password);
         assertNull("validateUserSuccessTest: user should be null when there is no user in the database", nullUser);
+
         // One user in the database
         User checkUser = insertTestingUser(username, password);
         User sucsefulUser1 = userService.validateUser(username, password);
         assertNotNull("validateUserSuccessTest: should succeed using the same user/pass info", sucsefulUser1);
         assertEquals("validateUserSuccessTest: user who logged in should still be the same user that was created.", sucsefulUser1, checkUser);
+
         // Two users in the database
         User checkUser2 = insertTestingUser(username2, password2);
         User sucsesfulUser2 = userService.validateUser(username2, password2);
@@ -469,58 +471,39 @@ public class UserServiceTest {
     }
 
     /**
-     * Verifies that a null username fails with an otherwise valid password
-     * when the database has zero, one, or two users.
-     */
-    @Test
-    public void validateUserNullUser() {
-        final String username = "testUser";
-        final String password = "testPassword";
-        final String username2 = "testUser2";
-        final String password2 = "testPassword2";
-        final String test = "validateUserNullUserValidPasswordTest";
-
-        // No users in the database
-        User result = userService.validateUser(null, password);
-        assertNull(test + ": should fail with no users", result);
-
-        // One user in the database
-        User checkUser = insertTestingUser(username, password);
-        result = userService.validateUser(null, password);
-        assertNull(test + ": should fail with one user", result);
-        assertLogin(test, checkUser, username, password);
-
-        // Two users in the database
-        User checkUser2 = insertTestingUser(username2, password2);
-        result = userService.validateUser(null, password);
-        assertNull(test + ": should reject the first user's password with a null username", result);
-        result = userService.validateUser(null, password2);
-        assertNull(test + ": should reject the second user's password with a null username", result);
-        assertLogin(test, checkUser, username, password);
-        assertLogin(test, checkUser2, username2, password2);
-    }
-
-    /**
      * Verifies that combinations of invalid usernames and invalid passwords
      * fail when the database has zero, one, or two users.
+     *
+     * @author Max Montowski
      */
     @Test
     public void validateUserInvalidUserInvalidPasswordTest() {
+        // Define the two usernames and passwords that will be used to create test accounts.
         final String[] usernames = {"testUser", "otherUser"};
         final String[] passwords = {"testPassword", "otherPassword"};
+
+        // Store references to the created users so their original information can be checked later.
         User[] storedUsers = new User[usernames.length];
 
+        // Run the test with zero, one, and two users stored in the database.
         for (int userCount = 0; userCount <= usernames.length; userCount++) {
+
+            // Add one additional user before testing each database size greater than zero.
+            // This allows the test to examine how validation behaves as more users are stored.
             if (userCount > 0) {
                 int newUserIndex = userCount - 1;
                 storedUsers[newUserIndex] = insertTestingUser(
                         usernames[newUserIndex], passwords[newUserIndex]);
             }
 
+            // Test invalid credentials against each of the two possible account combinations.
             for (int account = 0; account < usernames.length; account++) {
                 String username = usernames[account];
                 String password = passwords[account];
 
+                // Define usernames that should not successfully identify the intended account.
+                // These cases test missing users, shortened usernames, altered usernames,
+                // additional characters, embedded whitespace, empty values, and null values.
                 String[] invalidUsernames = {
                         "missingUser",
                         username.substring(1),
@@ -535,6 +518,9 @@ public class UserServiceTest {
                         null
                 };
 
+                // Define passwords that should not successfully authenticate the intended account.
+                // These cases test incorrect passwords, shortened passwords, added characters,
+                // leading or trailing whitespace, empty values, null values, and capitalization changes.
                 String[] invalidPasswords = {
                         "incorrectPassword",
                         password.substring(1),
@@ -554,9 +540,16 @@ public class UserServiceTest {
                         "T" + password.substring(1).toLowerCase(java.util.Locale.ROOT)
                 };
 
+                // Try every invalid username with every invalid password.
+                // This verifies that validation rejects all combinations rather than
+                // only checking invalid usernames and passwords individually.
                 for (String invalidUsername : invalidUsernames) {
                     for (String invalidPassword : invalidPasswords) {
+
+                        // Attempt to authenticate using the current invalid credential combination.
                         User result = userService.validateUser(invalidUsername, invalidPassword);
+
+                        // Verify that the invalid credentials never return an authenticated user.
                         assertNull(
                                 "validateUserInvalidUserInvalidPasswordTest: should reject username ["
                                         + invalidUsername + "] and password [" + invalidPassword
@@ -566,8 +559,14 @@ public class UserServiceTest {
                 }
             }
 
+            // Verify that adding more users has not prevented any previously created
+            // account from authenticating with its original username and password.
             for (int account = 0; account < userCount; account++) {
+
+                // Authenticate using the original credentials for the current stored account.
                 User result = userService.validateUser(usernames[account], passwords[account]);
+
+                // Verify that authentication returns the same user that was originally created.
                 assertEquals(
                         "validateUserInvalidUserInvalidPasswordTest: original credentials should still work for "
                                 + usernames[account] + " with " + userCount + " stored users",
@@ -630,6 +629,7 @@ public class UserServiceTest {
         assertEquals("newUserSuccessTest: third user should be able to log in without either space",
                 result3, loginResult3);
 
+        // Checks the users have not been affected by the tests.
         loginResult = userService.validateUser(username, password);
         assertEquals("newUserSuccessTest: first user should still be able to log in after adding the third user",
                 result, loginResult);
@@ -652,9 +652,10 @@ public class UserServiceTest {
         final String password2 = "testPassword2";
         final String newPassword = "differentPassword";
 
-        // One user in the database
+        // Saves the original user
         User checkUser = insertTestingUser(username, password);
 
+        // One user in the database, testing duplicate username
         User result = userService.newUser(username, newPassword);
         assertNull("newUserExistingUserTest: should reject the original username with one user", result);
         result = userService.newUser("testuser", newPassword);
@@ -908,37 +909,71 @@ public class UserServiceTest {
                 checkUser2, loginResult2);
     }
 
+    /**
+     * Tests multiple invalid username formats against the invalid password combinations.
+     *
+     * @param databaseState a description of the database state
+     */
     private void assertInvalidRegistrationCombinations(String databaseState) {
+
+        // Test a null username against all of the invalid password combinations.
         assertRegistrationRejectsInvalidPasswords(null, "a null username", databaseState);
+
+        // Test a username containing an internal space.
         assertRegistrationRejectsInvalidPasswords("test User", "a username with an internal space", databaseState);
+
+        // Test an empty username.
         assertRegistrationRejectsInvalidPasswords("", "an empty username", databaseState);
+
+        // Test a username containing only whitespace characters.
         assertRegistrationRejectsInvalidPasswords("    ", "a spaces-only username", databaseState);
+
+        // Test a username that is shorter than the minimum allowed length.
         assertRegistrationRejectsInvalidPasswords("a", "a one-character username", databaseState);
+
+        // Test a username that exceeds the maximum allowed length of 30 characters.
         assertRegistrationRejectsInvalidPasswords(
                 "1234567890123456789012345678901", "a 31-character username", databaseState);
     }
 
+    /**
+     * Attempts to register users with an invalid username and several invalid password formats.
+     *
+     * @param invalidUsername     the invalid username to test
+     * @param usernameDescription a description of the invalid username
+     * @param databaseState       a description of the database state
+     */
     private void assertRegistrationRejectsInvalidPasswords(
             String invalidUsername, String usernameDescription, String databaseState) {
+
+        // Define a valid-length password that will be modified to create invalid password combinations.
         final String password = "differentPassword";
+
+        // Build a shared assertion message identifying the database state and invalid username being tested.
         final String message = "newUserInvalidUserInvalidPasswordTest: with " + databaseState
                 + ", should reject " + usernameDescription + " paired with ";
 
+        // Attempt registration with a null password.
         User result = userService.newUser(invalidUsername, null);
         assertNull(message + "a null password", result);
 
+        // Attempt registration with an empty password.
         result = userService.newUser(invalidUsername, "");
         assertNull(message + "an empty password", result);
 
+        // Attempt registration with a password containing a leading space.
         result = userService.newUser(invalidUsername, " " + password);
         assertNull(message + "a password with a leading space", result);
 
+        // Attempt registration with a password containing a trailing space.
         result = userService.newUser(invalidUsername, password + " ");
         assertNull(message + "a password with a trailing space", result);
 
+        // Attempt registration with a password containing spaces at both ends.
         result = userService.newUser(invalidUsername, " " + password + " ");
         assertNull(message + "a password with spaces on both ends", result);
 
+        // Attempt registration with a password containing only whitespace characters.
         result = userService.newUser(invalidUsername, "        ");
         assertNull(message + "a spaces-only password", result);
     }
@@ -1345,6 +1380,10 @@ public class UserServiceTest {
 
     /**
      * Creates a test user and verifies that the saved credentials work.
+     *
+     * @param username the username of the user to create
+     * @param password the password of the user to create
+     * @return the created user
      */
     private User insertTestingUser(String username, String password) {
         User user = userService.validateUser(username, password);
@@ -1359,13 +1398,5 @@ public class UserServiceTest {
         assertEquals("insertTestingUser: validated user should match the created user", user, userCheck);
         assertEquals("inserTestingUser: validate user should have the same username still", userCheck.getUsername(), username);
         return user;
-    }
-
-    private User assertLogin(String test, User expectedUser, String username, String password) {
-        User result = userService.validateUser(username, password);
-        assertNotNull(test + ": " + username + " should be able to log in", result);
-        assertEquals(test + ": login should return the expected user for " + username, expectedUser, result);
-        assertEquals(test + ": login should return the expected username", username, result.getUsername());
-        return result;
     }
 }
