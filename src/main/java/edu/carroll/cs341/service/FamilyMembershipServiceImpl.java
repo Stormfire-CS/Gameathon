@@ -16,11 +16,11 @@ import java.util.List;
 
 /**
  * Service implementation for managing family membership requests and accepted family members.
- *
+ * <p>
  * Coordinates family, membership, and user repository operations to submit join requests,
  * retrieve pending requests, accept or reject requests, remove members, allow members to
  * leave a family, and resolve family membership information for users.
- *
+ * <p>
  * Membership state is managed using pending, accepted, and rejected statuses. Public
  * operations validate administrator permissions, family ownership, existing memberships,
  * request state, and missing input before modifying persisted membership records.
@@ -33,35 +33,49 @@ import java.util.List;
  * </ul>
  */
 @Service
-public class FamilyMembershipServiceImpl implements FamilyMembershipService{
+public class FamilyMembershipServiceImpl implements FamilyMembershipService {
 
-    /** Logger used to record service operations and validation outcomes. */
+    /**
+     * Logger used to record service operations and validation outcomes.
+     */
     private static final Logger log = LoggerFactory.getLogger(FamilyMembershipServiceImpl.class);
 
-    /** Status assigned to a membership request awaiting a decision. */
+    /**
+     * Status assigned to a membership request awaiting a decision.
+     */
     private static final String PENDING = "PENDING";
 
-    /** Status assigned to an approved family membership. */
+    /**
+     * Status assigned to an approved family membership.
+     */
     private static final String ACCEPTED = "ACCEPTED";
 
-    /** Status assigned to a rejected family membership request. */
+    /**
+     * Status assigned to a rejected family membership request.
+     */
     private static final String REJECTED = "REJECTED";
 
-    /** Repository used to retrieve and save family records. */
+    /**
+     * Repository used to retrieve and save family records.
+     */
     private final FamiliesRepository familiesRepo;
 
-    /** Repository used to retrieve and update family membership records. */
+    /**
+     * Repository used to retrieve and update family membership records.
+     */
     private final FamilyMembershipRepository membershipRepo;
 
-    /** Repository used to retrieve login records for users. */
+    /**
+     * Repository used to retrieve login records for users.
+     */
     private final UserRepository userRepo;
 
     /**
      * Creates the family service with its required repositories.
      *
-     * @param familiesRepo repository for family records
+     * @param familiesRepo   repository for family records
      * @param membershipRepo repository for family membership records
-     * @param userRepo repository for login records
+     * @param userRepo       repository for login records
      */
     public FamilyMembershipServiceImpl(FamiliesRepository familiesRepo, FamilyMembershipRepository membershipRepo, UserRepository userRepo) {
         this.familiesRepo = familiesRepo;
@@ -74,8 +88,8 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      *
      * @param user the username of the user
      * @return the associated family if the user has exactly one accepted
-     *         membership; {@code null} if the user is {@code null}, has a
-     *         different number of accepted memberships, or the family is missing
+     * membership; {@code null} if the user is {@code null}, has a
+     * different number of accepted memberships, or the family is missing
      */
     @Override
     public Family getFamilyForUser(User user) {
@@ -110,7 +124,7 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
         }
 
         // Checks to make sure the users family matches the family retrieved from the membership.
-        if(!familyUser.equals(family)) {
+        if (!familyUser.equals(family)) {
             log.error("getFamilyForUser: {} retrieved from users accepted membership {}, does not match {} retrieved from {}.", family, membership, user.getFamily(), user);
             return null;
         }
@@ -126,11 +140,11 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      * is invalid, the family does not exist, or the user already has an
      * accepted membership. A previously rejected request can be resubmitted.</p>
      *
-     * @param user the username of the user requesting membership
+     * @param user     the username of the user requesting membership
      * @param familyID the ID of the family the user wants to join
      * @return {@code true} if the request is submitted or resubmitted;
-     *         {@code false} if validation fails or an existing request is
-     *         already pending or accepted
+     * {@code false} if validation fails or an existing request is
+     * already pending or accepted
      */
     @Transactional
     @Override
@@ -138,7 +152,7 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
         log.info("requestToJoinFamily: user '{}' requested to join family with ID: {}", user, familyID);
 
         // A valid user is required to submit a request.
-        if (user == null ) {
+        if (user == null) {
             log.error("requestToJoinFamily: user is null");
             return false;
         }
@@ -195,7 +209,7 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      * @param user the user whose administered family's pending requests
      *             are being retrieved
      * @return a list of pending membership requests, or an empty list if the
-     *         user is {@code null} or does not administer a family
+     * user is {@code null} or does not administer a family
      */
     @Override
     public List<FamilyMembership> getPendingRequests(User user) {
@@ -231,10 +245,10 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      * administer the family, or the requesting user already has an accepted
      * membership.</p>
      *
-     * @param user the family administrator handling the request
+     * @param user             the family administrator handling the request
      * @param familyMembership the membership request being processed
      * @return {@code true} if the request is accepted and saved;
-     *         {@code false} if validation fails
+     * {@code false} if validation fails
      */
     @Transactional
     @Override
@@ -242,13 +256,13 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
         log.info("acceptRequest: '{}' attempted to accept request {}", user, familyMembership);
 
         // A valid user is required to accept a request.
-        if (user == null ) {
+        if (user == null) {
             log.error("acceptRequest: user is null");
             return false;
         }
 
         // A non-null membership is required to accept a request.
-        if (familyMembership == null ) {
+        if (familyMembership == null) {
             log.error("acceptRequest: user is null");
             return false;
         }
@@ -316,10 +330,10 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      * Rejects a pending membership request if the specified user administers
      * the family associated with that request.
      *
-     * @param user the family administrator handling the request
+     * @param user             the family administrator handling the request
      * @param familyMembership the membership request being processed
      * @return {@code true} if the request is rejected and saved;
-     *         {@code false} if validation fails
+     * {@code false} if validation fails
      */
     @Transactional
     @Override
@@ -327,13 +341,13 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
         log.info("rejectRequest: '{}' attempted to reject request '{}'", user, familyMembership);
 
         // A valid user is required to reject a request.
-        if (user == null ) {
+        if (user == null) {
             log.error("rejectRequest: user is null");
             return false;
         }
 
         // A non-null membership is required to reject a request.
-        if (familyMembership == null ) {
+        if (familyMembership == null) {
             log.error("rejectRequest: user is null");
             return false;
         }
@@ -405,7 +419,7 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
         FamilyMembership familyMembership = membershipRepo.findById(membershipID).orElse(null);
 
         // Check that the family membership exists
-        if(familyMembership == null) {
+        if (familyMembership == null) {
             return null;
         }
 
@@ -422,10 +436,10 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      * membership is not accepted, or the administrator attempts to remove
      * themselves.</p>
      *
-     * @param user the family administrator requesting the removal
+     * @param user         the family administrator requesting the removal
      * @param membershipID the ID of the membership to remove
      * @return {@code true} if the membership was removed successfully;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     @Override
     @Transactional
@@ -490,7 +504,7 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      *
      * @param user the user whose family members are being retrieved
      * @return a list of accepted family memberships, or an empty list if the
-     *         user is {@code null} or no associated family is found
+     * user is {@code null} or no associated family is found
      */
     @Override
     public List<FamilyMembership> getFamilyMembers(User user) {
@@ -522,7 +536,7 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      *
      * @param user the user who wants to leave the family
      * @return {@code true} if the user successfully leaves the family;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     @Transactional
     @Override
@@ -573,7 +587,7 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      *
      * @param user the user whose accepted memberships are being checked
      * @return {@code true} if the user has at least one accepted membership;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     private boolean hasAcceptedMembership(User user) {
         // A user with at least one accepted membership already belongs to a family.
@@ -585,7 +599,7 @@ public class FamilyMembershipServiceImpl implements FamilyMembershipService{
      *
      * @param user the user whose pending membership requests are being checked
      * @return {@code true} if the user has at least one pending request;
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     private boolean hasPendingRequest(User user) {
         // Pending requests have not yet been approved or rejected by an administrator.
