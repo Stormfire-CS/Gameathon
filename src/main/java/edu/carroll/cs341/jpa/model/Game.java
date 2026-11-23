@@ -10,12 +10,10 @@ import jakarta.persistence.Table;
 
 import java.util.Objects;
 
-import static org.aspectj.util.LangUtil.EOL;
-
 /**
  * Represents a game stored in the database.
  *
- * <p>This entity maps to the Games table and stores a game's unique identifier,
+ * <p>This entity maps to the game table and stores a game's unique identifier,
  * name, minimum and maximum player counts, and the user who added it.</p>
  *
  * <p>The user_who_added allows the application to distinguish games added by users
@@ -29,7 +27,7 @@ import static org.aspectj.util.LangUtil.EOL;
  * </ul>
  */
 @Entity
-@Table(name = "Game")
+@Table(name = "game")
 public class Game {
 
     /**
@@ -65,7 +63,7 @@ public class Game {
     private User userWhoAdded;
 
     /**
-     *  Whether the user can see the game.
+     * Whether the user can see the game.
      */
     @Column(name = "user_can_see")
     private Boolean canSee;
@@ -178,10 +176,20 @@ public class Game {
         this.userWhoAdded = userWhoAdded;
     }
 
+    /**
+     * Whether the user can see the game.
+     *
+     * @return {@code true} if the user can see the game, {@code false} otherwise
+     */
     public Boolean getCanSee() {
         return canSee;
     }
 
+    /**
+     * Sets whether the user can see the game.
+     *
+     * @param canSee {@code true} if the user can see the game, {@code false} otherwise
+     */
     public void setCanSee(Boolean canSee) {
         this.canSee = canSee;
     }
@@ -197,9 +205,9 @@ public class Game {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Game: Game_ID = ").append(gameID).append(EOL);
+        builder.append("Game: Game_ID = ").append(gameID);
         if (maxPlayers != null) {
-            builder.append("Max Number of Players = ").append(maxPlayers).append(EOL);
+            builder.append("Max Number of Players = ").append(maxPlayers).append(", ");
         }
         if (minPlayers != null) {
             builder.append("Min Number of Players = ").append(minPlayers);
