@@ -33,16 +33,14 @@ public class HomeController {
      */
     @GetMapping("/homePage")
     public String homePage(HttpSession session, Model model) {
-
+        // Ensures the user is logged in, and if not redirects to the login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
-        // Make the username available to the view for display and navigation.
+        // Make the user available to the view for display and navigation.
         model.addAttribute("user", user);
-
         return "homePage";
     }
 
