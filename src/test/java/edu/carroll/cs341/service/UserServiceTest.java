@@ -950,7 +950,8 @@ public class UserServiceTest {
      */
 
     /**
-     * Verifies that renaming a user updates only the selected user's name.
+     * Verifies that renaming a user trims surrounding spaces and updates
+     * only the selected user's name.
      */
     @Test
     public void renameUserSuccessTest() {
@@ -959,37 +960,60 @@ public class UserServiceTest {
         final String username2 = "testUser2";
         final String password2 = "testPassword2";
         final String newName = "NewTestName";
-        final String newName2 = "OtherTestName";
+        final String leadingSpaceName = "LEADINGSPACENAME";
+        final String trailingSpaceName = "trailingspacename";
+        final String surroundingSpacesName = "SurroundingSpacesName";
 
         // One user in the database
         User checkUser = insertTestingUser(username, password);
         boolean result = userService.renameUser(checkUser, newName);
         assertTrue("renameUserSuccessTest: should rename the first user", result);
-        assertEquals("renameUserSuccessTest: first user's name should be updated",
-                newName, checkUser.getName());
+        String actualName = checkUser.getName();
+        assertEquals("renameUserSuccessTest: first user's name should be updated", newName, actualName);
+
+        result = userService.renameUser(checkUser, " " + leadingSpaceName);
+        assertTrue("renameUserSuccessTest: should accept a name with a leading space", result);
+        actualName = checkUser.getName();
+        assertEquals("renameUserSuccessTest: first user's name should omit the leading space",
+                leadingSpaceName, actualName);
 
         // Two users in the database
         User checkUser2 = insertTestingUser(username2, password2);
         String originalName2 = checkUser2.getName();
 
-        result = userService.renameUser(checkUser, newName2);
-        assertTrue("renameUserSuccessTest: should rename the first user again", result);
-        assertEquals("renameUserSuccessTest: first user's name should change again",
-                newName2, checkUser.getName());
+        result = userService.renameUser(checkUser, trailingSpaceName + " ");
+        assertTrue("renameUserSuccessTest: should accept a name with a trailing space", result);
+        actualName = checkUser.getName();
+        assertEquals("renameUserSuccessTest: first user's name should omit the trailing space",
+                trailingSpaceName, actualName);
+        String actualName2 = checkUser2.getName();
         assertEquals("renameUserSuccessTest: second user's name should remain unchanged",
-                originalName2, checkUser2.getName());
+                originalName2, actualName2);
 
-        result = userService.renameUser(checkUser2, newName);
-        assertTrue("renameUserSuccessTest: should rename the second user", result);
-        assertEquals("renameUserSuccessTest: second user's name should be updated",
-                newName, checkUser2.getName());
+        result = userService.renameUser(checkUser2, " " + surroundingSpacesName + " ");
+        assertTrue("renameUserSuccessTest: should accept a name with spaces on both ends", result);
+        actualName2 = checkUser2.getName();
+        assertEquals("renameUserSuccessTest: second user's name should omit spaces from both ends",
+                surroundingSpacesName, actualName2);
+        actualName = checkUser.getName();
         assertEquals("renameUserSuccessTest: first user's name should remain unchanged",
-                newName2, checkUser.getName());
+                trailingSpaceName, actualName);
 
-        assertEquals("renameUserSuccessTest: first user's login should still work",
-                checkUser, userService.validateUser(username, password));
-        assertEquals("renameUserSuccessTest: second user's login should still work",
-                checkUser2, userService.validateUser(username2, password2));
+        User loginResult = userService.validateUser(username, password);
+        assertNotNull("renameUserSuccessTest: first user's login should still work", loginResult);
+        assertEquals("renameUserSuccessTest: first login should return the original account",
+                checkUser, loginResult);
+        String savedName = loginResult.getName();
+        assertEquals("renameUserSuccessTest: first user's trimmed name should be saved",
+                trailingSpaceName, savedName);
+
+        User loginResult2 = userService.validateUser(username2, password2);
+        assertNotNull("renameUserSuccessTest: second user's login should still work", loginResult2);
+        assertEquals("renameUserSuccessTest: second login should return the original account",
+                checkUser2, loginResult2);
+        String savedName2 = loginResult2.getName();
+        assertEquals("renameUserSuccessTest: second user's trimmed name should be saved",
+                surroundingSpacesName, savedName2);
     }
 
     /**
@@ -1027,98 +1051,78 @@ public class UserServiceTest {
     }
 
     /**
-     * Verifies that a null name is rejected without changing either user.
+     * Verifies that invalid names are rejected without changing either user's name.
      */
     @Test
-    public void renameUserNullNameTest() {
+    public void renameUserInvalidNameTest() {
         final String username = "testUser";
         final String password = "testPassword";
         final String username2 = "testUser2";
         final String password2 = "testPassword2";
+        final String tooShortName = "A";
+        final String tooLongName = "12345678901234567890123456789012345678901";
+        final String nameWithInternalSpace = "New Name";
+        final String spacesOnlyName = "    ";
 
         // One user in the database
         User checkUser = insertTestingUser(username, password);
         String originalName = checkUser.getName();
+
         boolean result = userService.renameUser(checkUser, null);
-        assertFalse("renameUserNullNameTest: should reject a null name", result);
-        assertEquals("renameUserNullNameTest: first user's name should remain unchanged",
-                originalName, checkUser.getName());
+        assertFalse("renameUserInvalidNameTest: should reject a null name with one user", result);
+        result = userService.renameUser(checkUser, tooShortName);
+        assertFalse("renameUserInvalidNameTest: should reject a one-character name with one user", result);
+        result = userService.renameUser(checkUser, tooLongName);
+        assertFalse("renameUserInvalidNameTest: should reject a 41-character name with one user", result);
+        result = userService.renameUser(checkUser, nameWithInternalSpace);
+        assertFalse("renameUserInvalidNameTest: should reject an internal space with one user", result);
+        result = userService.renameUser(checkUser, spacesOnlyName);
+        assertFalse("renameUserInvalidNameTest: should reject a spaces-only name with one user", result);
+        result = userService.renameUser(checkUser, "");
+        assertFalse("renameUserInvalidNameTest: should reject an empty name with one user", result);
+
+        String actualName = checkUser.getName();
+        assertEquals("renameUserInvalidNameTest: first user's name should remain unchanged with one user",
+                originalName, actualName);
 
         // Two users in the database
         User checkUser2 = insertTestingUser(username2, password2);
         String originalName2 = checkUser2.getName();
+
+        // Invalid names for the first user
         result = userService.renameUser(checkUser, null);
-        assertFalse("renameUserNullNameTest: should still reject a null name for the first user", result);
+        assertFalse("renameUserInvalidNameTest: should reject a null name for the first user", result);
+        result = userService.renameUser(checkUser, tooShortName);
+        assertFalse("renameUserInvalidNameTest: should reject a one-character name for the first user", result);
+        result = userService.renameUser(checkUser, tooLongName);
+        assertFalse("renameUserInvalidNameTest: should reject a 41-character name for the first user", result);
+        result = userService.renameUser(checkUser, nameWithInternalSpace);
+        assertFalse("renameUserInvalidNameTest: should reject an internal space for the first user", result);
+        result = userService.renameUser(checkUser, spacesOnlyName);
+        assertFalse("renameUserInvalidNameTest: should reject a spaces-only name for the first user", result);
+        result = userService.renameUser(checkUser, "");
+        assertFalse("renameUserInvalidNameTest: should reject an empty name for the first user", result);
+
+        // Invalid names for the second user
         result = userService.renameUser(checkUser2, null);
-        assertFalse("renameUserNullNameTest: should reject a null name for the second user", result);
-        assertEquals("renameUserNullNameTest: first user's name should still be unchanged",
-                originalName, checkUser.getName());
-        assertEquals("renameUserNullNameTest: second user's name should remain unchanged",
-                originalName2, checkUser2.getName());
-    }
+        assertFalse("renameUserInvalidNameTest: should reject a null name for the second user", result);
+        result = userService.renameUser(checkUser2, tooShortName);
+        assertFalse("renameUserInvalidNameTest: should reject a one-character name for the second user", result);
+        result = userService.renameUser(checkUser2, tooLongName);
+        assertFalse("renameUserInvalidNameTest: should reject a 41-character name for the second user", result);
+        result = userService.renameUser(checkUser2, nameWithInternalSpace);
+        assertFalse("renameUserInvalidNameTest: should reject an internal space for the second user", result);
+        result = userService.renameUser(checkUser2, spacesOnlyName);
+        assertFalse("renameUserInvalidNameTest: should reject a spaces-only name for the second user", result);
+        result = userService.renameUser(checkUser2, "");
+        assertFalse("renameUserInvalidNameTest: should reject an empty name for the second user", result);
 
-    /**
-     * Verifies that a name shorter than two characters is rejected.
-     */
-    @Test
-    public void renameUserShortNameTest() {
-        final String username = "testUser";
-        final String password = "testPassword";
-        final String username2 = "testUser2";
-        final String password2 = "testPassword2";
-        final String newName = "A";
-
-        // One user in the database
-        User checkUser = insertTestingUser(username, password);
-        String originalName = checkUser.getName();
-        boolean result = userService.renameUser(checkUser, newName);
-        assertFalse("renameUserShortNameTest: should reject a short name", result);
-        assertEquals("renameUserShortNameTest: first user's name should remain unchanged",
-                originalName, checkUser.getName());
-
-        // Two users in the database
-        User checkUser2 = insertTestingUser(username2, password2);
-        String originalName2 = checkUser2.getName();
-        result = userService.renameUser(checkUser, newName);
-        assertFalse("renameUserShortNameTest: should still reject a short name for the first user", result);
-        result = userService.renameUser(checkUser2, newName);
-        assertFalse("renameUserShortNameTest: should reject a short name for the second user", result);
-        assertEquals("renameUserShortNameTest: first user's name should still be unchanged",
-                originalName, checkUser.getName());
-        assertEquals("renameUserShortNameTest: second user's name should remain unchanged",
-                originalName2, checkUser2.getName());
-    }
-
-    /**
-     * Verifies that a name longer than forty characters is rejected.
-     */
-    @Test
-    public void renameUserLongNameTest() {
-        final String username = "testUser";
-        final String password = "testPassword";
-        final String username2 = "testUser2";
-        final String password2 = "testPassword2";
-        final String newName = "ThisNameIsMuchLongerThanTheAllowedFortyCharacters";
-
-        // One user in the database
-        User checkUser = insertTestingUser(username, password);
-        String originalName = checkUser.getName();
-        boolean result = userService.renameUser(checkUser, newName);
-        assertFalse("renameUserLongNameTest: should reject a long name", result);
-        assertEquals("renameUserLongNameTest: first user's name should remain unchanged",
-                originalName, checkUser.getName());
-
-        // Two users in the database
-        User checkUser2 = insertTestingUser(username2, password2);
-        String originalName2 = checkUser2.getName();
-        result = userService.renameUser(checkUser, newName);
-        assertFalse("renameUserLongNameTest: should still reject a long name for the first user", result);
-        result = userService.renameUser(checkUser2, newName);
-        assertFalse("renameUserLongNameTest: should reject a long name for the second user", result);
-        assertEquals("renameUserLongNameTest: first user's name should still be unchanged",
-                originalName, checkUser.getName());
-        assertEquals("renameUserLongNameTest: second user's name should remain unchanged",
-                originalName2, checkUser2.getName());
+        actualName = checkUser.getName();
+        assertEquals("renameUserInvalidNameTest: first user's name should remain unchanged with two users",
+                originalName, actualName);
+        String actualName2 = checkUser2.getName();
+        assertEquals("renameUserInvalidNameTest: second user's name should remain unchanged with two users",
+                originalName2, actualName2);
     }
 
     /*
