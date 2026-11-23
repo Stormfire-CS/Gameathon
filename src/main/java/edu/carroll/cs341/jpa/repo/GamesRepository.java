@@ -64,7 +64,7 @@ public interface GamesRepository extends JpaRepository<Game, Long> {
     /**
      * Finds a game by its name and the user who added it.
      *
-     * @param gameName the name of the game to search for
+     * @param gameName     the name of the game to search for
      * @param userWhoAdded the user who added the game
      * @return the matching game, or {@code null} if no match is found
      */

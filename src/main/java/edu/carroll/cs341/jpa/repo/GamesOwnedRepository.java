@@ -59,7 +59,7 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
      * Counts the number of game ownership records associated with the specified game and user.
      *
      * @param gameID the ID of the game
-     * @param user the user
+     * @param user   the user
      * @return the count of matching game ownership records
      */
     long countByGame_GameIDAndUser(Long gameID, User user);
@@ -68,7 +68,7 @@ public interface GamesOwnedRepository extends JpaRepository<GameOwned, Long> {
      * Finds all game ownership records associated with the specified game and user.
      *
      * @param gameID the ID of the game
-     * @param user the user
+     * @param user   the user
      * @return a list of matching game ownership records;
      * an empty list if no matching records are found
      */
