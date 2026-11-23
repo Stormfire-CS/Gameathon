@@ -60,7 +60,7 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
      *
      * @param family the family
      * @return a list of all memberships associated with the family;
-     *         an empty list if no matches are found
+     * an empty list if no matches are found
      */
     List<FamilyMembership> findByFamily(Family family);
 }
