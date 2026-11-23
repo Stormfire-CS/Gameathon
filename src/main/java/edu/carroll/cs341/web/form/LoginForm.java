@@ -54,6 +54,7 @@ public class LoginForm {
     public void setUsername(String username) {
         this.username = username == null ? null : username.trim();
     }
+
     /**
      * Retrieves the password entered in the form.
      *
