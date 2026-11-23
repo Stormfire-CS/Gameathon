@@ -44,7 +44,7 @@ public class JoinFamilyController {
 
     /**
      * Displays the page for requesting membership in an existing family.
-     * Makes the username available to the view.
+     * Makes the user available to the view.
      *
      * @param session the HTTP session containing the logged-in user
      * @param model   the model used to supply data to the view
@@ -52,14 +52,13 @@ public class JoinFamilyController {
      */
     @GetMapping("/joinFamilyPage")
     public String joinFamilyPage(HttpSession session, Model model) {
-
+        // Ensures the user is logged in, and if not redirects to the login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
-        // Make the username available to the view for subsequent form submissions.
+        // Make the user available to the view for subsequent form submissions.
         model.addAttribute("user", user);
 
         return "joinFamily";
@@ -75,9 +74,8 @@ public class JoinFamilyController {
      */
     @PostMapping("/requestToJoinFamily")
     public String requestToJoinFamily(HttpSession session, Long familyID) {
-
+        // Ensures the user is logged in, and if not redirects to the login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
