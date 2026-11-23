@@ -22,12 +22,14 @@
                 : game.maxPlayers == null
                     ? game.gameName + ' (' + game.minPlayers + '+ players)'
                     : game.gameName + ' (' + game.minPlayers + '-' + game.maxPlayers + ' players)'}">
-                </option>            </select>
+                </option>
+            </select>
             <input type="hidden" name="gameOwnedID" th:value="${gameOwned.gameOwnedID}"/>
             <label>Year Produced:</label>
             <input type="number" th:field="*{yearProduced}" placeholder="Year Produced"/>
             <span style="color: red;" th:if="${#fields.hasErrors('yearProduced')}" th:errors="*{yearProduced}"></span>
-            <span style="color: red;" th:if="${#fields.hasErrors('yearProducedValid')}" th:errors="*{yearProducedValid}">Future production year error</span>
+            <span style="color: red;" th:if="${#fields.hasErrors('yearProducedValid')}"
+                  th:errors="*{yearProducedValid}">Future production year error</span>
             <button type="submit">Save Changes</button>
         </form>
         <a th:href="@{/editCollectionPage}"><button type="button">Cancel</button></a>

@@ -14,7 +14,8 @@
         <form th:action="@{/editAccount}" th:object="${editNameForm}" method="post">
             <label for="name">New Name (This is how others will see you):</label><br>
             <input type="text" id="name" th:field="*{name}"/>
-            <span th:if="${#fields.hasErrors('name')}" style="color: red;" th:text="${#strings.listJoin(#fields.errors('name'), '; ')}">New Name Error</span><br>
+            <span th:if="${#fields.hasErrors('name')}" style="color: red;"
+                  th:text="${#strings.listJoin(#fields.errors('name'), '; ')}">New Name Error</span><br>
             <button type="submit">Change Name</button><br><br>
         </form>
         <hr>

@@ -7,7 +7,8 @@
     <body>
         <h1>Login</h1>
         <form action="#" th:action="@{/login}" th:object="${loginForm}" method="post">
-            <span style="color: red;" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}">Global error</span><br/>
+            <span style="color: red;" th:if="${#fields.hasGlobalErrors()}"
+                  th:errors="*{global}">Global error</span><br/>
             <input type="text" th:field="*{username}" placeholder="Username"/>
             <span style="color: red;" th:if="${#fields.hasErrors('username')}"
                   th:text="${#strings.listJoin(#fields.errors('username'), '; ')}">Username error</span><br/>

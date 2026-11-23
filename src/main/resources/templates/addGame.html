@@ -15,19 +15,20 @@
         <form th:action="@{/addGame}" th:object="${addGameForm}" method="post">
             <label>Game Name:</label>
             <input type="text" th:field="*{gameName}" placeholder="Game Name"/><br>
-            <span  style="color: red;" th:if="${#fields.hasErrors('gameName')}"
+            <span style="color: red;" th:if="${#fields.hasErrors('gameName')}"
                   th:text="${#strings.listJoin(#fields.errors('gameName'), '; ')}"></span><br/>
 
             <label>Minimum Number of Players:</label>
             <input type="number" th:field="*{minPlayers}" placeholder="Minimum # of Players"/><br>
-            <span  style="color: red;" th:if="${#fields.hasErrors('minPlayers')}" th:errors="*{minPlayers}"></span><br/>
+            <span style="color: red;" th:if="${#fields.hasErrors('minPlayers')}" th:errors="*{minPlayers}"></span><br/>
 
             <label>Maximum Number of Players:</label>
             <input type="number" th:field="*{maxPlayers}" placeholder="Maximum # of Players"/><br>
-            <span  style="color: red;" th:if="${#fields.hasErrors('maxPlayers')}" th:errors="*{maxPlayers}"></span><br/>
+            <span style="color: red;" th:if="${#fields.hasErrors('maxPlayers')}" th:errors="*{maxPlayers}"></span><br/>
 
-            <span  style="color: red;" th:if="${#fields.hasErrors('playerCountValid')}" th:errors="*{playerCountValid}"></span><br/>
-            <span  style="color: red;" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}"
+            <span style="color: red;" th:if="${#fields.hasErrors('playerCountValid')}"
+                  th:errors="*{playerCountValid}"></span><br/>
+            <span style="color: red;" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}"
                   th:text="${error}"></span>
 
             <button type="submit">Add Game to Database</button>
@@ -56,17 +57,20 @@
 
             <label>New Game Name:</label>
             <input type="text" th:field="*{gameName}" placeholder="Game Name"/><br/>
-            <span  style="color: red;" th:if="${#fields.hasErrors('gameName')}"
+            <span style="color: red;" th:if="${#fields.hasErrors('gameName')}"
                   th:text="${#strings.listJoin(#fields.errors('gameName'), '; ')}"></span><br/>
             <label>Minimum Number of Players:</label>
             <input type="number" th:field="*{minPlayers}" placeholder="Minimum # of Players"/><br/>
-            <span  style="color: red;" th:if="${#fields.hasErrors('minPlayers')}" th:errors="*{minPlayers}"></span><br/>
+            <span style="color: red;" th:if="${#fields.hasErrors('minPlayers')}" th:errors="*{minPlayers}"></span><br/>
             <label>Maximum Number of Players:</label>
             <input type="number" th:field="*{maxPlayers}" placeholder="Maximum # of Players"/><br/>
-            <span  style="color: red;" th:if="${#fields.hasErrors('maxPlayers')}" th:errors="*{maxPlayers}"></span><br/>
-            <span  style="color: red;" th:if="${#fields.hasErrors('playerCountValid')}" th:errors="*{playerCountValid}"></span><br/>
-            <span  style="color: red;" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></span>
-            <p>If you edit a game or the information assocaited with it, it will be changed for all of your games that refrence it</p>
+            <span style="color: red;" th:if="${#fields.hasErrors('maxPlayers')}" th:errors="*{maxPlayers}"></span><br/>
+            <span style="color: red;" th:if="${#fields.hasErrors('playerCountValid')}"
+                  th:errors="*{playerCountValid}"></span><br/>
+            <span style="color: red;" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}"
+                  th:text="${error}"></span>
+            <p>If you edit a game or the information assocaited with it, it will be changed for all of your games that
+                refrence it</p>
             <button type="submit">Save Changes</button>
         </form>
         <hr>
@@ -94,15 +98,15 @@
                     : game.gameName + ' (' + game.minPlayers + '-' + game.maxPlayers + ' players)'}">
                 </option>
             </select>
-            <span  style="color: red;" th:if="${removeGameError != null}" th:text="${removeGameError}"><br></span>
-            <span  style="color: red;" th:if="${removeGameSuccess != null}" th:text="${removeGameSuccess}"><br></span>
+            <span style="color: red;" th:if="${removeGameError != null}" th:text="${removeGameError}"><br></span>
+            <span style="color: red;" th:if="${removeGameSuccess != null}" th:text="${removeGameSuccess}"><br></span>
             <button type="submit">Remove Game</button>
         </form>
     </body>
     <script>
         const editForm = document.getElementById("editGameForm");
 
-        editForm.addEventListener("submit", async function(event) {
+        editForm.addEventListener("submit", async function (event) {
             event.preventDefault();
 
             const gameID = document.getElementById("gameID").value;

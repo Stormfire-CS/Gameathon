@@ -6,9 +6,11 @@
     </head>
     <body>
         <h1>Sign Up</h1>
-        Please enter a username longer than 2 characters containing no spaces and a password that is at least 8 characters long, also with no spaces:<br>
+        Please enter a username longer than 2 characters containing no spaces and a password that is at least 8
+        characters long, also with no spaces:<br>
         <form action="#" th:action="@{/signUpPage}" th:object="${createUserForm}" method="post">
-            <span style="color: red;" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}">Global error</span><br/>
+            <span style="color: red;" th:if="${#fields.hasGlobalErrors()}"
+                  th:errors="*{global}">Global error</span><br/>
             <input type="text" th:field="*{username}" placeholder="Username"/>
             <span style="color: red;" th:if="${#fields.hasErrors('username')}"
                   th:text="${#strings.listJoin(#fields.errors('username'), '; ')}">Username errors</span><br/>

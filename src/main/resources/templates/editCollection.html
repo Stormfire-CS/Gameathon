@@ -13,7 +13,8 @@
         <a th:href="@{/addGamePage}"><button type="button">Add, Remove, or Edit Game Title</button></a>
         <hr>
         <form th:action="@{/addGameToCollection}" th:object="${addGameToCollectionForm}" method="post">
-            To add a game to your collection, first select a game title, and then optionally enter the year your version was produced. <br>
+            To add a game to your collection, first select a game title, and then optionally enter the year your version
+            was produced. <br>
             <label>Game Name:</label>
             <select name="gameID">
                 <option value="">Select a Game Title</option>
@@ -32,7 +33,8 @@
             <label>Year Produced:</label>
             <input type="number" th:field="*{yearProduced}" placeholder="Year Produced (optional)"/>
             <span th:if="${#fields.hasErrors('yearProduced')}" style="color: red;" th:errors="*{yearProduced}">Production year error</span>
-            <span th:if="${#fields.hasErrors('yearProducedValid')}" style="color: red;" th:errors="*{yearProducedValid}">Future production year error</span>
+            <span th:if="${#fields.hasErrors('yearProducedValid')}" style="color: red;"
+                  th:errors="*{yearProducedValid}">Future production year error</span>
             <button type="submit">Add Game to Collection</button>
         </form>
         <hr>
@@ -57,7 +59,7 @@
                         <input type="hidden" name="gameOwnedID" th:value="${gameOwned.gameOwnedID}"/>
                         <button type="submit">Edit</button>
                     </form>
-                    </td>
+                </td>
                 <td>
                     <form th:action="@{/deleteGameFromCollection}" method="post">
                         <input type="hidden" name="gameOwnedID" th:value="${gameOwned.gameOwnedID}"/>
