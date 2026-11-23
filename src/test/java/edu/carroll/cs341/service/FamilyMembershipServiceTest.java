@@ -26,8 +26,6 @@ import static org.springframework.test.util.AssertionErrors.*;
 @SpringBootTest
 @Transactional
 public class FamilyMembershipServiceTest {
-    private static final String username = "membershiptestuser";
-    private static final String password = "membershiptestpass";
 
     @Autowired
     private FamilyMembershipService membershipService;
@@ -52,9 +50,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getFamilyForUserSuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("member", family);
+        User member = insertTestingMember("member", password, family);
 
         Family result = membershipService.getFamilyForUser(member);
 
@@ -77,10 +78,13 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getFamilyForUserNoAcceptedMembershipTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User applicant = insertTestingUser("applicant");
-        User rejectedUser = insertTestingUser("rejecteduser");
+        User applicant = insertTestingUser("applicant", password);
+        User rejectedUser = insertTestingUser("rejecteduser", password);
 
         // No membership requests for the applicant
         Family result = membershipService.getFamilyForUser(applicant);
@@ -103,9 +107,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getFamilyForUserNullFamilyReferenceTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingUser("member");
+        User member = insertTestingUser("member", password);
         insertTestingInconsistentMembership(family, member, "ACCEPTED");
 
         Family result = membershipService.getFamilyForUser(member);
@@ -119,11 +126,14 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getFamilyForUserMismatchedFamilyTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
-        User member = insertTestingUser("member");
+        User member = insertTestingUser("member", password);
 
         insertTestingInconsistentMembership(family, member, "ACCEPTED");
         member.setFamily(otherFamily);
@@ -140,11 +150,14 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getFamilyForUserMultipleAcceptedMembershipsTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
-        User member = insertTestingMember("member", family);
+        User member = insertTestingMember("member", password, family);
 
         insertTestingInconsistentMembership(otherFamily, member, "ACCEPTED");
 
@@ -165,9 +178,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void requestToJoinFamilySuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User applicant = insertTestingUser("applicant");
+        User applicant = insertTestingUser("applicant", password);
 
         boolean result = membershipService.requestToJoinFamily(
                 applicant, family.getFamilyID());
@@ -190,7 +206,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void requestToJoinFamilyNullUserTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
 
         boolean result = membershipService.requestToJoinFamily(
@@ -205,7 +224,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void requestToJoinFamilyNullFamilyIDTest() {
-        User user = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = membershipService.requestToJoinFamily(user, null);
 
@@ -218,7 +240,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void requestToJoinFamilyNonexistentFamilyTest() {
-        User user = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = membershipService.requestToJoinFamily(user, -1L);
 
@@ -232,9 +257,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void requestToJoinFamilyAlreadyMemberTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
 
         boolean result = membershipService.requestToJoinFamily(
@@ -253,9 +281,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void requestToJoinFamilyDuplicatePendingTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User applicant = insertTestingUser("applicant");
+        User applicant = insertTestingUser("applicant", password);
         FamilyMembership request = insertTestingPendingRequest(family, applicant);
         long previousCount = countMemberships(applicant);
 
@@ -277,9 +308,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void requestToJoinFamilyRejectedRequestTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User applicant = insertTestingUser("applicant");
+        User applicant = insertTestingUser("applicant", password);
         FamilyMembership request = insertTestingRejectedRequest(family, applicant);
         Long originalID = request.getMembershipID();
         long previousCount = countMemberships(applicant);
@@ -314,7 +348,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getPendingRequestsSuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
 
         // One family without any pending requests
@@ -323,13 +360,13 @@ public class FamilyMembershipServiceTest {
         assertTrue("getPendingRequestsSuccessTest: should start with no pending requests", result.isEmpty());
 
         // Two families with separate pending requests
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
 
-        FamilyMembership pending = insertTestingPendingRequest(family, insertTestingUser("applicant"));
-        insertTestingMember("member", family);
-        insertTestingRejectedRequest(family, insertTestingUser("rejecteduser"));
-        FamilyMembership otherPending = insertTestingPendingRequest(otherFamily, insertTestingUser("otherapplicant"));
+        FamilyMembership pending = insertTestingPendingRequest(family, insertTestingUser("applicant", password));
+        insertTestingMember("member", password, family);
+        insertTestingRejectedRequest(family, insertTestingUser("rejecteduser", password));
+        FamilyMembership otherPending = insertTestingPendingRequest(otherFamily, insertTestingUser("otherapplicant", password));
 
         // Check the first family's pending requests.
         result = membershipService.getPendingRequests(admin);
@@ -366,10 +403,13 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getPendingRequestsNotAdminTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("member", family);
-        insertTestingPendingRequest(family, insertTestingUser("applicant"));
+        User member = insertTestingMember("member", password, family);
+        insertTestingPendingRequest(family, insertTestingUser("applicant", password));
 
         List<FamilyMembership> result = membershipService.getPendingRequests(member);
 
@@ -389,11 +429,14 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void acceptRequestSuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
-        User applicant = insertTestingUser("applicant");
+        User applicant = insertTestingUser("applicant", password);
 
         FamilyMembership request = insertTestingPendingRequest(family, applicant);
         FamilyMembership otherRequest =
@@ -415,9 +458,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void acceptRequestNullUserTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant", password));
 
         boolean result = membershipService.acceptRequest(null, request);
 
@@ -431,7 +477,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void acceptRequestNullRequestTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         insertTestingFamily(admin);
 
         boolean result = membershipService.acceptRequest(admin, null);
@@ -445,9 +494,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void acceptRequestNotPendingTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        FamilyMembership request = insertTestingRejectedRequest(family, insertTestingUser("applicant"));
+        FamilyMembership request = insertTestingRejectedRequest(family, insertTestingUser("applicant", password));
 
         boolean result = membershipService.acceptRequest(admin, request);
 
@@ -462,10 +514,13 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void acceptRequestNoFamilyTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User outsider = insertTestingUser("outsider");
-        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
+        User outsider = insertTestingUser("outsider", password);
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant", password));
 
         boolean result = membershipService.acceptRequest(outsider, request);
 
@@ -480,10 +535,13 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void acceptRequestNotAdminTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("member", family);
-        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
+        User member = insertTestingMember("member", password, family);
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant", password));
 
         boolean result = membershipService.acceptRequest(member, request);
 
@@ -497,11 +555,14 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void acceptRequestAlreadyMemberTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
-        User applicant = insertTestingMember("applicant", otherFamily);
+        User applicant = insertTestingMember("applicant", password, otherFamily);
         FamilyMembership request = insertTestingInconsistentMembership(family, applicant, "PENDING");
 
         boolean result = membershipService.acceptRequest(admin, request);
@@ -520,11 +581,14 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void acceptRequestDifferentFamilyTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         insertTestingFamily(admin);
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
-        User applicant = insertTestingUser("applicant");
+        User applicant = insertTestingUser("applicant", password);
         FamilyMembership request =
                 insertTestingPendingRequest(otherFamily, applicant);
 
@@ -550,11 +614,14 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void rejectRequestSuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
-        User applicant = insertTestingUser("applicant");
+        User applicant = insertTestingUser("applicant", password);
 
         FamilyMembership request = insertTestingPendingRequest(family, applicant);
         FamilyMembership otherRequest =
@@ -577,9 +644,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void rejectRequestNullUserTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant", password));
 
         boolean result = membershipService.rejectRequest(null, request);
 
@@ -593,7 +663,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void rejectRequestNullRequestTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         insertTestingFamily(admin);
 
         boolean result = membershipService.rejectRequest(admin, null);
@@ -607,9 +680,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void rejectRequestNotPendingTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("member", family);
+        User member = insertTestingMember("member", password, family);
         FamilyMembership membership = findTestingAcceptedMembership(family, member);
 
         boolean result = membershipService.rejectRequest(admin, membership);
@@ -628,10 +704,13 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void rejectRequestNoFamilyTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User outsider = insertTestingUser("outsider");
-        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
+        User outsider = insertTestingUser("outsider", password);
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant", password));
 
         boolean result = membershipService.rejectRequest(outsider, request);
 
@@ -646,10 +725,13 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void rejectRequestNotAdminTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("member", family);
-        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
+        User member = insertTestingMember("member", password, family);
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant", password));
 
         boolean result = membershipService.rejectRequest(member, request);
 
@@ -663,11 +745,14 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void rejectRequestDifferentFamilyTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         insertTestingFamily(admin);
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
-        FamilyMembership request = insertTestingPendingRequest(otherFamily, insertTestingUser("applicant"));
+        FamilyMembership request = insertTestingPendingRequest(otherFamily, insertTestingUser("applicant", password));
 
         boolean result = membershipService.rejectRequest(admin, request);
 
@@ -688,7 +773,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getMembershipByIDSuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
         FamilyMembership membership = findTestingAcceptedMembership(family, admin);
 
@@ -725,7 +813,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getUserByMembershipIDSuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
         FamilyMembership membership = findTestingAcceptedMembership(family, admin);
 
@@ -766,9 +857,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void removeFamilyMemberSuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("member", family);
+        User member = insertTestingMember("member", password, family);
         FamilyMembership membership = findTestingAcceptedMembership(family, member);
 
         boolean result = membershipService.removeFamilyMember(
@@ -797,7 +891,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void removeFamilyMemberNullIDTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         insertTestingFamily(admin);
 
         assertFalse("removeFamilyMemberNullIDTest: should reject a null ID",
@@ -809,7 +906,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void removeFamilyMemberNonexistentIDTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         insertTestingFamily(admin);
 
         assertFalse("removeFamilyMemberNonexistentIDTest: should reject a nonexistent ID",
@@ -821,10 +921,13 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void removeFamilyMemberNotAdminTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("member", family);
-        User otherMember = insertTestingMember("othermember", family);
+        User member = insertTestingMember("member", password, family);
+        User otherMember = insertTestingMember("othermember", password, family);
         FamilyMembership membership =
                 findTestingAcceptedMembership(family, otherMember);
 
@@ -842,7 +945,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void removeFamilyMemberSelfTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
         FamilyMembership membership = findTestingAcceptedMembership(family, admin);
 
@@ -863,9 +969,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void removeFamilyMemberPendingTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant"));
+        FamilyMembership request = insertTestingPendingRequest(family, insertTestingUser("applicant", password));
 
         boolean result = membershipService.removeFamilyMember(
                 admin, request.getMembershipID());
@@ -881,11 +990,14 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void removeFamilyMemberDifferentFamilyTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         insertTestingFamily(admin);
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         Family otherFamily = insertTestingFamily(otherAdmin);
-        User member = insertTestingMember("member", otherFamily);
+        User member = insertTestingMember("member", password, otherFamily);
         FamilyMembership membership =
                 findTestingAcceptedMembership(otherFamily, member);
 
@@ -913,14 +1025,17 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getFamilyMembersSuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("member", family);
+        User member = insertTestingMember("member", password, family);
 
-        insertTestingPendingRequest(family, insertTestingUser("applicant"));
-        insertTestingRejectedRequest(family, insertTestingUser("rejecteduser"));
+        insertTestingPendingRequest(family, insertTestingUser("applicant", password));
+        insertTestingRejectedRequest(family, insertTestingUser("rejecteduser", password));
 
-        User otherAdmin = insertTestingUser("otheradmin");
+        User otherAdmin = insertTestingUser("otheradmin", password);
         insertTestingFamily(otherAdmin);
 
         List<FamilyMembership> adminResult = membershipService.getFamilyMembers(admin);
@@ -962,7 +1077,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void getFamilyMembersNoFamilyTest() {
-        User user = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User user = insertTestingUser(username, password);
 
         List<FamilyMembership> result = membershipService.getFamilyMembers(user);
 
@@ -982,9 +1100,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void leaveFamilySuccessTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User member = insertTestingMember("member", family);
+        User member = insertTestingMember("member", password, family);
         FamilyMembership membership = findTestingAcceptedMembership(family, member);
 
         boolean result = membershipService.leaveFamily(member);
@@ -1015,9 +1136,12 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void leaveFamilyNoAcceptedMembershipTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
-        User applicant = insertTestingUser("applicant");
+        User applicant = insertTestingUser("applicant", password);
         FamilyMembership request = insertTestingPendingRequest(family, applicant);
 
         boolean result = membershipService.leaveFamily(applicant);
@@ -1033,7 +1157,10 @@ public class FamilyMembershipServiceTest {
      */
     @Test
     public void leaveFamilyAdminTest() {
-        User admin = insertTestingUser();
+        final String username = "membershiptestuser";
+        final String password = "membershiptestpass";
+
+        User admin = insertTestingUser(username, password);
         Family family = insertTestingFamily(admin);
         FamilyMembership membership = findTestingAcceptedMembership(family, admin);
 
@@ -1053,14 +1180,10 @@ public class FamilyMembershipServiceTest {
      * = = = = = = = = = = =
      */
 
-    private User insertTestingUser() {
-        return insertTestingUser(username);
-    }
-
     /**
      * Creates a test user and verifies that the saved credentials work.
      */
-    private User insertTestingUser(String username) {
+    private User insertTestingUser(String username, String password) {
         User user = userService.validateUser(username, password);
         assertNull("insertTestingUser: user should not exist yet", user);
 
@@ -1102,8 +1225,8 @@ public class FamilyMembershipServiceTest {
     /**
      * Creates a member through the request and acceptance workflow.
      */
-    private User insertTestingMember(String username, Family family) {
-        User member = insertTestingUser(username);
+    private User insertTestingMember(String username, String password, Family family) {
+        User member = insertTestingUser(username, password);
         FamilyMembership request = insertTestingPendingRequest(family, member);
 
         boolean result = membershipService.acceptRequest(family.getFamilyAdmin(), request);

@@ -27,11 +27,6 @@ import static org.springframework.test.util.AssertionErrors.*;
 @SpringBootTest
 @Transactional
 public class GamesServiceTest {
-    private static final String username = "testuser";
-    private static final String password = "testpass";
-    private static final String validName = "free";
-    private static final Integer smaller = 1;
-    private static final Integer larger = 10;
 
     @Autowired
     private GamesService gamesService;
@@ -56,8 +51,13 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameSuccessTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
         final String test = "addGameSuccessTest";
-        User user = insertTestingUser(username);
+
+        User user = insertTestingUser(username, password);
 
         assertAddedGame(test, user, "Regular Game", smaller, larger);
         assertAddedGame(test, user, "Single Player Game", smaller, smaller);
@@ -72,18 +72,24 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameInvalidPlayerCountsTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
         final String test = "addGameInvalidPlayerCountsTest";
-        User user = insertTestingUser(username);
+
+        User user = insertTestingUser(username, password);
         List<Game> initialCatalog = gamesService.getAvailableGames(user);
 
         // No user-owned games in the catalog
-        assertAddGameRejectsInvalidPlayerCounts(test, user, validName);
+        assertAddGameRejectsInvalidPlayerCounts(test, user, validName, smaller, larger);
         assertEquals(test + ": invalid counts should leave the initial catalog intact",
                 initialCatalog, gamesService.getAvailableGames(user));
 
         // One user-owned game in the catalog
-        Game existingGame = insertTestingGame("Existing Game", user);
-        assertAddGameRejectsInvalidPlayerCounts(test, user, validName);
+        Game existingGame = insertTestingGame("Existing Game", user, smaller, larger);
+        assertAddGameRejectsInvalidPlayerCounts(test, user, validName, smaller, larger);
         List<Game> catalog = gamesService.getAvailableGames(user);
         assertEquals(test + ": invalid counts should leave the catalog size unchanged", initialCatalog.size() + 1, catalog.size());
         assertTrue(test + ": the existing game should still be visible", catalog.contains(existingGame));
@@ -95,13 +101,18 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameExistingUserGameTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
         final String test = "addGameExistingUserGameTest";
         final String gameName = "Existing Game";
-        User user = insertTestingUser(username);
-        Game existingGame = insertTestingGame(gameName, user);
+
+        User user = insertTestingUser(username, password);
+        Game existingGame = insertTestingGame(gameName, user, smaller, larger);
         List<Game> initialCatalog = gamesService.getAvailableGames(user);
 
-        assertAddGameRejectsAllPlayerCounts(test, user, gameName);
+        assertAddGameRejectsAllPlayerCounts(test, user, gameName, smaller, larger);
         boolean result = gamesService.addGame(user, "  EXISTING GAME  ", smaller, larger);
         assertFalse(test + ": should reject the same name with different case and surrounding spaces", result);
         assertEquals(test + ": the catalog should still contain the original games", initialCatalog, gamesService.getAvailableGames(user));
@@ -113,9 +124,14 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameExistingPublicGameTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
         final String gameName = "Public Game";
-        User user = insertTestingUser(username);
-        Game publicGame = insertTestingPublicGame(gameName);
+
+        User user = insertTestingUser(username, password);
+        Game publicGame = insertTestingPublicGame(gameName, smaller, larger);
 
         boolean result = gamesService.addGame(user, "  PUBLIC GAME  ", smaller, larger);
         assertFalse("addGameExistingPublicGameTest: should reject a public duplicate after trimming and ignoring case", result);
@@ -128,11 +144,16 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameNullNameTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
         final String test = "addGameNullNameTest";
-        User user = insertTestingUser(username);
+
+        User user = insertTestingUser(username, password);
         List<Game> initialCatalog = gamesService.getAvailableGames(user);
 
-        assertAddGameRejectsAllPlayerCounts(test, user, null);
+        assertAddGameRejectsAllPlayerCounts(test, user, null, smaller, larger);
         assertEquals(test + ": should preserve the catalog", initialCatalog, gamesService.getAvailableGames(user));
     }
 
@@ -141,15 +162,21 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameNullUserTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
         final String test = "addGameNullUserTest";
         final String publicName = "Public Game";
-        User user = insertTestingUser(username);
-        insertTestingPublicGame(publicName);
+
+        User user = insertTestingUser(username, password);
+        insertTestingPublicGame(publicName, smaller, larger);
         List<Game> initialCatalog = gamesService.getAvailableGames(user);
 
-        assertAddGameRejectsAllPlayerCounts(test, null, validName);
-        assertAddGameRejectsAllPlayerCounts(test, null, publicName);
-        assertAddGameRejectsAllPlayerCounts(test, null, null);
+        assertAddGameRejectsAllPlayerCounts(test, null, validName, smaller, larger);
+        assertAddGameRejectsAllPlayerCounts(test, null, publicName, smaller, larger);
+        assertAddGameRejectsAllPlayerCounts(test, null, null, smaller, larger);
         assertEquals(test + ": should preserve the catalog", initialCatalog, gamesService.getAvailableGames(user));
     }
 
@@ -158,7 +185,12 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameBlankNameTest() {
-        User user = insertTestingUser(username);
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
         List<Game> initialCatalog = gamesService.getAvailableGames(user);
 
         boolean result = gamesService.addGame(user, "", smaller, larger);
@@ -173,9 +205,14 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameNameWithSpacesTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
         final String test = "addGameNameWithSpacesTest";
-        User user = insertTestingUser(username);
-        User otherUser = insertTestingUser("otheruser");
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("otheruser", password);
 
         assertAddedGame(test, user, "Trailing Game ", smaller, larger);
         assertAddedGame(test, user, " Leading Game", smaller, larger);
@@ -190,10 +227,15 @@ public class GamesServiceTest {
      */
     @Test
     public void addGameRestoresHiddenGameTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
         final String test = "addGameRestoresHiddenGameTest";
         final String gameName = "Hidden Game";
-        User user = insertTestingUser(username);
-        Game hiddenGame = insertTestingCatalogEntry(gameName, user, false);
+
+        User user = insertTestingUser(username, password);
+        Game hiddenGame = insertTestingCatalogEntry(gameName, user, false, smaller, larger);
         Long originalID = hiddenGame.getGameID();
         assertNull(test + ": the hidden game should be absent from the catalog", findAvailableGame(user, gameName));
 
@@ -226,15 +268,20 @@ public class GamesServiceTest {
      */
     @Test
     public void getAvailableGamesVisibleGamesTest() {
-        User user = insertTestingUser(username);
-        User otherUser = insertTestingUser("otheruser");
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("otheruser", password);
 
         // Existing catalog before adding this test's games
         List<Game> emptyCatalog = gamesService.getAvailableGames(user);
         int initialGameCount = emptyCatalog.size();
 
         // One public game
-        Game publicGame = insertTestingPublicGame("Public Game");
+        Game publicGame = insertTestingPublicGame("Public Game", smaller, larger);
         List<Game> publicCatalog = gamesService.getAvailableGames(user);
         int gameCount = publicCatalog.size();
         assertEquals("getAvailableGamesVisibleGamesTest: should add one visible public game", initialGameCount + 1, gameCount);
@@ -242,9 +289,9 @@ public class GamesServiceTest {
         assertTrue("getAvailableGamesVisibleGamesTest: should return the public game", containsPublicGame);
 
         // Public, private, and hidden games
-        Game userGame = insertTestingGame("User Game", user);
-        Game hiddenGame = insertTestingCatalogEntry("Hidden Game", user, false);
-        Game otherGame = insertTestingGame("Other Game", otherUser);
+        Game userGame = insertTestingGame("User Game", user, smaller, larger);
+        Game hiddenGame = insertTestingCatalogEntry("Hidden Game", user, false, smaller, larger);
+        Game otherGame = insertTestingGame("Other Game", otherUser, smaller, larger);
 
         List<Game> result = gamesService.getAvailableGames(user);
 
@@ -274,9 +321,14 @@ public class GamesServiceTest {
      */
     @Test
     public void getAvailableGamesUserCopyOverridesPublicGameTest() {
-        User user = insertTestingUser(username);
-        Game publicGame = insertTestingPublicGame("Shared Game");
-        Game userGame = insertTestingUserCopy(publicGame, user, true);
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game publicGame = insertTestingPublicGame("Shared Game", smaller, larger);
+        Game userGame = insertTestingUserCopy(publicGame, user, true, smaller, larger);
 
         List<Game> result = gamesService.getAvailableGames(user);
 
@@ -293,9 +345,14 @@ public class GamesServiceTest {
      */
     @Test
     public void getAvailableGamesHiddenCopyHidesPublicGameTest() {
-        User user = insertTestingUser(username);
-        Game publicGame = insertTestingPublicGame("Shared Game");
-        Game hiddenGame = insertTestingUserCopy(publicGame, user, false);
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game publicGame = insertTestingPublicGame("Shared Game", smaller, larger);
+        Game hiddenGame = insertTestingUserCopy(publicGame, user, false, smaller, larger);
 
         List<Game> result = gamesService.getAvailableGames(user);
 
@@ -313,10 +370,15 @@ public class GamesServiceTest {
      */
     @Test
     public void getAvailableGamesAlphabeticalOrderTest() {
-        User user = insertTestingUser(username);
-        Game zebra = insertTestingGame("zebra", user);
-        Game apple = insertTestingGame("apple", user);
-        Game banana = insertTestingGame("Banana", user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game zebra = insertTestingGame("zebra", user, smaller, larger);
+        Game apple = insertTestingGame("apple", user, smaller, larger);
+        Game banana = insertTestingGame("Banana", user, smaller, larger);
 
         List<Game> result = gamesService.getAvailableGames(user);
 
@@ -339,7 +401,11 @@ public class GamesServiceTest {
      */
     @Test
     public void getGameByGameIDSuccessTest() {
-        Game game = insertTestingPublicGame(validName);
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        Game game = insertTestingPublicGame(validName, smaller, larger);
 
         Game result = gamesService.getGameByGameID(game.getGameID());
 
@@ -380,8 +446,14 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameSameNameSuccessTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), validName, 2, 6);
@@ -407,8 +479,14 @@ public class GamesServiceTest {
      */
     @Test
     public void editGamePublicGameCreatesUserCopyTest() {
-        User user = insertTestingUser(username);
-        Game publicGame = insertTestingPublicGame(validName);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game publicGame = insertTestingPublicGame(validName, smaller, larger);
 
         boolean result = gamesService.editGame(
                 user, publicGame.getGameID(), validName, 2, 6);
@@ -442,8 +520,14 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNewNameSuccessTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "Renamed Game", 2, 6);
@@ -472,8 +556,14 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNameWithSpacesTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "  Renamed Game  ", smaller, larger);
@@ -488,10 +578,16 @@ public class GamesServiceTest {
      */
     @Test
     public void editGamePublicGameNewNameTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
         final String test = "editGamePublicGameNewNameTest";
-        User user = insertTestingUser(username);
-        User otherUser = insertTestingUser("otheruser");
-        Game publicGame = insertTestingPublicGame(validName);
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("otheruser", password);
+        Game publicGame = insertTestingPublicGame(validName, smaller, larger);
 
         boolean result = gamesService.editGame(user, publicGame.getGameID(), "Renamed Game", null, null);
         assertTrue(test + ": should rename the game with unspecified player counts", result);
@@ -509,9 +605,15 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameInvalidPlayerCountsTest() {
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
         final String test = "editGameInvalidPlayerCountsTest";
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
         Long gameID = game.getGameID();
 
         boolean result = gamesService.editGame(user, gameID, validName, larger, smaller);
@@ -534,7 +636,11 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNullUserTest() {
-        Game game = insertTestingPublicGame(validName);
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        Game game = insertTestingPublicGame(validName, smaller, larger);
 
         boolean result = gamesService.editGame(
                 null, game.getGameID(), "Renamed Game", smaller, larger);
@@ -550,7 +656,13 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNullGameIDTest() {
-        User user = insertTestingUser(username);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
 
         boolean result = gamesService.editGame(
                 user, null, validName, smaller, larger);
@@ -563,7 +675,13 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameInvalidGameIDTest() {
-        User user = insertTestingUser(username);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
 
         boolean result = gamesService.editGame(
                 user, -1L, validName, smaller, larger);
@@ -576,8 +694,14 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameNullGameNameTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), null, smaller, larger);
@@ -590,8 +714,14 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameEmptyGameNameTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "", smaller, larger);
@@ -604,8 +734,14 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameWhitespaceGameNameTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "   ", smaller, larger);
@@ -619,9 +755,15 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameExistingUserGameNameTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
-        insertTestingGame("Existing Game", user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
+        insertTestingGame("Existing Game", user, smaller, larger);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "EXISTING GAME", smaller, larger);
@@ -638,9 +780,15 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameExistingPublicGameNameTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
-        insertTestingPublicGame("Public Game");
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
+        insertTestingPublicGame("Public Game", smaller, larger);
 
         boolean result = gamesService.editGame(
                 user, game.getGameID(), "Public Game", smaller, larger);
@@ -658,9 +806,15 @@ public class GamesServiceTest {
      */
     @Test
     public void editGameUpdatesCollectionReferencesTest() {
-        User user = insertTestingUser(username);
-        User otherUser = insertTestingUser("otheruser");
-        Game publicGame = insertTestingPublicGame(validName);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("otheruser", password);
+        Game publicGame = insertTestingPublicGame(validName, smaller, larger);
 
         assertTrue("editGameUpdatesCollectionReferencesTest: should add the user's copy",
                 gamesOwnedService.addGameToCollection(user, publicGame.getGameID(), 2020));
@@ -698,8 +852,14 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameUserGameSuccessTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
 
         boolean result = gamesService.removeGame(user, game.getGameID());
 
@@ -722,9 +882,15 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGamePublicGameSuccessTest() {
-        User user = insertTestingUser(username);
-        User otherUser = insertTestingUser("otheruser");
-        Game publicGame = insertTestingPublicGame(validName);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("otheruser", password);
+        Game publicGame = insertTestingPublicGame(validName, smaller, larger);
 
         boolean result = gamesService.removeGame(user, publicGame.getGameID());
 
@@ -758,7 +924,11 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameNullUserTest() {
-        Game game = insertTestingPublicGame(validName);
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        Game game = insertTestingPublicGame(validName, smaller, larger);
 
         boolean result = gamesService.removeGame(null, game.getGameID());
 
@@ -773,7 +943,10 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameNullGameIDTest() {
-        User user = insertTestingUser(username);
+        final String username = "testuser";
+        final String password = "testpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = gamesService.removeGame(user, null);
 
@@ -785,7 +958,10 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameInvalidGameIDTest() {
-        User user = insertTestingUser(username);
+        final String username = "testuser";
+        final String password = "testpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = gamesService.removeGame(user, -1L);
 
@@ -799,8 +975,14 @@ public class GamesServiceTest {
      */
     @Test
     public void removeGameReferencedByCollectionTest() {
-        User user = insertTestingUser(username);
-        Game game = insertTestingGame(validName, user);
+        final String username = "testuser";
+        final String password = "testpass";
+        final String validName = "free";
+        final int smaller = 1;
+        final int larger = 10;
+
+        User user = insertTestingUser(username, password);
+        Game game = insertTestingGame(validName, user, smaller, larger);
 
         assertTrue("removeGameReferencedByCollectionTest: should add the game to the collection",
                 gamesOwnedService.addGameToCollection(user, game.getGameID(), 2020));
@@ -822,7 +1004,7 @@ public class GamesServiceTest {
     /**
      * Creates a test user and verifies that the saved credentials work.
      */
-    private User insertTestingUser(String username) {
+    private User insertTestingUser(String username, String password) {
         User user = userService.validateUser(username, password);
         assertNull("insertTestingUser: user should not exist yet", user);
 
@@ -841,22 +1023,22 @@ public class GamesServiceTest {
     /**
      * Adds a visible user game and verifies its stored details.
      */
-    private Game insertTestingGame(String name, User user) {
+    private Game insertTestingGame(String name, User user, int smaller, int larger) {
         return assertAddedGame("insertTestingGame", user, name, smaller, larger);
     }
 
     /**
      * Persists a public game for tests of the default catalog.
      */
-    private Game insertTestingPublicGame(String gameName) {
-        return insertTestingCatalogEntry(gameName, null, true);
+    private Game insertTestingPublicGame(String gameName, int smaller, int larger) {
+        return insertTestingCatalogEntry(gameName, null, true, smaller, larger);
     }
 
     /**
      * Creates a separate user copy of a public game, with the specified visibility.
      */
-    private Game insertTestingUserCopy(Game publicGame, User user, boolean visible) {
-        Game userCopy = insertTestingCatalogEntry(publicGame.getGameName(), user, visible);
+    private Game insertTestingUserCopy(Game publicGame, User user, boolean visible, int smaller, int larger) {
+        Game userCopy = insertTestingCatalogEntry(publicGame.getGameName(), user, visible, smaller, larger);
         assertNotEquals("insertTestingUserCopy: should create a separate record", publicGame.getGameID(), userCopy.getGameID());
         return userCopy;
     }
@@ -864,7 +1046,7 @@ public class GamesServiceTest {
     /**
      * Persists catalog entries that cannot be created directly by the add operation.
      */
-    private Game insertTestingCatalogEntry(String name, User user, boolean visible) {
+    private Game insertTestingCatalogEntry(String name, User user, boolean visible, int smaller, int larger) {
         Game game = new Game(name);
         game.setUserWhoAdded(user);
         game.setCanSee(visible);
@@ -914,8 +1096,8 @@ public class GamesServiceTest {
         return matches.isEmpty() ? null : matches.getFirst();
     }
 
-    private void assertAddGameRejectsAllPlayerCounts(String test, User user, String name) {
-        assertAddGameRejectsInvalidPlayerCounts(test, user, name);
+    private void assertAddGameRejectsAllPlayerCounts(String test, User user, String name, int smaller, int larger) {
+        assertAddGameRejectsInvalidPlayerCounts(test, user, name, smaller, larger);
         assertAddGameRejected(test, user, name, smaller, larger);
         assertAddGameRejected(test, user, name, smaller, smaller);
         assertAddGameRejected(test, user, name, 0, 0);
@@ -924,7 +1106,7 @@ public class GamesServiceTest {
         assertAddGameRejected(test, user, name, null, null);
     }
 
-    private void assertAddGameRejectsInvalidPlayerCounts(String test, User user, String name) {
+    private void assertAddGameRejectsInvalidPlayerCounts(String test, User user, String name, int smaller, int larger) {
         assertAddGameRejected(test, user, name, smaller, -1);
         assertAddGameRejected(test, user, name, -1, larger);
         assertAddGameRejected(test, user, name, larger, smaller);

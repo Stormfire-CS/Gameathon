@@ -31,8 +31,6 @@ import static org.springframework.test.util.AssertionErrors.*;
 @SpringBootTest
 @Transactional
 public class GamesOwnedServiceTest {
-    private static final String username = "ownedtestuser";
-    private static final String password = "ownedtestpass";
 
     @Autowired
     private GamesOwnedService gamesOwnedService;
@@ -63,7 +61,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getGamesOwnedByUsernameReturnsListTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingPublicGame("Owned Test Game");
         insertTestingOwnedGame(user, game, null);
 
@@ -77,7 +78,7 @@ public class GamesOwnedServiceTest {
         assertEquals("getGamesOwnedByUsernameReturnsListTest: result should contain the user's game", game, ownedGame);
 
         // Two owned copies, one per user
-        User otherUser = insertTestingUser("othercollector");
+        User otherUser = insertTestingUser("othercollector", password);
         insertTestingOwnedGame(otherUser, game, null);
 
         result = gamesOwnedService.getGamesOwnedByUsername(user);
@@ -103,7 +104,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getGamesOwnedByUsernameEmptyListTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
 
         List<GameOwned> result = gamesOwnedService.getGamesOwnedByUsername(user);
 
@@ -134,7 +138,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionSuccessTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingPublicGame("Owned Test Game");
 
         boolean result = gamesOwnedService.addGameToCollection(user, game.getGameID(), 2020);
@@ -155,7 +162,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionNullYearTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.addGameToCollection(user, game.getGameID(), null);
@@ -172,7 +182,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionNullUserTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.addGameToCollection(null, game.getGameID(), 2020);
@@ -187,7 +200,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionNullGameIDTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = gamesOwnedService.addGameToCollection(user, null, 2020);
 
@@ -199,7 +215,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionNonexistentGameTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = gamesOwnedService.addGameToCollection(user, -1L, 2020);
 
@@ -211,7 +230,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionYearTooEarlyTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.addGameToCollection(
@@ -228,7 +250,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionYearTooLateTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.addGameToCollection(
@@ -245,7 +270,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionMinimumYearTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.addGameToCollection(
@@ -263,7 +291,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionMaximumYearTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         int maximumYear = Year.now().getValue() + 2;
 
@@ -283,7 +314,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void addGameToCollectionMultipleCopiesTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean firstResult = gamesOwnedService.addGameToCollection(
@@ -310,7 +344,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void removeGameFromCollectionSuccessTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         insertTestingOwnedGame(user, game, 2020);
         List<GameOwned> ownedGames = gamesOwnedService.getGamesOwnedByUsername(user);
@@ -330,12 +367,15 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void removeGameFromCollectionNullUserTest() {
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
         // No owned games in the database
         boolean result = gamesOwnedService.removeGameFromCollection(null, -1L);
         assertFalse("removeGameFromCollectionNullUserTest: should fail with no owned games", result);
 
         // One owned game in the database
-        User user = insertTestingUser();
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
         result = gamesOwnedService.removeGameFromCollection(null, ownedGame.getGameOwnedID());
@@ -349,7 +389,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void removeGameFromCollectionNullIDTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = gamesOwnedService.removeGameFromCollection(user, null);
 
@@ -361,7 +404,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void removeGameFromCollectionNonexistentIDTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
 
         boolean result = gamesOwnedService.removeGameFromCollection(user, -1L);
 
@@ -373,8 +419,11 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void removeGameFromCollectionWrongUserTest() {
-        User user = insertTestingUser();
-        User otherUser = insertTestingUser("ownedtestuser2");
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("ownedtestuser2", password);
         Game game = insertTestingGame(user, "Owned Test Game");
         insertTestingOwnedGame(user, game, 2020);
         List<GameOwned> ownedGames = gamesOwnedService.getGamesOwnedByUsername(user);
@@ -401,7 +450,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getGameOwnedByIDSuccessTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
@@ -422,7 +474,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getGameOwnedByIDNullUserTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         GameOwned ownedGame = insertTestingOwnedGame(
                 user, insertTestingGame(user, "Owned Test Game"), 2020);
 
@@ -437,7 +492,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getGameOwnedByIDNullIDTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
 
         GameOwned result = gamesOwnedService.getGameOwnedByID(user, null);
 
@@ -449,7 +507,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getGameOwnedByIDNonexistentIDTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
 
         GameOwned result = gamesOwnedService.getGameOwnedByID(user, -1L);
 
@@ -461,8 +522,11 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getGameOwnedByIDWrongUserTest() {
-        User user = insertTestingUser();
-        User otherUser = insertTestingUser("ownedtestuser2");
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("ownedtestuser2", password);
         GameOwned ownedGame = insertTestingOwnedGame(
                 user, insertTestingGame(user, "Owned Test Game"), 2020);
 
@@ -485,8 +549,11 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getNumberOfReferencesSuccessTest() {
-        User user = insertTestingUser();
-        User otherUser = insertTestingUser("ownedtestuser2");
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("ownedtestuser2", password);
         Game game = insertTestingGame(user, "Owned Test Game");
         Game otherGame = insertTestingGame(user, "Other Game");
 
@@ -507,7 +574,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getNumberOfReferencesNoReferencesTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         long result = gamesOwnedService.getNumberOfReferences(
@@ -522,7 +592,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getNumberOfReferencesNullUserTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         long result = gamesOwnedService.getNumberOfReferences(
@@ -537,7 +610,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getNumberOfReferencesNullGameIDTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
 
         long result = gamesOwnedService.getNumberOfReferences(null, user);
 
@@ -550,7 +626,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getNumberOfReferencesNonexistentGameTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
 
         long result = gamesOwnedService.getNumberOfReferences(-1L, user);
 
@@ -570,8 +649,11 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void updateGameReferencesSuccessTest() {
-        User user = insertTestingUser();
-        User otherUser = insertTestingUser("ownedtestuser2");
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("ownedtestuser2", password);
         Game originalGame = insertTestingGame(user, "Owned Test Game");
         Game replacementGame = insertTestingGame(user, "Replacement Game");
         Game unrelatedGame = insertTestingGame(user, "Unrelated Game");
@@ -616,7 +698,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void updateGameReferencesNoReferencesTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game originalGame = insertTestingGame(user, "Owned Test Game");
         Game replacementGame = insertTestingGame(user, "Replacement Game");
 
@@ -634,7 +719,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void updateGameReferencesNullGameIDTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.updateGameReferences(null, user, game);
@@ -648,7 +736,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void updateGameReferencesNullUserTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.updateGameReferences(
@@ -664,7 +755,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void updateGameReferencesNullNewGameTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
@@ -690,7 +784,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionSuccessTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game originalGame = insertTestingGame(user, "Owned Test Game");
         Game replacementGame = insertTestingGame(user, "Replacement Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, originalGame, 2020);
@@ -720,7 +817,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionNullYearTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
@@ -738,7 +838,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionNullUserTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
@@ -754,7 +857,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionNullIDTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -769,7 +875,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionNullGameTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
@@ -788,7 +897,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionNonexistentIDTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
 
         boolean result = gamesOwnedService.editGameInCollection(
@@ -803,8 +915,11 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionWrongUserTest() {
-        User user = insertTestingUser();
-        User otherUser = insertTestingUser("ownedtestuser2");
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
+        User otherUser = insertTestingUser("ownedtestuser2", password);
         Game originalGame = insertTestingGame(user, "Owned Test Game");
         Game replacementGame = insertTestingGame(user, "Replacement Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, originalGame, 2020);
@@ -830,7 +945,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionYearTooEarlyTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game originalGame = insertTestingGame(user, "Owned Test Game");
         Game replacementGame = insertTestingGame(user, "Replacement Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, originalGame, 2020);
@@ -856,7 +974,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionYearTooLateTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game originalGame = insertTestingGame(user, "Owned Test Game");
         Game replacementGame = insertTestingGame(user, "Replacement Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, originalGame, 2020);
@@ -883,7 +1004,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionMinimumYearTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
 
@@ -902,7 +1026,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void editGameInCollectionMaximumYearTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Game game = insertTestingGame(user, "Owned Test Game");
         GameOwned ownedGame = insertTestingOwnedGame(user, game, 2020);
         int maximumYear = Year.now().getValue() + 2;
@@ -929,7 +1056,10 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getGamesOwnedByFamilyNoMembersTest() {
-        User user = insertTestingUser();
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
         Family family = insertTestingFamilyWithoutMembers(user);
         insertTestingOwnedGame(user, insertTestingGame(user, "Owned Test Game"), 2020);
 
@@ -948,10 +1078,13 @@ public class GamesOwnedServiceTest {
      */
     @Test
     public void getGamesOwnedByFamilyAcceptedMembersTest() {
-        User user = insertTestingUser();
-        User secondMember = insertTestingUser("ownedtestuser2");
-        User pendingMember = insertTestingUser("ownedtestuser3");
-        User outsider = insertTestingUser("ownedtestuser4");
+        final String username = "ownedtestuser";
+        final String password = "ownedtestpass";
+
+        User user = insertTestingUser(username, password);
+        User secondMember = insertTestingUser("ownedtestuser2", password);
+        User pendingMember = insertTestingUser("ownedtestuser3", password);
+        User outsider = insertTestingUser("ownedtestuser4", password);
 
         Family family = insertTestingFamily(user, "Test Family");
         insertTestingFamily(outsider, "Other Family");
@@ -962,7 +1095,7 @@ public class GamesOwnedServiceTest {
                 family, membershipService.getFamilyForUser(secondMember));
         insertTestingPendingRequest(family, pendingMember);
 
-        User rejectedMember = insertTestingUser("rejectedcollector");
+        User rejectedMember = insertTestingUser("rejectedcollector", password);
         FamilyMembership rejectedRequest = insertTestingPendingRequest(family, rejectedMember);
         boolean rejected = membershipService.rejectRequest(user, rejectedRequest);
         assertTrue("getGamesOwnedByFamilyAcceptedMembersTest: should reject the other applicant", rejected);
@@ -1017,14 +1150,10 @@ public class GamesOwnedServiceTest {
      * = = = = = = = = = = =
      */
 
-    private User insertTestingUser() {
-        return insertTestingUser(username);
-    }
-
     /**
      * Creates a test user and verifies that the saved credentials work.
      */
-    private User insertTestingUser(String username) {
+    private User insertTestingUser(String username, String password) {
         User user = userService.validateUser(username, password);
         assertNull("insertTestingUser: user should not exist yet", user);
 
