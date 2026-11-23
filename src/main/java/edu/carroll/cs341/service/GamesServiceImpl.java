@@ -3,7 +3,6 @@ package edu.carroll.cs341.service;
 import edu.carroll.cs341.jpa.model.Game;
 import edu.carroll.cs341.jpa.model.User;
 import edu.carroll.cs341.jpa.repo.GamesRepository;
-import edu.carroll.cs341.jpa.repo.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
