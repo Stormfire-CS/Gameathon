@@ -11,8 +11,6 @@ import jakarta.persistence.Table;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.aspectj.util.LangUtil.EOL;
-
 /**
  * Represents a family stored in the database.
  *
@@ -56,7 +54,7 @@ public class Family {
     /**
      * A unique identifier used to distinguish this family from other families.
      */
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(name = "family_identifier", nullable = false, unique = true, updatable = false)
     private String familyIdentifier = UUID.randomUUID().toString();
 
     /**
@@ -143,7 +141,7 @@ public class Family {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Family: family ID = ").append(familyID).append(EOL);
+        builder.append("Family: family ID = ").append(familyID).append(", ");
         builder.append("familyName = ").append(familyName);
         return builder.toString();
     }
