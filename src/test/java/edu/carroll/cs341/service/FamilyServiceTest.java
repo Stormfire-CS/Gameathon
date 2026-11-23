@@ -774,16 +774,21 @@ public class FamilyServiceTest {
      * @return the created user
      */
     private User insertTestingUser(String username, String password) {
+        // Verify that the username is not already associated with an existing user.
         User user = userService.validateUser(username, password);
         assertNull("insertTestingUser: user should not exist yet", user);
 
+        // Create the new user and verify that the user was saved successfully.
         user = userService.newUser(username, password);
         assertNotNull("insertTestingUser: user should exist after creation", user);
         assertNotNull("insertTestingUser: user should have an ID", user.getId());
         assertEquals("insertTestingUser: user should have the correct username", username, user.getUsername());
 
+        // Validate the newly created user's credentials to verify that login works.
         User userCheck = userService.validateUser(username, password);
         assertNotNull("insertTestingUser: user should exist after validation", userCheck);
+
+        // Verify that authentication returns the same user that was originally created.
         assertEquals("insertTestingUser: login should return the created user's ID", user.getId(), userCheck.getId());
         assertEquals("insertTestingUser: login should return the expected username", username, userCheck.getUsername());
         return userCheck;
@@ -797,17 +802,24 @@ public class FamilyServiceTest {
      * @return the created family
      */
     private Family insertTestingFamily(User admin, String familyName) {
+        // Verify that the administrator does not already belong to a family.
         assertNull("insertTestingFamily: the administrator should start without a family",
                 membershipService.getFamilyForUser(admin));
 
+        // Create the family using the specified administrator and name.
         boolean result = familyService.createFamily(admin, familyName);
         assertTrue("insertTestingFamily: should create the family", result);
 
+        // Retrieve the newly created family through the administrator's membership.
         Family family = membershipService.getFamilyForUser(admin);
+
+        // Verify that the family was created with the expected information.
         assertNotNull("insertTestingFamily: should find the created family", family);
         assertNotNull("insertTestingFamily: family should have an ID", family.getFamilyID());
         assertEquals("insertTestingFamily: should store the expected name", familyName, family.getFamilyName());
         assertEquals("insertTestingFamily: should assign the administrator", admin, family.getFamilyAdmin());
+
+        // Retrieve the family's memberships and verify that the administrator has an accepted membership.
         List<FamilyMembership> memberships = membershipService.getFamilyMembers(admin);
         assertEquals("insertTestingFamily: should create exactly one membership", 1, memberships.size());
         assertEquals("insertTestingFamily: should accept the administrator", "ACCEPTED", memberships.getFirst().getStatus());
@@ -824,14 +836,21 @@ public class FamilyServiceTest {
      * @return the created member
      */
     private User insertTestingMember(String username, String password, Family family) {
+        // Create a new user who will request to join the family.
         User member = insertTestingUser(username, password);
+
+        // Submit a membership request for the newly created user.
         FamilyMembership request = insertTestingPendingRequest(family, member);
 
+        // Accept the membership request using the family's administrator.
         boolean result = membershipService.acceptRequest(family.getFamilyAdmin(), request);
         assertTrue("insertTestingMember: should accept the member", result);
 
+        // Retrieve the saved membership to verify that the request was accepted.
         FamilyMembership membership = membershipService.getMembershipByID(request.getMembershipID());
         assertNotNull("insertTestingMember: should find the accepted membership", membership);
+
+        // Verify that the membership has accepted status and the user belongs to the specified family.
         assertEquals("insertTestingMember: should save accepted status", "ACCEPTED", membership.getStatus());
         assertEquals("insertTestingMember: should associate the member with the family",
                 family, membershipService.getFamilyForUser(member));
@@ -846,23 +865,33 @@ public class FamilyServiceTest {
      * @return the created membership request
      */
     private FamilyMembership insertTestingPendingRequest(Family family, User applicant) {
+        // Retrieve the administrator of the family to access its pending requests.
         User admin = family.getFamilyAdmin();
+
+        // Verify that the applicant does not already have a pending request for this family.
         assertTrue("insertTestingPendingRequest: applicant should have no pending request for this family",
                 membershipService.getPendingRequests(admin).stream()
                         .noneMatch(request -> applicant.equals(request.getUser())));
 
+        // Submit a request for the applicant to join the specified family.
         boolean result = membershipService.requestToJoinFamily(applicant, family.getFamilyID());
         assertTrue("insertTestingPendingRequest: should submit the request", result);
 
+        // Retrieve pending requests and find the request belonging to the applicant.
         List<FamilyMembership> requests = membershipService.getPendingRequests(admin).stream()
                 .filter(request -> applicant.equals(request.getUser()))
                 .toList();
+
+        // Verify that exactly one pending request was created for the applicant.
         assertEquals("insertTestingPendingRequest: should find one request for the applicant", 1, requests.size());
+
+        // Retrieve the matching request and verify its ID, associations, and status.
         FamilyMembership request = requests.getFirst();
         assertNotNull("insertTestingPendingRequest: request should have an ID", request.getMembershipID());
         assertEquals("insertTestingPendingRequest: should save the expected family", family, request.getFamily());
         assertEquals("insertTestingPendingRequest: should save the expected applicant", applicant, request.getUser());
         assertEquals("insertTestingPendingRequest: should save pending status", "PENDING", request.getStatus());
+
         return request;
     }
 
@@ -872,6 +901,7 @@ public class FamilyServiceTest {
      * @return the number of families
      */
     private long countFamilies() {
+        // Execute a JPQL query to count all family records in the database.
         return entityManager.createQuery("select count(family) from Family family", Long.class)
                 .getSingleResult();
     }
@@ -883,10 +913,13 @@ public class FamilyServiceTest {
      * @return the number of memberships in the family
      */
     private long countMemberships(Long familyID) {
+        // Count every membership associated with the specified family.
+        // No status condition is applied, so all membership statuses are included.
         return entityManager.createQuery("""
-                        select count(membership) from FamilyMembership membership
-                        where membership.family.familyID = :familyID
-                        """, Long.class)
+                    select count(membership) from FamilyMembership membership
+                    where membership.family.familyID = :familyID
+                    """, Long.class)
+                // Supply the family ID used to filter the query.
                 .setParameter("familyID", familyID)
                 .getSingleResult();
     }

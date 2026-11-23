@@ -1167,14 +1167,17 @@ public class GamesOwnedServiceTest {
      * @return the created user
      */
     private User insertTestingUser(String username, String password) {
+        // Check whether the supplied credentials already authenticate.
         User user = userService.validateUser(username, password);
         assertNull("insertTestingUser: user should not exist yet", user);
 
+        // Create the user and verify that it was saved with the expected details.
         user = userService.newUser(username, password);
         assertNotNull("insertTestingUser: user should exist after creation", user);
         assertNotNull("insertTestingUser: user should have an ID", user.getId());
         assertEquals("insertTestingUser: user should have the correct username", username, user.getUsername());
 
+        // Verify that the newly created user's credentials successfully authenticate.
         User userCheck = userService.validateUser(username, password);
         assertNotNull("insertTestingUser: user should exist after validation", userCheck);
         assertEquals("insertTestingUser: login should return the created user's ID", user.getId(), userCheck.getId());
@@ -1190,16 +1193,22 @@ public class GamesOwnedServiceTest {
      * @return the created game
      */
     private Game insertTestingGame(User user, String gameName) {
+        // Add the game to the catalog with a minimum of 1 and maximum of 4 players.
         boolean result = gamesService.addGame(user, gameName, 1, 4);
         assertTrue("insertTestingGame: should add the catalog game", result);
 
+        // Find the newly added game in the list of games available to this user.
         List<Game> games = gamesService.getAvailableGames(user).stream()
                 .filter(game -> gameName.equals(game.getGameName()))
                 .toList();
         assertEquals("insertTestingGame: should find one game with the expected name", 1, games.size());
         Game game = games.getFirst();
+
+        // Verify that the game has an ID and is associated with the user who added it.
         assertNotNull("insertTestingGame: game should have an ID", game.getGameID());
         assertEquals("insertTestingGame: should save the user who added the game", user, game.getUserWhoAdded());
+
+        // Retrieve the game again using its ID to verify that it was saved correctly.
         Game saved = gamesService.getGameByGameID(game.getGameID());
         assertNotNull("insertTestingGame: should retrieve the game by its ID", saved);
         assertEquals("insertTestingGame: catalog lookup should return the created game ID", game.getGameID(), saved.getGameID());
@@ -1216,11 +1225,15 @@ public class GamesOwnedServiceTest {
      * @return the created game
      */
     private Game insertTestingPublicGame(String gameName) {
+        // Create a game without assigning a user as its owner.
         Game game = new Game(gameName);
         game.setCanSee(true);
+
+        // Persist the public game directly and flush it to the database.
         entityManager.persist(game);
         entityManager.flush();
 
+        // Verify that the public game was saved and can be retrieved by its ID.
         assertNotNull("insertTestingPublicGame: public game should have an ID", game.getGameID());
         Game saved = gamesService.getGameByGameID(game.getGameID());
         assertNotNull("insertTestingPublicGame: should retrieve the game by its ID", saved);
@@ -1239,15 +1252,20 @@ public class GamesOwnedServiceTest {
      * @return the created ownership record
      */
     private GameOwned insertTestingOwnedGame(User user, Game game, Integer yearProduced) {
+        // Store the IDs of the games already in the user's collection.
         List<Long> previousIDs = gamesOwnedService.getGamesOwnedByUsername(user).stream()
                 .map(GameOwned::getGameOwnedID)
                 .toList();
 
+        // Add the game to the user's collection with the specified production year.
         boolean result = gamesOwnedService.addGameToCollection(user, game.getGameID(), yearProduced);
         assertTrue("insertTestingOwnedGame: should add the test ownership record", result);
 
+        // Retrieve the updated collection and verify that exactly one record was added.
         List<GameOwned> ownedGames = gamesOwnedService.getGamesOwnedByUsername(user);
         assertEquals("insertTestingOwnedGame: collection should grow by one", previousIDs.size() + 1, ownedGames.size());
+
+        // Identify the new ownership record by finding an ID that was not in the original collection.
         List<GameOwned> newGames = ownedGames.stream()
                 .filter(ownedGame -> !previousIDs.contains(ownedGame.getGameOwnedID()))
                 .toList();
@@ -1255,6 +1273,7 @@ public class GamesOwnedServiceTest {
         Long ownedID = newGames.getFirst().getGameOwnedID();
         assertNotNull("insertTestingOwnedGame: copy should have an ID", ownedID);
 
+        // Retrieve the new ownership record by its ID and verify its saved information.
         GameOwned ownedGame = gamesOwnedService.getGameOwnedByID(user, ownedID);
         assertNotNull("insertTestingOwnedGame: should find the copy by its ID", ownedGame);
         assertEquals("insertTestingOwnedGame: should return the expected ownership ID", ownedID, ownedGame.getGameOwnedID());
@@ -1272,17 +1291,22 @@ public class GamesOwnedServiceTest {
      * @return the created family
      */
     private Family insertTestingFamily(User admin, String familyName) {
+        // Verify that the administrator does not already belong to a family.
         assertNull("insertTestingFamily: the administrator should start without a family",
                 membershipService.getFamilyForUser(admin));
 
+        // Create the family with the specified administrator and name.
         boolean result = familyService.createFamily(admin, familyName);
         assertTrue("insertTestingFamily: should create the family", result);
 
+        // Retrieve the family and verify its ID, name, and administrator.
         Family family = membershipService.getFamilyForUser(admin);
         assertNotNull("insertTestingFamily: should find the created family", family);
         assertNotNull("insertTestingFamily: family should have an ID", family.getFamilyID());
         assertEquals("insertTestingFamily: should store the expected name", familyName, family.getFamilyName());
         assertEquals("insertTestingFamily: should assign the administrator", admin, family.getFamilyAdmin());
+
+        // Verify that creating the family also created an accepted membership for the administrator.
         List<FamilyMembership> memberships = membershipService.getFamilyMembers(admin);
         assertEquals("insertTestingFamily: should create exactly one membership", 1, memberships.size());
         assertEquals("insertTestingFamily: should accept the administrator", "ACCEPTED", memberships.getFirst().getStatus());
@@ -1298,19 +1322,26 @@ public class GamesOwnedServiceTest {
      * @return the created pending membership request
      */
     private FamilyMembership insertTestingPendingRequest(Family family, User applicant) {
+        // Retrieve the administrator so the pending requests can be checked through their account.
         User admin = family.getFamilyAdmin();
+
+        // Verify that the applicant does not already have a pending request for this family.
         assertTrue("insertTestingPendingRequest: applicant should have no pending request for this family",
                 membershipService.getPendingRequests(admin).stream()
                         .noneMatch(request -> applicant.equals(request.getUser())));
 
+        // Submit a request for the applicant to join the specified family.
         boolean result = membershipService.requestToJoinFamily(applicant, family.getFamilyID());
         assertTrue("insertTestingPendingRequest: should submit the request", result);
 
+        // Find the applicant's request in the administrator's pending requests.
         List<FamilyMembership> requests = membershipService.getPendingRequests(admin).stream()
                 .filter(request -> applicant.equals(request.getUser()))
                 .toList();
         assertEquals("insertTestingPendingRequest: should find one request for the applicant", 1, requests.size());
         FamilyMembership request = requests.getFirst();
+
+        // Verify that the request was saved with the correct ID, family, applicant, and status.
         assertNotNull("insertTestingPendingRequest: request should have an ID", request.getMembershipID());
         assertEquals("insertTestingPendingRequest: should save the expected family", family, request.getFamily());
         assertEquals("insertTestingPendingRequest: should save the expected applicant", applicant, request.getUser());
@@ -1325,15 +1356,18 @@ public class GamesOwnedServiceTest {
      * @return the created family
      */
     private Family insertTestingFamilyWithoutMembers(User admin) {
+        // Create and persist a family directly instead of using the service method.
+        // This allows the test to create a family without its usual initial membership.
         Family family = new Family("Test Family", admin);
         entityManager.persist(family);
         entityManager.flush();
 
+        // Verify that the family was saved and that no membership records were created for it.
         assertNotNull("insertTestingFamilyWithoutMembers: family should have an ID", family.getFamilyID());
         Long count = entityManager.createQuery("""
-                        select count(membership) from FamilyMembership membership
-                        where membership.family = :family
-                        """, Long.class)
+                    select count(membership) from FamilyMembership membership
+                    where membership.family = :family
+                    """, Long.class)
                 .setParameter("family", family)
                 .getSingleResult();
         assertEquals("insertTestingFamilyWithoutMembers: family should have no memberships", 0L, count);

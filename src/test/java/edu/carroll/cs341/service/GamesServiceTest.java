@@ -1008,16 +1008,23 @@ public class GamesServiceTest {
 
     /**
      * Creates a test user and verifies that the saved credentials work.
+     *
+     * @param username the username of the user to create
+     * @param password the password of the user to create
+     * @return the created user
      */
     private User insertTestingUser(String username, String password) {
+        // Check whether the supplied credentials already authenticate.
         User user = userService.validateUser(username, password);
         assertNull("insertTestingUser: user should not exist yet", user);
 
+        // Create the user and verify that it was saved with the expected details.
         user = userService.newUser(username, password);
         assertNotNull("insertTestingUser: user should exist after creation", user);
         assertNotNull("insertTestingUser: user should have an ID", user.getId());
         assertEquals("insertTestingUser: user should have the correct username", username, user.getUsername());
 
+        // Verify that the newly created user's credentials successfully authenticate.
         User userCheck = userService.validateUser(username, password);
         assertNotNull("insertTestingUser: user should exist after validation", userCheck);
         assertEquals("insertTestingUser: login should return the created user's ID", user.getId(), userCheck.getId());
@@ -1027,39 +1034,73 @@ public class GamesServiceTest {
 
     /**
      * Adds a visible user game and verifies its stored details.
+     *
+     * @param name the name of the game to add
+     * @param user the user who owns the game
+     * @param smaller the smaller number in the game
+     * @param larger the larger number in the game
+     * @return the game that was added
      */
     private Game insertTestingGame(String name, User user, int smaller, int larger) {
+        // Add the game and verify that it was successfully saved.
         return assertAddedGame("insertTestingGame", user, name, smaller, larger);
     }
 
     /**
      * Persists a public game for tests of the default catalog.
+     *
+     * @param gameName the name of the game to add
+     * @param smaller the smaller number in the game
+     * @param larger the larger number in the game
+     * @return the game that was added
      */
     private Game insertTestingPublicGame(String gameName, int smaller, int larger) {
+        // Create a public catalog entry without assigning a user as its owner.
         return insertTestingCatalogEntry(gameName, null, true, smaller, larger);
     }
 
     /**
      * Creates a separate user copy of a public game, with the specified visibility.
+     *
+     * @param publicGame the public game to copy
+     * @param user the user who owns the copy
+     * @param visible whether the copy should be visible
+     * @param smaller the smaller number in the game
+     * @param larger the larger number in the game
+     * @return the game that was added
      */
     private Game insertTestingUserCopy(Game publicGame, User user, boolean visible, int smaller, int larger) {
+        // Create a separate catalog entry using the public game's name and the specified owner and visibility.
         Game userCopy = insertTestingCatalogEntry(publicGame.getGameName(), user, visible, smaller, larger);
+
+        // Verify that the user's copy has a different database ID from the public game.
         assertNotEquals("insertTestingUserCopy: should create a separate record", publicGame.getGameID(), userCopy.getGameID());
         return userCopy;
     }
 
     /**
      * Persists catalog entries that cannot be created directly by the add operation.
+     *
+     * @param name the name of the game to add
+     * @param user the user who owns the game
+     * @param visible whether the game should be visible
+     * @param smaller the smaller number in the game
+     * @param larger the larger number in the game
+     * @return the game that was added
      */
     private Game insertTestingCatalogEntry(String name, User user, boolean visible, int smaller, int larger) {
+        // Create a catalog entry and assign its owner, visibility, and player limits.
         Game game = new Game(name);
         game.setUserWhoAdded(user);
         game.setCanSee(visible);
         game.setMinPlayers(smaller);
         game.setMaxPlayers(larger);
+
+        // Persist the entry directly and flush it to the database.
         entityManager.persist(game);
         entityManager.flush();
 
+        // Verify that the entry was saved and can be retrieved with the expected details.
         assertNotNull("insertTestingCatalogEntry: should assign an ID", game.getGameID());
         Game saved = gamesService.getGameByGameID(game.getGameID());
         assertGameDetails("insertTestingCatalogEntry", saved, name, user, smaller, larger, visible);
@@ -1069,23 +1110,47 @@ public class GamesServiceTest {
 
     /**
      * Adds a game and checks that the catalog exposes the saved record.
+     *
+     * @param name the name of the game to add
+     * @param user the user who owns the game
+     * @param minPlayers the minimum number of players for the game
+     * @param maxPlayers the maximum number of players for the game
+     * @return the game that was added
      */
     private Game assertAddedGame(String test, User user, String name, Integer minPlayers, Integer maxPlayers) {
+        // Attempt to add the game through the games service.
         boolean result = gamesService.addGame(user, name, minPlayers, maxPlayers);
         assertTrue(test + ": should add " + name, result);
 
+        // Find the newly added game in the user's available games and verify its details.
         Game game = findAvailableGame(user, name.trim());
         assertGameDetails(test, game, name.trim(), user, minPlayers, maxPlayers, true);
+
+        // Retrieve the game by its ID and verify that the saved record matches the visible entry.
         Game saved = gamesService.getGameByGameID(game.getGameID());
         assertGameDetails(test, saved, name.trim(), user, minPlayers, maxPlayers, true);
         assertEquals(test + ": the saved ID should match the visible game", game.getGameID(), saved.getGameID());
         return saved;
     }
 
-    private void assertGameDetails(String test, Game game, String name, User user,
+    /**
+     * Verifies that a game has the expected name, owner, player limits, and visibility.
+     *
+     * @param test the name of the test case
+     * @param game the game to verify
+     * @param name the expected name of the game
+     * @param user the expected owner of the game
+     * @param minPlayers the expected minimum number of players for the game
+     * @param maxPlayers the expected maximum number of players for the game
+     * @param visible whether the game should be visible
+     */
+     private void assertGameDetails(String test, Game game, String name, User user,
                                    Integer minPlayers, Integer maxPlayers, boolean visible) {
+        // Check that the game was retrieved and has a database ID.
         assertNotNull(test + ": should retrieve " + name, game);
         assertNotNull(test + ": game should have an ID", game.getGameID());
+
+        // Verify that all saved game details match the expected values.
         assertEquals(test + ": should save the expected name", name, game.getGameName());
         assertEquals(test + ": should save the expected owner", user, game.getUserWhoAdded());
         assertEquals(test + ": should save minimum players", minPlayers, game.getMinPlayers());
@@ -1093,16 +1158,38 @@ public class GamesServiceTest {
         assertEquals(test + ": should save the expected visibility", visible, game.getCanSee());
     }
 
+    /**
+     *  Finds a game by name in the list of games available to the specified user.
+     *
+     * @param user the user who owns the game
+     * @param gameName the name of the game to find
+     * @return the game that was found, or null if no matching game was found
+     */
     private Game findAvailableGame(User user, String gameName) {
+        // Filter the user's available games to find entries with the requested name.
         List<Game> matches = gamesService.getAvailableGames(user).stream()
                 .filter(game -> gameName.equals(game.getGameName()))
                 .toList();
+
+        // Ensure that no more than one matching visible game is returned.
         assertTrue("findAvailableGame: should find at most one visible game named " + gameName, matches.size() <= 1);
         return matches.isEmpty() ? null : matches.getFirst();
     }
 
+    /**
+     *  Verifies that adding a game is rejected for the supplied invalid player-count combinations.
+     *
+     * @param test the name of the test case
+     * @param user the user who owns the game
+     * @param name the name of the game to add
+     * @param smaller the smaller number in the game
+     * @param larger the larger number in the game
+     */
     private void assertAddGameRejectsAllPlayerCounts(String test, User user, String name, int smaller, int larger) {
+        // Test invalid minimum and maximum player counts.
         assertAddGameRejectsInvalidPlayerCounts(test, user, name, smaller, larger);
+
+        // Test equal player counts, zero player counts, and missing player-count values.
         assertAddGameRejected(test, user, name, smaller, larger);
         assertAddGameRejected(test, user, name, smaller, smaller);
         assertAddGameRejected(test, user, name, 0, 0);
@@ -1111,7 +1198,17 @@ public class GamesServiceTest {
         assertAddGameRejected(test, user, name, null, null);
     }
 
+    /**
+     *  Tests additional invalid combinations involving negative or reversed player counts.
+     *
+     * @param test the name of the test case
+     * @param user the user who owns the game
+     * @param name the name of the game to add
+     * @param smaller the smaller number in the game
+     * @param larger the larger number in the game
+     */
     private void assertAddGameRejectsInvalidPlayerCounts(String test, User user, String name, int smaller, int larger) {
+        // Verify that negative values and minimum counts greater than maximum counts are rejected.
         assertAddGameRejected(test, user, name, smaller, -1);
         assertAddGameRejected(test, user, name, -1, larger);
         assertAddGameRejected(test, user, name, larger, smaller);
@@ -1120,8 +1217,20 @@ public class GamesServiceTest {
         assertAddGameRejected(test, user, name, -1, -1);
     }
 
+    /**
+     * Attempts to add a game with the supplied details and verifies that the operation is rejected.
+     *
+     * @param test the name of the test case
+     * @param user the user who owns the game
+     * @param name the name of the game to add
+     * @param minPlayers the minimum number of players in the game
+     * @param maxPlayers the maximum number of players in the game
+     */
     private void assertAddGameRejected(String test, User user, String name, Integer minPlayers, Integer maxPlayers) {
+        // Attempt to add the game using the specified name and player-count values.
         boolean result = gamesService.addGame(user, name, minPlayers, maxPlayers);
+
+        // Verify that the games service rejects the invalid game details.
         assertFalse(test + ": should reject name " + name + " with minimum " + minPlayers
                 + " and maximum " + maxPlayers, result);
     }
