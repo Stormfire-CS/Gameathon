@@ -52,10 +52,20 @@ public class EditGameForm {
      */
     private Long gameID;
 
+    /**
+     * Retrieves the ID of the game being edited.
+     *
+     * @return the ID of the game being edited
+     */
     public Long getGameID() {
         return gameID;
     }
 
+    /**
+     * Sets the ID of the game being edited.
+     *
+     * @param gameID the ID of the game being edited
+     */
     public void setGameID(Long gameID) {
         this.gameID = gameID;
     }
@@ -127,7 +137,6 @@ public class EditGameForm {
         if (minPlayers == null || maxPlayers == null) {
             return true;
         }
-
         return minPlayers <= maxPlayers;
     }
 }
