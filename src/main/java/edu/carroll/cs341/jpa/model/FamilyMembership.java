@@ -10,12 +10,10 @@ import jakarta.persistence.Table;
 
 import java.util.Objects;
 
-import static org.aspectj.util.LangUtil.EOL;
-
 /**
  * Represents a user's membership or join request for a family.
  *
- * <p>This entity maps to the FamilyMembership table and stores the membership
+ * <p>This entity maps to the family_membership table and stores the membership
  * identifier, the family it is associated with, the user it is associated with, and the
  * current membership status.</p>
  *
@@ -30,7 +28,7 @@ import static org.aspectj.util.LangUtil.EOL;
  * </ul>
  */
 @Entity
-@Table(name = "FamilyMembership")
+@Table(name = "family_membership")
 public class FamilyMembership {
 
     /**
@@ -165,9 +163,9 @@ public class FamilyMembership {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Family membership: membership ID = ").append(membershipID).append(EOL);
-        builder.append("family = ").append(family);
-        builder.append("user = ").append(user);
+        builder.append("Family membership: membership ID = ").append(membershipID).append(", ");
+        builder.append("family = ").append(family).append(", ");
+        builder.append("user = ").append(user).append(", ");
         builder.append("status = ").append(status);
         return builder.toString();
     }

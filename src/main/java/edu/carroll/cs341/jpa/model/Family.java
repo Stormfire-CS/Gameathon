@@ -14,7 +14,7 @@ import java.util.UUID;
 /**
  * Represents a family stored in the database.
  *
- * <p>This entity maps to the Families table and stores the family's unique
+ * <p>This entity maps to the family table and stores the family's unique
  * identifier, name, and the user who administers the family.</p>
  *
  * <p>The family name must be unique and cannot be null. Each family must also
@@ -28,7 +28,7 @@ import java.util.UUID;
  * </ul>
  */
 @Entity
-@Table(name = "Family")
+@Table(name = "family")
 public class Family {
 
     /**
