@@ -10,12 +10,10 @@ import jakarta.persistence.Table;
 
 import java.util.Objects;
 
-import static org.aspectj.util.LangUtil.EOL;
-
 /**
  * Represents a game owned by a particular user.
  *
- * <p>This entity maps to the GamesOwned table and associates an owner with
+ * <p>This entity maps to the games_owned table and associates an owner with
  * a game through entity relationships. The game and user columns
  * reference the primary keys of the corresponding Game and Owner records.</p>
  *
@@ -30,7 +28,7 @@ import static org.aspectj.util.LangUtil.EOL;
  * </ul>
  */
 @Entity
-@Table(name = "GamesOwned")
+@Table(name = "games_owned")
 public class GameOwned {
 
     /**
@@ -156,19 +154,19 @@ public class GameOwned {
      * Returns a readable representation of the game ownership record.
      *
      * <p>The representation includes the ownership ID, game ID, game name,
-     * owner ID, and production year when available.</p>
+     * owner name, and production year when available.</p>
      *
      * @return a string containing the ownership record's information
      */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Game Owned ID = ").append(gameOwnedID).append(EOL);
-        builder.append("Game ID = ").append(game.getGameID()).append(EOL);
-        builder.append("Game Name = ").append(game.getGameName()).append(EOL);
+        builder.append("Game Owned: ID = ").append(gameOwnedID).append(", ");
+        builder.append("Game ID = ").append(game.getGameID()).append(", ");
+        builder.append("Game Name = ").append(game.getGameName()).append(", ");
         builder.append("Owner Name = ").append(user.getName());
         if (yearProduced != null) {
-            builder.append("Publish Year = ").append(yearProduced).append(EOL);
+            builder.append(", ").append("Publish Year = ").append(yearProduced);
         }
         return builder.toString();
     }
