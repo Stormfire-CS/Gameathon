@@ -53,24 +53,22 @@ public class EnterPasswordPageController {
      * and a new login form to the model.
      *
      * @param session the HTTP session containing the logged-in user
-     * @param model the model used to provide attributes to the view
+     * @param model   the model used to provide attributes to the view
      * @return the password entry page, or a redirect to the login page
      */
     @GetMapping("/enterPasswordPage")
     public String enterPasswordPageGet(HttpSession session, Model model) {
+        // Ensure the user is logged in and if not redirects to login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
-        // Make the username available to the view for subsequent form submissions.
+        // Passes attributes to the view that are needed.
         model.addAttribute("user", user);
         LoginForm loginForm = new LoginForm();
         loginForm.setUsername(user.getUsername());
-
         model.addAttribute("loginForm", loginForm);
-
         return "enterPasswordPage";
     }
 
@@ -83,37 +81,41 @@ public class EnterPasswordPageController {
      * stores the user in the password session, sets the session inactivity
      * limit to five minutes, and redirects to the password change page.
      *
-     * @param loginForm the form containing the submitted password information
-     * @param result the result of validating the submitted form
-     * @param session the HTTP session containing the logged-in user
+     * @param loginForm       the form containing the submitted password information
+     * @param result          the result of validating the submitted form
+     * @param session         the HTTP session containing the logged-in user
      * @param passwordSession the HTTP session used for the password change process
-     * @param model the model used to provide attributes to the view
+     * @param model           the model used to provide attributes to the view
      * @return the password entry page, a redirect to the login page, or a
      * redirect to the password change page
      */
     @PostMapping("/enterPasswordPage")
     public String enterPasswordPagePost(@Valid @ModelAttribute LoginForm loginForm, BindingResult result, HttpSession session, HttpSession passwordSession, Model model) {
+        // Ensure the user is logged in and if not redirects to login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
 
+        // If the form has errors, return to the password entry page.
         if (result.hasErrors()) {
             model.addAttribute("user", user);
             return "enterPasswordPage";
         }
 
+        // Checks if the password is correct.
         User validatingUser = userService.validateUser(loginForm.getUsername(), loginForm.getPassword());
-        if(validatingUser == null) {
+
+        // If the password is incorrect, return to the password entry page.
+        if (validatingUser == null) {
             model.addAttribute("user", user);
             model.addAttribute("passwordError", "Incorrect password.");
             return "enterPasswordPage";
         }
 
-        passwordSession.setMaxInactiveInterval(5*60);
+        // If password correct, redirect to change password page.
+        passwordSession.setMaxInactiveInterval(5 * 60);
         passwordSession.setAttribute("loggedInUser", user);
-
         return "redirect:/changePasswordPage";
 
     }
