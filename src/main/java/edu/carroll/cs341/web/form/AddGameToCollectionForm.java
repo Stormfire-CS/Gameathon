@@ -25,7 +25,9 @@ import java.time.Year;
  */
 public class AddGameToCollectionForm {
 
-    /** The year the game was produced, represented as an integer. */
+    /**
+     * The year the game was produced, represented as an integer.
+     */
     @Min(value = -2000, message = "Game cannot be older than 2000 B.C.")
     private Integer yearProduced;
 
@@ -55,15 +57,13 @@ public class AddGameToCollectionForm {
      * allowing the field to remain optional.</p>
      *
      * @return {@code true} if the year is not more than two years in the future
-     *         or no year was provided; {@code false} otherwise
+     * or no year was provided; {@code false} otherwise
      */
     @AssertTrue(message = "Game cannot be produced more than two years in the future")
     public boolean isYearProducedValid() {
         if (yearProduced == null) {
             return true;
         }
-
         return yearProduced <= Year.now().getValue() + 2;
-
     }
 }
