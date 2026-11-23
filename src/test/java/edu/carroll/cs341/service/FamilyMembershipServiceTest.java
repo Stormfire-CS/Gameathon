@@ -1193,6 +1193,10 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Creates a test user and verifies that the saved credentials work.
+     *
+     * @param username the username of the user to create
+     * @param password the password of the user to create
+     * @return the created user
      */
     private User insertTestingUser(String username, String password) {
         User user = userService.validateUser(username, password);
@@ -1212,6 +1216,9 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Creates a family and checks its administrator and initial membership.
+     *
+     * @param admin the user to create a family for
+     * @return the created family
      */
     private Family insertTestingFamily(User admin) {
         final String familyName = "Family of " + admin.getUsername();
@@ -1235,6 +1242,11 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Creates a member through the request and acceptance workflow.
+     *
+     * @param username the username of the member to create
+     * @param password the password of the member to create
+     * @param family the family to create a membership request for
+     * @return the created member
      */
     private User insertTestingMember(String username, String password, Family family) {
         User member = insertTestingUser(username, password);
@@ -1253,6 +1265,10 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Submits a join request and verifies its persisted status and associations.
+     *
+     * @param family the family to create a membership request for
+     * @param applicant the user to create a membership request for
+     * @return the created membership request
      */
     private FamilyMembership insertTestingPendingRequest(Family family, User applicant) {
         User admin = family.getFamilyAdmin();
@@ -1268,6 +1284,10 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Checks that the family has exactly one pending request for the applicant.
+     *
+     * @param family the family to check pending requests for
+     * @param applicant the user to check pending requests for
+     * @return the pending membership request for the applicant in the family
      */
     private FamilyMembership findTestingPendingRequest(Family family, User applicant) {
         List<FamilyMembership> requests = membershipService.getPendingRequests(family.getFamilyAdmin()).stream()
@@ -1283,6 +1303,10 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Submits and rejects a request, then checks its status and family assignment.
+     *
+     * @param family the family to create a membership request for
+     * @param applicant the user to create a membership request for
+     * @return the created membership request
      */
     private FamilyMembership insertTestingRejectedRequest(Family family, User applicant) {
         FamilyMembership request = insertTestingPendingRequest(family, applicant);
@@ -1298,6 +1322,11 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Persists a membership that the public service workflow would reject.
+     *
+     * @param family the family to create a membership for
+     * @param user the user to create a membership for
+     * @param status the status of the membership to create
+     * @return the created membership
      */
     private FamilyMembership insertTestingInconsistentMembership(Family family, User user, String status) {
         FamilyMembership membership = new FamilyMembership(family, user, status);
@@ -1314,6 +1343,10 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Checks that an accepted user has exactly one membership in the specified family.
+     *
+     * @param family the family to check memberships for
+     * @param user the user to check memberships for
+     * @return the accepted membership for the user in the family
      */
     private FamilyMembership findTestingAcceptedMembership(Family family, User user) {
         List<FamilyMembership> memberships = membershipService.getFamilyMembers(family.getFamilyAdmin()).stream()
@@ -1329,6 +1362,9 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Retrieves an existing membership by its generated ID.
+     *
+     * @param membership the membership to retrieve
+     * @return the retrieved membership
      */
     private FamilyMembership savedMembership(FamilyMembership membership) {
         FamilyMembership saved = membershipService.getMembershipByID(membership.getMembershipID());
@@ -1340,6 +1376,9 @@ public class FamilyMembershipServiceTest {
 
     /**
      * Counts all of a user's memberships, regardless of status.
+     *
+     * @param user the user to count memberships for
+     * @return the number of memberships for the user
      */
     private long countMemberships(User user) {
         return entityManager.createQuery("""

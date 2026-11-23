@@ -15,7 +15,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.Year;
 import java.util.List;
 
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertNull;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Tests the {@link GamesOwnedService} methods responsible for managing users'
@@ -26,7 +30,12 @@ import static org.springframework.test.util.AssertionErrors.*;
  * {@link Transactional} annotation rolls back database changes after each
  * test.</p>
  *
- * @author Max Montowski
+ * <p><b>Sources Used:</b></p>
+ * <ul>
+ *   <li>ChatGPT – Assisted with generating Javadoc comments and tests for this file
+ *   in conjunction with Max Montowski.
+ *   All comments were reviewed by the author and tests followed authors layout.</li>
+ * </ul>
  */
 @SpringBootTest
 @Transactional
@@ -1152,6 +1161,10 @@ public class GamesOwnedServiceTest {
 
     /**
      * Creates a test user and verifies that the saved credentials work.
+     *
+     * @param username the username of the user to create
+     * @param password the password of the user to create
+     * @return the created user
      */
     private User insertTestingUser(String username, String password) {
         User user = userService.validateUser(username, password);
@@ -1171,6 +1184,10 @@ public class GamesOwnedServiceTest {
 
     /**
      * Adds a catalog game and verifies that the owner can retrieve it.
+     *
+     * @param user the user who owns the game
+     * @param gameName the name of the game to create
+     * @return the created game
      */
     private Game insertTestingGame(User user, String gameName) {
         boolean result = gamesService.addGame(user, gameName, 1, 4);
@@ -1194,6 +1211,9 @@ public class GamesOwnedServiceTest {
 
     /**
      * Persists a public catalog game for tests that exercise shared ownership.
+     *
+     * @param gameName the name of the game to create
+     * @return the created game
      */
     private Game insertTestingPublicGame(String gameName) {
         Game game = new Game(gameName);
@@ -1212,6 +1232,11 @@ public class GamesOwnedServiceTest {
 
     /**
      * Adds one ownership record and validates the generated record and its details.
+     *
+     * @param user the user who owns the game
+     * @param game the game being owned
+     * @param yearProduced the year the game was produced
+     * @return the created ownership record
      */
     private GameOwned insertTestingOwnedGame(User user, Game game, Integer yearProduced) {
         List<Long> previousIDs = gamesOwnedService.getGamesOwnedByUsername(user).stream()
@@ -1241,6 +1266,10 @@ public class GamesOwnedServiceTest {
 
     /**
      * Creates a family and checks its administrator and initial membership.
+     *
+     * @param admin the administrator of the family
+     * @param familyName the name of the family
+     * @return the created family
      */
     private Family insertTestingFamily(User admin, String familyName) {
         assertNull("insertTestingFamily: the administrator should start without a family",
@@ -1263,6 +1292,10 @@ public class GamesOwnedServiceTest {
 
     /**
      * Submits a join request and verifies its persisted status and associations.
+     *
+     * @param family the family to request to join
+     * @param applicant the user requesting to join the family
+     * @return the created pending membership request
      */
     private FamilyMembership insertTestingPendingRequest(Family family, User applicant) {
         User admin = family.getFamilyAdmin();
@@ -1287,6 +1320,9 @@ public class GamesOwnedServiceTest {
 
     /**
      * Creates a family without the initial membership normally created by the service.
+     *
+     * @param admin the admin user for the family
+     * @return the created family
      */
     private Family insertTestingFamilyWithoutMembers(User admin) {
         Family family = new Family("Test Family", admin);

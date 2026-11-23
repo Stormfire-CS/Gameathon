@@ -768,6 +768,10 @@ public class FamilyServiceTest {
 
     /**
      * Creates a test user and verifies that the saved credentials work.
+     *
+     * @param username the username of the user to create
+     * @param password the password of the user to create
+     * @return the created user
      */
     private User insertTestingUser(String username, String password) {
         User user = userService.validateUser(username, password);
@@ -787,6 +791,10 @@ public class FamilyServiceTest {
 
     /**
      * Creates a family and checks its administrator and initial membership.
+     *
+     * @param admin the administrator of the family to create
+     * @param familyName the name of the family to create
+     * @return the created family
      */
     private Family insertTestingFamily(User admin, String familyName) {
         assertNull("insertTestingFamily: the administrator should start without a family",
@@ -809,6 +817,11 @@ public class FamilyServiceTest {
 
     /**
      * Creates a member through the request and acceptance workflow.
+     *
+     * @param username the username of the member to create
+     * @param password the password of the member to create
+     * @param family the family to request to join
+     * @return the created member
      */
     private User insertTestingMember(String username, String password, Family family) {
         User member = insertTestingUser(username, password);
@@ -827,6 +840,10 @@ public class FamilyServiceTest {
 
     /**
      * Submits a join request and verifies its persisted status and associations.
+     *
+     * @param family the family to request to join
+     * @param applicant the user who is requesting to join the family
+     * @return the created membership request
      */
     private FamilyMembership insertTestingPendingRequest(Family family, User applicant) {
         User admin = family.getFamilyAdmin();
@@ -851,6 +868,8 @@ public class FamilyServiceTest {
 
     /**
      * Counts family rows, including any family without a membership.
+     *
+     * @return the number of families
      */
     private long countFamilies() {
         return entityManager.createQuery("select count(family) from Family family", Long.class)
@@ -859,6 +878,9 @@ public class FamilyServiceTest {
 
     /**
      * Counts memberships in every status, including pending and rejected requests.
+     *
+     * @param familyID the ID of the family to count memberships for
+     * @return the number of memberships in the family
      */
     private long countMemberships(Long familyID) {
         return entityManager.createQuery("""

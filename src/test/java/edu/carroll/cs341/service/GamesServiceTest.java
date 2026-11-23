@@ -22,7 +22,12 @@ import static org.springframework.test.util.AssertionErrors.*;
  * {@link Transactional} annotation rolls back database changes after each
  * test.</p>
  *
- * @author Max Montowski
+ * <p><b>Sources Used:</b></p>
+ * <ul>
+ *   <li>ChatGPT – Assisted with generating Javadoc comments and tests for this file
+ *   in conjunction with Max Montowski.
+ *   All comments were reviewed by the author and tests followed authors layout.</li>
+ * </ul>
  */
 @SpringBootTest
 @Transactional
