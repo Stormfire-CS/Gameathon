@@ -141,16 +141,6 @@ public class User {
     }
 
     /**
-     * The platform-specific line separator used when formatting output.
-     */
-    private static final String EOL = System.lineSeparator();
-
-    /**
-     * The tab character used to indent formatted output.
-     */
-    private static final String TAB = "\t";
-
-    /**
      * Retrieves the user's name.
      *
      * @return the name associated with this user
@@ -197,8 +187,10 @@ public class User {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("User: ").append(super.toString());
-        builder.append(TAB).append("username=").append(username);
+        builder.append("User: ").append("username = ").append(username);
+        if (family != null) {
+            builder.append(", family = ").append(family.getFamilyName());
+        }
         return builder.toString();
     }
 
