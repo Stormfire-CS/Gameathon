@@ -50,9 +50,8 @@ public class ViewGamesController {
      */
     @GetMapping("/viewGamesPage")
     public String viewGamesPage(HttpSession session, Model model) {
-
+        // Ensures the user is logged in, and if not redirects to the login page.
         User user = (User) session.getAttribute("loggedInUser");
-
         if (user == null) {
             return "redirect:/login";
         }
